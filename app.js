@@ -50,23 +50,7 @@ async function loadData() {
     const data = await res.json();
     logs = data.logs || [];
     orders = data.orders || [];
-    
-    // One-off patch to mark Koraput Ethnic Blend and Caramelly as gifts
-    const toPatch = logs.filter(l => !l.is_gift && (l.name.toLowerCase().includes('koraput ethnic blend') || l.name.toLowerCase().includes('caramelly')));
-    if (toPatch.length > 0) {
-      console.log('Patching gifts...', toPatch);
-      for (const p of toPatch) {
-        await fetch(API, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...p, is_gift: 1 })
-        });
-      }
-      const res2 = await fetch(API);
-      const data2 = await res2.json();
-      logs = data2.logs || [];
-      orders = data2.orders || [];
-    }
+
   } catch (e) {
     console.error('Logs fetch error:', e);
   }
