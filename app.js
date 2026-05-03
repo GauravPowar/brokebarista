@@ -1125,26 +1125,40 @@ function renderInsights() {
   const aTotal = acc.reduce((s, l) => s + Number(l.price || 0), 0);
   const total = bTotal + gTotal + aTotal;
 
-  // Vendor totals
-  const vendorTot = {};
-  logs.forEach(l => { vendorTot[l.vendor] = (vendorTot[l.vendor] || 0) + Number(l.price || 0); });
-  const topVendors = Object.entries(vendorTot).sort((a, b) => b[1] - a[1]);
-  const topVendor = topVendors[0]?.[0] || '—';
+  // Roaster totals
+  const roasterTot = {};
+  const roasterBags = {};
+  beans.forEach(l => { 
+    const r = l.roaster || l.vendor || 'Unknown';
+    roasterTot[r] = (roasterTot[r] || 0) + Number(l.price || 0); 
+    roasterBags[r] = (roasterBags[r] || 0) + 1;
+  });
+  const topRoasters = Object.entries(roasterTot).sort((a, b) => b[1] - a[1]);
+  const mostExplored = Object.entries(roasterBags).sort((a, b) => b[1] - a[1]);
 
-  // Roasters (unique)
-  const roasters = new Set(beans.map(l => l.roaster).filter(Boolean));
-
-  // Cost per gram
+  // Cost per gram and Bang for Buck
   const bagsWithSize = beans.filter(l => l.size && l.price);
   let costPerGram = 0;
+  let bestValueBean = null;
+  let bestValueCpg = Infinity;
+
   const cpg = bagsWithSize.length ? (() => {
-    const totalG = bagsWithSize.reduce((s, l) => {
+    let totalG = 0;
+    let totalP = 0;
+    bagsWithSize.forEach(l => {
       const m = String(l.size).match(/(\d+(?:\.\d+)?)\s*g/i);
       const km = String(l.size).match(/(\d+(?:\.\d+)?)\s*kg/i);
       const g = m ? Number(m[1]) : km ? Number(km[1]) * 1000 : 0;
-      return s + g;
-    }, 0);
-    const totalP = bagsWithSize.reduce((s, l) => s + Number(l.price || 0), 0);
+      if (g > 0) {
+        totalG += g;
+        totalP += Number(l.price || 0);
+        const l_cpg = Number(l.price || 0) / g;
+        if (l_cpg < bestValueCpg) {
+          bestValueCpg = l_cpg;
+          bestValueBean = l;
+        }
+      }
+    });
     if (totalG > 0) {
       costPerGram = totalP / totalG;
       return Math.round(costPerGram * 100);
@@ -1184,12 +1198,14 @@ function renderInsights() {
   // Callouts
   const callouts = [];
   if (bTotal > gTotal + aTotal) callouts.push({ icon: '☕', text: `You spend <strong>${Math.round(bTotal / total * 100)}%</strong> of your budget on beans — a true coffee purist.` });
-  else callouts.push({ icon: 'âš™ï¸', text: `You've invested more in gear than beans so far. Once the setup's sorted, let the beans shine.` });
-  if (topVendors[0]) callouts.push({ icon: 'ðŸ†', text: `<strong>${topVendors[0][0]}</strong> is your most-spent vendor at ${fmt(topVendors[0][1])}.` });
+  else callouts.push({ icon: '⚙️', text: `You've invested more in gear than beans so far. Once the setup's sorted, let the beans shine.` });
+  
+  if (mostExplored[0]) callouts.push({ icon: '🧭', text: `<strong>${esc(mostExplored[0][0])}</strong> is your most explored roaster with ${mostExplored[0][1]} bag${mostExplored[0][1] !== 1 ? 's' : ''} logged.` });
+  if (bestValueBean) callouts.push({ icon: '🪙', text: `<strong>${esc(bestValueBean.name)}</strong> (${esc(bestValueBean.roaster || bestValueBean.vendor || 'Unknown')}) gives you the best bang for your buck at roughly <strong>₹${(bestValueCpg * 15).toFixed(1)}/cup</strong>.` });
+
   if (cpg) callouts.push({ icon: '📊', text: `Your average cost is <strong>${fmt(cpg)}/100g</strong> across bags with known sizes.` });
   if (pricPerCup > 0) callouts.push({ icon: '☕', text: `Based on a standard 15g dose, each cup costs you roughly <strong>₹${pricPerCup.toFixed(1)}</strong> in beans.` });
   $('insCallouts').innerHTML = callouts.map(c => `<div class="insight-callout"><span class="callout-icon">${c.icon}</span><div class="callout-text">${c.text}</div></div>`).join('');
-
   // Monthly
   const monthly = {}, monthlyB = {}, monthlyG = {}, monthlyA = {};
   logs.forEach(l => {
@@ -1246,9 +1262,9 @@ function renderInsights() {
   // Line over time — removed (chart canvas not in DOM)
   if (lineInst) { lineInst.destroy(); lineInst = null; }
 
-  // Vendor bar list
-  const maxV = topVendors[0]?.[1] || 1;
-  $('vendorBarList').innerHTML = topVendors.slice(0, 8).map(([v, a]) =>
+  // Roaster bar list
+  const maxV = topRoasters[0]?.[1] || 1;
+  $('vendorBarList').innerHTML = topRoasters.slice(0, 8).map(([v, a]) =>
     `<div class="bar-row"><span class="bar-label">${esc(v)}</span><div class="bar-track"><div class="bar-fill" style="width:${(a / maxV * 100).toFixed(1)}%"></div></div><span class="bar-val">${fmt(a)}</span></div>`).join('');
 
   // Coffee type bar
