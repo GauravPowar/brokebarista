@@ -3,7 +3,7 @@
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const API = '/api/logs';
 const $ = id => document.getElementById(id);
-const fmt = v => 'â‚¹' + Number(v || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+const fmt = v => '₹' + Number(v || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
 const TYPEMETA = {
@@ -15,14 +15,14 @@ const TYPEMETA = {
 const BREW_OPTS = ['French Press', 'Cafflano Kompresso', 'Moka Pot', 'V60', 'AeroPress', 'Espresso Machine', 'Cold Brew', 'Siphon'];
 const SIZE_OPTS = ['100g', '200g', '250g', '500g', '1kg'];
 
-// Process detection â€” maps keywords in name/notes â†’ canonical process
+// Process detection — maps keywords in name/notes â†’ canonical process
 const PROCESS_MAP = [
   { key: 'natural', label: 'Natural', icon: 'ðŸ’', hint: 'sun-dried, dry process' },
-  { key: 'washed', label: 'Washed', icon: 'ðŸ’§', hint: 'wet process, fully washed' },
+  { key: 'washed', label: 'Washed', icon: '💧', hint: 'wet process, fully washed' },
   { key: 'honey', label: 'Honey', icon: 'ðŸ¯', hint: 'pulped natural, honey process' },
   { key: 'anaerobic', label: 'Anaerobic', icon: 'âš—ï¸', hint: 'fermentation, carbonic maceration' },
-  { key: 'wet-hulled', label: 'Wet Hulled', icon: 'ðŸŒ¾', hint: 'giling basah' },
-  { key: 'experimental', label: 'Experimental', icon: 'ðŸ§ª', hint: 'infused, experimental, barrel aged' },
+  { key: 'wet-hulled', label: 'Wet Hulled', icon: '🌾', hint: 'giling basah' },
+  { key: 'experimental', label: 'Experimental', icon: '🧪', hint: 'infused, experimental, barrel aged' },
 ];
 
 let logs = [], orders = [];
@@ -30,7 +30,7 @@ let currentFilter = 'all';
 let editingId = null;
 let itemCount = 0;
 
-// Shelf & journal â€” all synced to D1, no localStorage
+// Shelf & journal — all synced to D1, no localStorage
 let finishedBags = [];  // derived from bagMeta
 let bagMeta = {};       // keyed by log_id (number), loaded from /api/shelf
 let journal = [];       // loaded from /api/journal
@@ -44,7 +44,7 @@ let pieInst, barInst, lineInst;
    LOAD DATA FROM API
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 async function loadData() {
-  // Fetch logs (critical) â€” always renders whatever succeeds
+  // Fetch logs (critical) — always renders whatever succeeds
   try {
     const res = await fetch(API);
     const data = await res.json();
@@ -132,7 +132,7 @@ function addItemRow(prefill = {}) {
   div.innerHTML = `
     <div class="item-row-head">
       <span class="item-num">Item ${n}</span>
-      <button class="btn-rm" onclick="removeItem(${n})">âœ•</button>
+      <button class="btn-rm" onclick="removeItem(${n})">✕</button>
     </div>
     <div class="form-row full"><div class="field">
       <label class="form-label">Product Name</label>
@@ -148,7 +148,7 @@ function addItemRow(prefill = {}) {
         </select>
       </div>
       <div class="field" id="item-price-wrap-${n}" style="${isCombo ? 'display:none' : ''}">
-        <label class="form-label">Price (â‚¹)</label>
+        <label class="form-label">Price (₹)</label>
         <input type="number" id="item-price-${n}" value="${prefill.price || ''}" placeholder="0" step="0.01">
       </div>
     </div>
@@ -352,7 +352,7 @@ function renderStats() {
 function renderEntries() {
   let list = currentFilter === 'all' ? logs : logs.filter(l => l.category === currentFilter);
   list = [...list].sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (!list.length) { $('entriesList').innerHTML = '<div class="empty-state"><div class="icon">â˜•</div><p>No entries yet.</p></div>'; return; }
+  if (!list.length) { $('entriesList').innerHTML = '<div class="empty-state"><div class="icon">☕</div><p>No entries yet.</p></div>'; return; }
 
   const groups = {};
   list.forEach(l => {
@@ -379,7 +379,7 @@ function renderEntries() {
           <div class="og-left">
             <span class="og-id">#${k}</span>
             ${isCombo ? '<span class="combo-badge">Combo</span>' : ''}
-            <span class="og-meta">${g[0]?.vendor || ''} Â· ${fmtDate(g[0]?.date)}</span>
+            <span class="og-meta">${g[0]?.vendor || ''} · ${fmtDate(g[0]?.date)}</span>
           </div>
           <div class="og-actions">
             <span class="og-total">${fmt(groupTotal)}</span>
@@ -401,7 +401,7 @@ function renderEntryCard(l, isCombo, cls) {
   if (l.coffee_type && TYPEMETA[l.coffee_type]) pills.push(`<span class="epill">${TYPEMETA[l.coffee_type].label}</span>`);
   const proc = detectProcess(l);
   if (proc) pills.push(`<span class="epill process">${proc.icon} ${proc.label}</span>`);
-  getBrew(l).forEach(b => pills.push(`<span class="epill brew">â˜• ${esc(b)}</span>`));
+  getBrew(l).forEach(b => pills.push(`<span class="epill brew">☕ ${esc(b)}</span>`));
   const priceHtml = isCombo ? `<span class="entry-price combo-part">combo</span>` : `<span class="entry-price">${fmt(l.price)}</span>`;
   return `<div class="${cls}">
     <div class="entry-left">
@@ -418,7 +418,7 @@ function renderEntryCard(l, isCombo, cls) {
       ${priceHtml}
       <div style="display:flex;gap:.3rem">
         <button class="action-btn" onclick="editEntry(${l.id})">Edit</button>
-        <button class="action-btn del" onclick="deleteEntry(${l.id})">âœ•</button>
+        <button class="action-btn del" onclick="deleteEntry(${l.id})">✕</button>
       </div>
     </div>
   </div>`;
@@ -464,13 +464,13 @@ function renderShelf() {
     if (l.size) pills.push(`<span class="epill">${esc(l.size)}</span>`);
     if (l.coffee_type && TYPEMETA[l.coffee_type]) pills.push(`<span class="epill">${TYPEMETA[l.coffee_type].label}</span>`);
     if (proc) pills.push(`<span class="epill process">${proc.icon} ${proc.label}</span>`);
-    brew.forEach(b => pills.push(`<span class="epill brew">â˜• ${esc(b)}</span>`));
+    brew.forEach(b => pills.push(`<span class="epill brew">☕ ${esc(b)}</span>`));
 
     // Lifecycle date pills
     const lifePills = [];
-    if (meta.roastDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">ðŸŒ¿ Roasted ${fmtDate(meta.roastDate)}</span>`);
-    if (meta.deliveredDate) lifePills.push(`<span class="epill">ðŸ“¦ ${fmtDate(meta.deliveredDate)}</span>`);
-    if (meta.openedDate) lifePills.push(`<span class="epill">ðŸ”“ ${fmtDate(meta.openedDate)}</span>`);
+    if (meta.roastDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">🌿 Roasted ${fmtDate(meta.roastDate)}</span>`);
+    if (meta.deliveredDate) lifePills.push(`<span class="epill">📦 ${fmtDate(meta.deliveredDate)}</span>`);
+    if (meta.openedDate) lifePills.push(`<span class="epill">🔓 ${fmtDate(meta.openedDate)}</span>`);
     if (isDone && meta.finishedDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">âœ… ${fmtDate(meta.finishedDate)}</span>`);
 
     // Gram usage bar
@@ -482,7 +482,7 @@ function renderShelf() {
       if (bagSizeG) {
         const pct = Math.min(100, Math.round(totalUsed / bagSizeG * 100));
         gramBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${totalUsed}g brewed Â· ${bagSizeG - totalUsed > 0 ? (bagSizeG - totalUsed) + 'g left' : 'bag empty'}</div>
+          <div class="freshness-label">${totalUsed}g brewed · ${bagSizeG - totalUsed > 0 ? (bagSizeG - totalUsed) + 'g left' : 'bag empty'}</div>
           <div class="freshness-track"><div class="freshness-fill ${pct >= 100 ? 'fresh-red' : 'fresh-amber'}" style="width:${pct}%"></div></div>
         </div>`;
       } else {
@@ -490,7 +490,7 @@ function renderShelf() {
       }
     }
 
-    // Freshness bar â€” two-phase: resting (from roast) + freshness (from bag opened)
+    // Freshness bar — two-phase: resting (from roast) + freshness (from bag opened)
     let freshnessBar = '';
     if (!isDone) {
       // Per-bean rest days (user-set or smart default based on process)
@@ -506,25 +506,25 @@ function renderShelf() {
       const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
 
       if (roastDate && daysSinceRoast < RESTING_DAYS && !openedDate) {
-        // â”€â”€ Phase 1: Still resting / degassing (only if bag not yet opened)
+        // ── Phase 1: Still resting / degassing (only if bag not yet opened)
         const restPct = Math.min(100, Math.round(daysSinceRoast / RESTING_DAYS * 100));
         const daysLeft = RESTING_DAYS - daysSinceRoast;
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">â˜ï¸ Resting Â· ${daysSinceRoast}d of ${RESTING_DAYS}d degassing Â· ${daysLeft}d left</div>
+          <div class="freshness-label">â˜ï¸ Resting · ${daysSinceRoast}d of ${RESTING_DAYS}d degassing · ${daysLeft}d left</div>
           <div class="freshness-track"><div class="freshness-fill fresh-blue" style="width:${restPct}%"></div></div>
         </div>`;
       } else if (roastDate && daysSinceRoast >= RESTING_DAYS && !openedDate) {
-        // â”€â”€ Resting complete but bag not opened yet â€” sealed shelf life
+        // ── Resting complete but bag not opened yet — sealed shelf life
         const sealedDays = daysSinceRoast;
         const sealedPct = Math.max(0, Math.min(100, 100 - Math.round(sealedDays / SEALED_SHELF_LIFE * 100)));
         const sealedCls = sealedPct > 60 ? 'fresh-green' : sealedPct > 30 ? 'fresh-amber' : 'fresh-red';
         const sealedLabel = sealedPct > 60 ? 'âœ… Ready to open' : sealedPct > 30 ? 'â³ Open soon' : 'âš ï¸ Open now';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${sealedLabel} Â· Rested ${daysSinceRoast}d since roast Â· sealed</div>
+          <div class="freshness-label">${sealedLabel} · Rested ${daysSinceRoast}d since roast · sealed</div>
           <div class="freshness-track"><div class="freshness-fill ${sealedCls}" style="width:${sealedPct}%"></div></div>
         </div>`;
       } else if (openedDate) {
-        // â”€â”€ Phase 2: Bag is opened â€” freshness countdown from opened date
+        // ── Phase 2: Bag is opened — freshness countdown from opened date
         // Also factor in roast age at open if available
         let maxFresh = FRESH_AFTER_OPEN;
         let extraInfo = '';
@@ -532,8 +532,8 @@ function renderShelf() {
           const roastAgeAtOpen = Math.floor((openedDate - roastDate) / 86400000);
           const wasRested = roastAgeAtOpen >= RESTING_DAYS;
           extraInfo = wasRested
-            ? ` Â· rested ${roastAgeAtOpen}d`
-            : ` Â· opened early (${roastAgeAtOpen}d rest)`;
+            ? ` · rested ${roastAgeAtOpen}d`
+            : ` · opened early (${roastAgeAtOpen}d rest)`;
           // If opened much later after roast, shorten the fresh window
           if (roastAgeAtOpen > 30) maxFresh = Math.max(14, FRESH_AFTER_OPEN - Math.floor((roastAgeAtOpen - 30) / 3));
         }
@@ -541,18 +541,18 @@ function renderShelf() {
         const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
         const freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Getting Stale';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${freshLabel} Â· ${daysSinceOpened}d since opened${extraInfo}</div>
+          <div class="freshness-label">${freshLabel} · ${daysSinceOpened}d since opened${extraInfo}</div>
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       } else {
-        // â”€â”€ Fallback: no roast date or opened date â€” use purchase date
+        // ── Fallback: no roast date or opened date — use purchase date
         const daysSincePurchase = Math.floor((now - purchaseDate) / 86400000);
         const fallbackMax = 45;
         const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSincePurchase / fallbackMax * 100)));
         const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
         const freshLabel = freshPct > 60 ? 'Likely Fresh' : freshPct > 30 ? 'Check Freshness' : 'Possibly Stale';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${freshLabel} Â· ${daysSincePurchase}d since purchase</div>
+          <div class="freshness-label">${freshLabel} · ${daysSincePurchase}d since purchase</div>
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       }
@@ -561,7 +561,7 @@ function renderShelf() {
     return `<div class="shelf-card ${isDone ? 'finished' : ''}">
       <div class="shelf-left">
         <div class="shelf-name">${esc(l.name)}</div>
-        <div class="shelf-roaster">${esc(l.vendor)}${l.roaster && l.roaster !== l.vendor ? ' Â· ' + esc(l.roaster) : ''}</div>
+        <div class="shelf-roaster">${esc(l.vendor)}${l.roaster && l.roaster !== l.vendor ? ' · ' + esc(l.roaster) : ''}</div>
         ${pills.length ? `<div class="shelf-pills">${pills.join('')}</div>` : ''}
         ${lifePills.length ? `<div class="shelf-pills" style="margin-top:.32rem">${lifePills.join('')}</div>` : ''}
         ${freshnessBar}
@@ -570,9 +570,9 @@ function renderShelf() {
       <div class="shelf-right">
 
         <span class="shelf-date">${fmtDate(l.date)}</span>
-        <button class="action-btn" onclick="openBagModal(${l.id})" style="font-size:.68rem;white-space:nowrap">ðŸ“‹ Track</button>
+        <button class="action-btn" onclick="openBagModal(${l.id})" style="font-size:.68rem;white-space:nowrap">📋 Track</button>
         <button class="btn-finish ${isDone ? 'done' : ''}" onclick="toggleFinished(${l.id})">
-          ${isDone ? 'â†© Reopen' : 'âœ“ Finished'}
+          ${isDone ? '↩ Reopen' : '✓ Finished'}
         </button>
       </div>
     </div>`;
@@ -584,7 +584,7 @@ function renderShelf() {
 
   $('shelf-list').innerHTML = listToShow.length
     ? listToShow.map(b => renderBag(b, currentShelfFilter === 'finished')).join('')
-    : `<div class="empty-state"><div class="icon">ðŸ«™</div><p>No ${currentShelfFilter} beans found.</p></div>`;
+    : `<div class="empty-state"><div class="icon">🫙</div><p>No ${currentShelfFilter} beans found.</p></div>`;
 }
 
 async function toggleFinished(id) {
@@ -669,7 +669,7 @@ function _updateGramUI(id) {
     $('bm-gramFill').className = 'gram-fill' + (totalUsed > bagSizeG ? ' over' : '');
     $('bm-gramTrack').style.display = '';
     const rem = bagSizeG - totalUsed;
-    $('bm-gramSummary').textContent = `${totalUsed}g used of ${bagSizeG}g Â· ${rem > 0 ? rem + 'g remaining' : 'bag empty'}`;
+    $('bm-gramSummary').textContent = `${totalUsed}g used of ${bagSizeG}g · ${rem > 0 ? rem + 'g remaining' : 'bag empty'}`;
   } else {
     $('bm-gramTrack').style.display = 'none';
     $('bm-gramSummary').textContent = totalUsed > 0 ? `${totalUsed}g used total` : '';
@@ -688,10 +688,10 @@ function renderGramEntries(id) {
       <input type="number" value="${e.grams || ''}" placeholder="g" min="0" step="0.1"
         oninput="updateGramEntry(${i},'grams',this.value)">
       <select onchange="updateGramEntry(${i},'usedFor',this.value)" style="font-size:.75rem;padding:.45rem .5rem">
-        <option value="">â€” for â€”</option>
+        <option value="">— for —</option>
         ${USE_FOR_OPTS.map(o => `<option value="${o}" ${e.usedFor === o ? 'selected' : ''}>${o}</option>`).join('')}
       </select>
-      <button class="btn-rm-gram" onclick="removeGramEntry(${i})">âœ•</button>
+      <button class="btn-rm-gram" onclick="removeGramEntry(${i})">✕</button>
     </div>`).join('');
 }
 
@@ -758,8 +758,8 @@ function detectProcess(l) {
       p.label.toLowerCase() === explicit.toLowerCase()
     );
     if (match) return match;
-    // Otherwise it's a custom process â€” return a synthetic entry
-    return { key: '__custom__:' + explicit, label: explicit, icon: 'âœ¨', custom: true };
+    // Otherwise it's a custom process — return a synthetic entry
+    return { key: '__custom__:' + explicit, label: explicit, icon: '✨', custom: true };
   }
   // 2. Fallback: keyword scan of name/notes
   const haystack = [(l.name || ''), (l.notes || '')].join(' ').toLowerCase();
@@ -798,7 +798,7 @@ function renderProcess() {
     let meta;
     if (key.startsWith('__custom__:')) {
       const label = key.replace('__custom__:', '');
-      meta = { label, icon: 'âœ¨', hint: 'custom process' };
+      meta = { label, icon: '✨', hint: 'custom process' };
     } else {
       meta = PROCESS_MAP.find(p => p.key === key) || { label: 'Untagged', icon: 'â“', hint: 'process not identified' };
     }
@@ -808,7 +808,7 @@ function renderProcess() {
         <span class="process-icon">${meta.icon}</span>
         <div class="process-title-wrap">
           <div class="process-name">${meta.label}</div>
-          <div class="process-count">${list.length} bag${list.length !== 1 ? 's' : ''} Â· ${fmt(total)}</div>
+          <div class="process-count">${list.length} bag${list.length !== 1 ? 's' : ''} · ${fmt(total)}</div>
         </div>
       </div>`;
     list.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(l => {
@@ -818,12 +818,12 @@ function renderProcess() {
           <div>
             <div class="process-card-name">${esc(l.name)}</div>
             <div class="process-card-meta">
-              <span class="process-card-roaster">${esc(l.vendor)}${l.roaster && l.roaster !== l.vendor ? ' Â· ' + esc(l.roaster) : ''}</span>
+              <span class="process-card-roaster">${esc(l.vendor)}${l.roaster && l.roaster !== l.vendor ? ' · ' + esc(l.roaster) : ''}</span>
               <span class="process-card-date">${fmtDate(l.date)}</span>
               ${l.size ? `<span class="epill">${esc(l.size)}</span>` : ''}
               ${l.coffee_type && TYPEMETA[l.coffee_type] ? `<span class="epill">${TYPEMETA[l.coffee_type].label}</span>` : ''}
             </div>
-            ${brew.length ? `<div class="entry-pills" style="margin-top:.38rem">${brew.map(b => `<span class="epill brew">â˜• ${esc(b)}</span>`).join('')}</div>` : ''}
+            ${brew.length ? `<div class="entry-pills" style="margin-top:.38rem">${brew.map(b => `<span class="epill brew">☕ ${esc(b)}</span>`).join('')}</div>` : ''}
             ${l.notes ? `<div class="entry-notes" style="margin-top:.28rem">${esc(l.notes)}</div>` : ''}
           </div>
 
@@ -833,7 +833,7 @@ function renderProcess() {
     html += '</div>';
   });
 
-  $('processList').innerHTML = html || '<div class="empty-state"><div class="icon">ðŸŒ¿</div><p>Log some beans to see them by process.</p></div>';
+  $('processList').innerHTML = html || '<div class="empty-state"><div class="icon">🌿</div><p>Log some beans to see them by process.</p></div>';
 }
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -846,29 +846,29 @@ function renderJournal() {
   const avgR = rated.length ? Math.round(rated.reduce((s, j) => s + j.rating, 0) / rated.length * 10) / 10 : null;
   const brewCount = {};
   journal.forEach(j => { if (j.brewer) brewCount[j.brewer] = (brewCount[j.brewer] || 0) + 1; });
-  const favBrew = Object.entries(brewCount).sort((a, b) => b[1] - a[1])[0]?.[0] || 'â€”';
+  const favBrew = Object.entries(brewCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
   $('jsTotal').textContent = total;
-  $('jsAvgRating').textContent = avgR ? avgR + 'â˜…' : 'â€”';
+  $('jsAvgRating').textContent = avgR ? avgR + '★' : '—';
   $('jsFavMethod').textContent = favBrew.split(' ')[0]; // short label
   // Money saved stat in journal header (journal-tracked sessions only)
   const { totalSaved } = calcMoneySaved();
-  $('jsSaved').textContent = (totalSaved >= 0 ? 'â‚¹' : '-â‚¹') + Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  $('jsSaved').textContent = (totalSaved >= 0 ? '₹' : '-₹') + Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
   if (!journal.length) {
-    $('journalList').innerHTML = '<div class="empty-state"><div class="icon">ðŸ““</div><p>Log your first brew session!</p></div>';
+    $('journalList').innerHTML = '<div class="empty-state"><div class="icon">📓</div><p>Log your first brew session!</p></div>';
     return;
   }
 
   const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date));
   $('journalList').innerHTML = sorted.map(j => {
-    const stars = 'â˜…'.repeat(j.rating || 0) + 'â˜†'.repeat(5 - (j.rating || 0));
+    const stars = '★'.repeat(j.rating || 0) + '☆'.repeat(5 - (j.rating || 0));
     const tastes = (j.tastes || []).map(t => `<span class="taste-chip">${esc(t)}</span>`).join('');
     const meta = [];
-    if (j.brewer) meta.push(`<span class="epill brew">â˜• ${esc(j.brewer)}</span>`);
+    if (j.brewer) meta.push(`<span class="epill brew">☕ ${esc(j.brewer)}</span>`);
     if (j.dose) meta.push(`<span class="epill">${j.dose}g dose</span>`);
     if (j.yield) meta.push(`<span class="epill">${j.yield}g yield</span>`);
     if (j.time) meta.push(`<span class="epill">${j.time}s</span>`);
-    if (j.temp) meta.push(`<span class="epill">${j.temp}Â°C</span>`);
+    if (j.temp) meta.push(`<span class="epill">${j.temp}°C</span>`);
     if (j.grinder) meta.push(`<span class="epill">âš™ï¸ ${esc(j.grinder)}</span>`);
     if (j.grind) meta.push(`<span class="epill">ðŸ“ ${esc(j.grind)}</span>`);
     const beanName = j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '' : j.beanLabel || '';
@@ -885,16 +885,16 @@ function renderJournal() {
       ${j.notes ? `<div class="je-notes">${esc(j.notes)}</div>` : ''}
       <div class="je-actions">
         <button class="action-btn" onclick="openJournalModal(${j.id})">Edit</button>
-        <button class="action-btn del" onclick="deleteJournalEntry(${j.id})">âœ•</button>
+        <button class="action-btn del" onclick="deleteJournalEntry(${j.id})">✕</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function openJournalModal(editId) {
-  // populate bean select from logs â€” exclude finished bags
+  // populate bean select from logs — exclude finished bags
   const beans = logs.filter(l => l.category === 'beans' && !finishedBags.includes(l.id)).sort((a, b) => new Date(b.date) - new Date(a.date));
-  $('j-bean').innerHTML = '<option value="">â€” Select a bean â€”</option>' +
+  $('j-bean').innerHTML = '<option value="">— Select a bean —</option>' +
     beans.map(b => `<option value="${b.id}">${esc(b.name)} (${esc(b.roaster || b.vendor)})</option>`).join('');
 
   if (editId) {
@@ -1002,9 +1002,9 @@ async function deleteJournalEntry(id) {
 const ESPRESSO_BREWERS = ['Cafflano Kompresso', 'Espresso Machine'];
 const AMERICANO_BREWERS = ['Moka Pot'];
 // Market prices per cup
-const MARKET_ESPRESSO = 140;  // â‚¹/cup
-const MARKET_AMERICANO = 100; // â‚¹/cup
-const MARKET_STANDARD = 80;   // â‚¹/cup (all other methods)
+const MARKET_ESPRESSO = 140;  // ₹/cup
+const MARKET_AMERICANO = 100; // ₹/cup
+const MARKET_STANDARD = 80;   // ₹/cup (all other methods)
 const STD_DOSE_G = 15;        // grams per cup (standard assumption)
 
 function marketPriceForBrewer(brewer) {
@@ -1043,10 +1043,10 @@ function globalCostPerGram() {
 }
 
 function calcMoneySaved() {
-  const gcpg = globalCostPerGram(); // global fallback â‚¹/g
+  const gcpg = globalCostPerGram(); // global fallback ₹/g
   const rows = []; // { label, cups, homeCost, cafeCost, saved, note }
 
-  // â”€â”€ Part 1: Journal-tracked sessions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Part 1: Journal-tracked sessions ──────────────────
   // Each journal entry = 1 cup. Use actual dose if given, else STD_DOSE_G.
   const trackedBeanIds = new Set();
   journal.forEach(j => {
@@ -1061,7 +1061,7 @@ function calcMoneySaved() {
     const beanName = beanLog?.name || j.beanLabel || 'Unknown bean';
     const brewerLabel = j.brewer || 'Unknown brewer';
     rows.push({
-      label: `${beanName} â€” ${brewerLabel}`,
+      label: `${beanName} — ${brewerLabel}`,
       date: j.date,
       cups: 1,
       dose,
@@ -1069,14 +1069,14 @@ function calcMoneySaved() {
       cafeCost,
       saved,
       tracked: true,
-      note: `${dose}g dose Â· â‚¹${cpg > 0 ? (cpg * dose).toFixed(0) : '?'} beans Â· vs â‚¹${marketPrice} cafÃ©`,
+      note: `${dose}g dose · ₹${cpg > 0 ? (cpg * dose).toFixed(0) : '?'} beans · vs ₹${marketPrice} café`,
     });
     if (beanLog) trackedBeanIds.add(beanLog.id);
   });
 
-  // â”€â”€ Part 2: Bean bags without any journal tracking â”€â”€â”€â”€â”€
+  // ── Part 2: Bean bags without any journal tracking ─────
   // For beans with known size, estimate cups = size_g / STD_DOSE_G
-  // Assume standard â‚¹80 market price since brewer is unknown
+  // Assume standard ₹80 market price since brewer is unknown
   const untrackedBeans = logs.filter(l =>
     l.category === 'beans' &&
     l.size &&
@@ -1103,7 +1103,7 @@ function calcMoneySaved() {
       cafeCost,
       saved,
       tracked: false,
-      note: `${cups} cups estimated Â· ${STD_DOSE_G}g/cup Â· vs â‚¹${MARKET_STANDARD}/cup standard`,
+      note: `${cups} cups estimated · ${STD_DOSE_G}g/cup · vs ₹${MARKET_STANDARD}/cup standard`,
     });
   });
 
@@ -1129,7 +1129,7 @@ function renderInsights() {
   const vendorTot = {};
   logs.forEach(l => { vendorTot[l.vendor] = (vendorTot[l.vendor] || 0) + Number(l.price || 0); });
   const topVendors = Object.entries(vendorTot).sort((a, b) => b[1] - a[1]);
-  const topVendor = topVendors[0]?.[0] || 'â€”';
+  const topVendor = topVendors[0]?.[0] || '—';
 
   // Roasters (unique)
   const roasters = new Set(beans.map(l => l.roaster).filter(Boolean));
@@ -1152,7 +1152,7 @@ function renderInsights() {
     return 0;
   })() : 0;
 
-  // Price per cup â€” fixed 15g dose * cost per gram
+  // Price per cup — fixed 15g dose * cost per gram
   let pricPerCup = 0;
   if (beans.length > 0) {
     const totalGrams = bagsWithSize.reduce((s, l) => {
@@ -1169,8 +1169,8 @@ function renderInsights() {
   $('ins-total-h').textContent = fmt(total);
   $('ins-orders').textContent = orders.length;
   $('ins-beans-pct').textContent = total > 0 ? Math.round(bTotal / total * 100) + '%' : '0%';
-  $('ins-cpg').textContent = cpg ? fmt(cpg) : 'â€”';
-  $('ins-ppc').textContent = pricPerCup > 0 ? 'â‚¹' + pricPerCup.toFixed(1) : 'â€”';
+  $('ins-cpg').textContent = cpg ? fmt(cpg) : '—';
+  $('ins-ppc').textContent = pricPerCup > 0 ? '₹' + pricPerCup.toFixed(1) : '—';
 
   // Total kg of beans bought
   const totalKgBought = beans.reduce((s, l) => {
@@ -1183,11 +1183,11 @@ function renderInsights() {
 
   // Callouts
   const callouts = [];
-  if (bTotal > gTotal + aTotal) callouts.push({ icon: 'â˜•', text: `You spend <strong>${Math.round(bTotal / total * 100)}%</strong> of your budget on beans â€” a true coffee purist.` });
+  if (bTotal > gTotal + aTotal) callouts.push({ icon: '☕', text: `You spend <strong>${Math.round(bTotal / total * 100)}%</strong> of your budget on beans — a true coffee purist.` });
   else callouts.push({ icon: 'âš™ï¸', text: `You've invested more in gear than beans so far. Once the setup's sorted, let the beans shine.` });
   if (topVendors[0]) callouts.push({ icon: 'ðŸ†', text: `<strong>${topVendors[0][0]}</strong> is your most-spent vendor at ${fmt(topVendors[0][1])}.` });
-  if (cpg) callouts.push({ icon: 'ðŸ“Š', text: `Your average cost is <strong>${fmt(cpg)}/100g</strong> across bags with known sizes.` });
-  if (pricPerCup > 0) callouts.push({ icon: 'â˜•', text: `Based on a standard 15g dose, each cup costs you roughly <strong>â‚¹${pricPerCup.toFixed(1)}</strong> in beans.` });
+  if (cpg) callouts.push({ icon: '📊', text: `Your average cost is <strong>${fmt(cpg)}/100g</strong> across bags with known sizes.` });
+  if (pricPerCup > 0) callouts.push({ icon: '☕', text: `Based on a standard 15g dose, each cup costs you roughly <strong>₹${pricPerCup.toFixed(1)}</strong> in beans.` });
   $('insCallouts').innerHTML = callouts.map(c => `<div class="insight-callout"><span class="callout-icon">${c.icon}</span><div class="callout-text">${c.text}</div></div>`).join('');
 
   // Monthly
@@ -1225,7 +1225,7 @@ function renderInsights() {
       plugins: { legend: { labels: { color: textColor, font: { size: 11, family: 'DM Sans' } } } },
       scales: {
         x: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-        y: { stacked: true, ticks: { color: textColor, font: { size: 10 }, callback: v => `â‚¹${v.toLocaleString('en-IN')}` }, grid: { color: gridColor } }
+        y: { stacked: true, ticks: { color: textColor, font: { size: 10 }, callback: v => `₹${v.toLocaleString('en-IN')}` }, grid: { color: gridColor } }
       }
     }
   });
@@ -1243,7 +1243,7 @@ function renderInsights() {
     options: { plugins: { legend: { labels: { color: textColor, font: { size: 11, family: 'DM Sans' } } } }, cutout: '60%' }
   });
 
-  // Line over time â€” removed (chart canvas not in DOM)
+  // Line over time — removed (chart canvas not in DOM)
   if (lineInst) { lineInst.destroy(); lineInst = null; }
 
   // Vendor bar list
@@ -1261,7 +1261,7 @@ function renderInsights() {
     `<div class="bar-row"><span class="bar-label">${TYPEMETA[k]?.label || k}</span><div class="bar-track"><div class="bar-fill ${tCls[i] || ''}" style="width:${(a / maxT * 100).toFixed(1)}%"></div></div><span class="bar-val">${fmt(a)}</span></div>`).join('')
     : '<p style="font-size:.78rem;color:var(--light);font-style:italic">Tag your beans with a type to see this.</p>';
 
-  // Beans Ã— Brewer â€” built from journal entries
+  // Beans × Brewer — built from journal entries
   // Map: beanLabel â†’ { brewer â†’ sessionCount }
   const beanBrewerMap = {};
   journal.forEach(j => {
@@ -1276,7 +1276,7 @@ function renderInsights() {
     $('brewBarList').innerHTML = beanBrewerEntries.map(([bean, brewers]) => {
       const total = Object.values(brewers).reduce((s, v) => s + v, 0);
       const brewerPills = Object.entries(brewers).sort((a, b) => b[1] - a[1])
-        .map(([br, c]) => `<span class="epill brew" style="font-size:.62rem">â˜• ${esc(br)} Ã—${c}</span>`).join('');
+        .map(([br, c]) => `<span class="epill brew" style="font-size:.62rem">☕ ${esc(br)} ×${c}</span>`).join('');
       return `<div class="bar-row" style="flex-direction:column;align-items:flex-start;gap:.3rem;padding:.5rem 0;border-bottom:1px solid var(--parchment)">
         <div style="display:flex;justify-content:space-between;width:100%">
           <span class="bar-label" style="font-size:.78rem">${esc(bean)}</span>
@@ -1299,18 +1299,18 @@ function renderInsights() {
     `<div class="bar-row"><span class="bar-label">${esc(k)}</span><div class="bar-track"><div class="bar-fill ${pCls[i] || ''}" style="width:${(a / maxP * 100).toFixed(1)}%"></div></div><span class="bar-val">${fmt(a)}</span></div>`).join('')
     : '<p style="font-size:.78rem;color:var(--light);font-style:italic">Add process info to beans to see this.</p>';
 
-  // â”€â”€ Money Saved section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Money Saved section ────────────────────────────────
   renderMoneySaved();
 }
 
 function renderMoneySaved() {
   const { rows, totalHomeCost, totalCafeCost, totalSaved } = calcMoneySaved();
 
-  $('ins-saved-total').textContent = (totalSaved >= 0 ? 'â‚¹' : '-â‚¹') + Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  $('ins-saved-total').textContent = (totalSaved >= 0 ? '₹' : '-₹') + Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
   $('ins-home-cost').textContent = fmt(totalHomeCost);
   $('ins-cafe-cost').textContent = fmt(totalCafeCost);
 
-  // â”€â”€ Break-even panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Break-even panel ─────────────────────────────────
   renderBreakEven(totalSaved);
 
   // Sort rows: tracked sessions first (date desc), then untracked bags
@@ -1331,16 +1331,16 @@ function renderMoneySaved() {
   let html = '';
 
   if (tracked.length) {
-    html += `<div style="font-size:.67rem;color:var(--mid);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin:.3rem 0 .5rem">ðŸ““ Tracked brew sessions (${tracked.length})</div>`;
+    html += `<div style="font-size:.67rem;color:var(--mid);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin:.3rem 0 .5rem">📓 Tracked brew sessions (${tracked.length})</div>`;
     tracked.forEach(r => {
       const savedColor = r.saved >= 0 ? 'var(--green)' : '#c0392b';
       html += `<div class="savings-row">
             <div class="savings-row-label">
               ${esc(r.label)}
-              <small>${fmtDate(r.date)} Â· ${r.note}</small>
+              <small>${fmtDate(r.date)} · ${r.note}</small>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <div style="font-family:'Playfair Display',serif;font-size:.88rem;color:${savedColor}">${r.saved >= 0 ? '+â‚¹' : '-â‚¹'}${Math.abs(r.saved).toFixed(0)}</div>
+              <div style="font-family:'Playfair Display',serif;font-size:.88rem;color:${savedColor}">${r.saved >= 0 ? '+₹' : '-₹'}${Math.abs(r.saved).toFixed(0)}</div>
               <div style="font-size:.63rem;color:var(--light)">saved</div>
             </div>
           </div>`;
@@ -1348,16 +1348,16 @@ function renderMoneySaved() {
   }
 
   if (untracked.length) {
-    html += `<div style="font-size:.67rem;color:var(--mid);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin:.8rem 0 .5rem">ðŸ«™ Untracked bags â€” estimated (${untracked.length})</div>`;
+    html += `<div style="font-size:.67rem;color:var(--mid);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin:.8rem 0 .5rem">🫙 Untracked bags — estimated (${untracked.length})</div>`;
     untracked.forEach(r => {
       const savedColor = r.saved >= 0 ? 'var(--green)' : '#c0392b';
       html += `<div class="savings-row">
             <div class="savings-row-label">
               ${esc(r.label)}
-              <small>${fmtDate(r.date)} Â· ${r.note}</small>
+              <small>${fmtDate(r.date)} · ${r.note}</small>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <div style="font-family:'Playfair Display',serif;font-size:.88rem;color:${savedColor}">${r.saved >= 0 ? '+â‚¹' : '-â‚¹'}${Math.abs(r.saved).toFixed(0)}</div>
+              <div style="font-family:'Playfair Display',serif;font-size:.88rem;color:${savedColor}">${r.saved >= 0 ? '+₹' : '-₹'}${Math.abs(r.saved).toFixed(0)}</div>
               <div style="font-size:.63rem;color:var(--light)">saved</div>
             </div>
           </div>`;
@@ -1366,9 +1366,9 @@ function renderMoneySaved() {
 
   $('ins-savings-breakdown').innerHTML = html;
   $('ins-savings-assumptions').innerHTML =
-    `Assumptions: Espresso/Cafflano = â‚¹${MARKET_ESPRESSO}/cup Â· Moka Pot = â‚¹${MARKET_AMERICANO}/cup Â· All other methods = â‚¹${MARKET_STANDARD}/cup Â· ` +
+    `Assumptions: Espresso/Cafflano = ₹${MARKET_ESPRESSO}/cup · Moka Pot = ₹${MARKET_AMERICANO}/cup · All other methods = ₹${MARKET_STANDARD}/cup · ` +
     `Standard dose ${STD_DOSE_G}g/cup for untracked bags. ` +
-    `Home cost uses actual bag price Ã· bag size. Negative savings means the brew cost more than cafÃ©.`;
+    `Home cost uses actual bag price Ã· bag size. Negative savings means the brew cost more than café.`;
 }
 
 function renderBreakEven(totalSaved) {
@@ -1399,15 +1399,15 @@ function renderBreakEven(totalSaved) {
         const beDateStr = beDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
         const months = Math.round(daysLeft / 30);
         etaHtml = `<span style="font-size:1.1rem">ðŸ—“ï¸</span>
-              <span>At your current pace of <strong style="color:var(--caramel)">â‚¹${dailySavings.toFixed(0)}/day</strong> in savings,
+              <span>At your current pace of <strong style="color:var(--caramel)">₹${dailySavings.toFixed(0)}/day</strong> in savings,
               you'll break even in <strong style="color:var(--roast)">${months > 1 ? months + ' months' : daysLeft + ' days'}</strong>
-              â€” around <strong>${beDateStr}</strong>.</span>`;
+              — around <strong>${beDateStr}</strong>.</span>`;
       }
     }
   } else if (achieved) {
     etaHtml = `<span style="font-size:1.1rem">ðŸ†</span>
-          <span>You've <strong style="color:var(--green)">broken even!</strong> Every cup you brew now is pure profit over cafÃ© prices.
-          You're <strong style="color:var(--green)">â‚¹${netPosition.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> ahead.</span>`;
+          <span>You've <strong style="color:var(--green)">broken even!</strong> Every cup you brew now is pure profit over café prices.
+          You're <strong style="color:var(--green)">₹${netPosition.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</strong> ahead.</span>`;
   } else if (gearInvestment === 0) {
     etaHtml = `<span>No gear or accessories logged yet. Add them to the log to track your investment.</span>`;
   } else {
@@ -1417,7 +1417,7 @@ function renderBreakEven(totalSaved) {
   // Update DOM
   $('be-card').classList.toggle('achieved', achieved);
   $('be-badge').className = 'be-badge ' + (achieved ? 'achieved' : 'in-progress');
-  $('be-badge').textContent = achieved ? 'âœ“ Broken Even!' : 'In Progress';
+  $('be-badge').textContent = achieved ? '✓ Broken Even!' : 'In Progress';
   $('be-fill').style.width = pct.toFixed(1) + '%';
   $('be-fill').className = 'be-fill' + (achieved ? ' done' : '');
   $('be-progress-pct').textContent = pct.toFixed(0) + '% recovered';
@@ -1458,7 +1458,7 @@ function applyTheme() {
 function updateThemeUI() {
   const isDark = document.body.classList.contains('dark-mode');
   document.querySelectorAll('.theme-toggle').forEach(btn => {
-    btn.innerHTML = isDark ? 'â˜€ï¸' : 'ðŸŒ™';
+    btn.innerHTML = isDark ? 'â˜€ï¸' : '🌙';
   });
 }
 
