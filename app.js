@@ -50,6 +50,23 @@ async function loadData() {
     const data = await res.json();
     logs = data.logs || [];
     orders = data.orders || [];
+    
+    // One-off patch to mark Koraput Ethnic Blend and Caramelly as gifts
+    const toPatch = logs.filter(l => !l.is_gift && (l.name.toLowerCase().includes('koraput ethnic blend') || l.name.toLowerCase().includes('caramelly')));
+    if (toPatch.length > 0) {
+      console.log('Patching gifts...', toPatch);
+      for (const p of toPatch) {
+        await fetch(API, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...p, is_gift: 1 })
+        });
+      }
+      const res2 = await fetch(API);
+      const data2 = await res2.json();
+      logs = data2.logs || [];
+      orders = data2.orders || [];
+    }
   } catch (e) {
     console.error('Logs fetch error:', e);
   }
@@ -148,8 +165,14 @@ function addItemRow(prefill = {}) {
         </select>
       </div>
       <div class="field" id="item-price-wrap-${n}" style="${isCombo ? 'display:none' : ''}">
-        <label class="form-label">Price (₹)</label>
-        <input type="number" id="item-price-${n}" value="${prefill.price || ''}" placeholder="0" step="0.01">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <label class="form-label">Price (₹)</label>
+          <label class="form-label" style="display:flex;align-items:center;gap:0.25rem;cursor:pointer">
+            <input type="checkbox" id="item-gift-${n}" ${prefill.is_gift ? 'checked' : ''} onchange="$('item-price-${n}').disabled = this.checked; if(this.checked) $('item-price-${n}').value = 0;">
+            Is Gift 🎁
+          </label>
+        </div>
+        <input type="number" id="item-price-${n}" value="${prefill.price || ''}" placeholder="0" step="0.01" ${prefill.is_gift ? 'disabled' : ''}>
       </div>
     </div>
     <div class="beans-only" id="beans-fields-${n}">
@@ -233,6 +256,7 @@ function getItemData(n) {
     category: $(`item-cat-${n}`)?.value || 'beans',
     name: ($(`item-name-${n}`)?.value || '').trim(),
     price: parseFloat($(`item-price-${n}`)?.value) || 0,
+    is_gift: $(`item-gift-${n}`)?.checked || false,
     notes: ($(`item-notes-${n}`)?.value || '').trim(),
     roaster: ($(`item-roaster-${n}`)?.value || '').trim(),
     size: sizeRaw === 'custom' ? ($(`item-size-custom-${n}`)?.value || '').trim() : sizeRaw,
@@ -276,6 +300,7 @@ async function saveOrder() {
         body: JSON.stringify({
           id: editingId, order_id: orderId, date, vendor,
           category: item.category, name: item.name, price: isCombo ? 0 : item.price,
+          is_gift: item.is_gift,
           notes: item.notes, roaster: item.roaster, size: item.size,
           coffee_type: item.coffee_type, brew_equip: item.brew_equip, qty: 1,
           process: item.process,
@@ -402,7 +427,7 @@ function renderEntryCard(l, isCombo, cls) {
   const proc = detectProcess(l);
   if (proc) pills.push(`<span class="epill process">${proc.icon} ${proc.label}</span>`);
   getBrew(l).forEach(b => pills.push(`<span class="epill brew">☕ ${esc(b)}</span>`));
-  const priceHtml = isCombo ? `<span class="entry-price combo-part">combo</span>` : `<span class="entry-price">${fmt(l.price)}</span>`;
+  const priceHtml = l.is_gift ? `<span class="entry-price" style="color:var(--green)">🎁 Gift</span>` : isCombo ? `<span class="entry-price combo-part">combo</span>` : `<span class="entry-price">${fmt(l.price)}</span>`;
   return `<div class="${cls}">
     <div class="entry-left">
       <div class="entry-name">${esc(l.name)}</div>
