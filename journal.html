@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broke Barista | Journal</title>
+  <meta name="description" content="Your brew journal — sessions, tasting notes, and ratings. 10 per page.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body data-page="journal">
+
+  <!-- OWNER LOGIN MODAL -->
+  <div id="pin-overlay" onclick="maybeHidePinModal(event)">
+    <div class="pin-card" style="position:relative">
+      <button class="pin-close-btn" onclick="hidePinModal()">✕</button>
+      <div class="pin-logo">☕</div>
+      <h2 class="pin-title">Broke <em>Barista</em></h2>
+      <p class="pin-sub">Enter owner PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key pin-blank" disabled></button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-del" onclick="pinDel()">⌫</button>
+      </div>
+      <p class="pin-error-msg" id="pinErr"></p>
+    </div>
+  </div>
+
+  <!-- JOURNAL PAGE -->
+  <div class="page-header">
+    <div style="display:flex;align-items:flex-start;flex:1">
+      <div>
+        <h1>Brew <em>Journal</em></h1>
+        <div class="sub">Sessions, tasting notes, ratings</div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+      <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
+    </div>
+    <button class="btn-primary" onclick="openJournalModal()">+ New Session</button>
+  </div>
+  <div class="page-content">
+    <div class="stat-strip" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card">
+        <div class="stat-num" id="jsTotal">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="jsAvgRating">—</div>
+        <div class="stat-label">Avg Rating</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="jsFavMethod">—</div>
+        <div class="stat-label">Fav Brewer</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(94,138,58,.4);background:rgba(94,138,58,.06)">
+        <div class="stat-num" id="jsSaved" style="color:var(--green)">₹0</div>
+        <div class="stat-label">Total Saved</div>
+      </div>
+    </div>
+    <div id="journalList"></div>
+    <div id="journalPagination"></div>
+  </div>
+
+  <!-- JOURNAL MODAL -->
+  <div class="modal-backdrop" id="journalModal" onclick="maybeCloseJModal(event)">
+    <div class="modal">
+      <div class="modal-head">
+        <span class="modal-title" id="jModalTitle">New Brew Session</span>
+        <button class="btn-close" onclick="closeJModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row three">
+          <div class="field"><label class="form-label">Date</label><input type="date" id="j-date"></div>
+          <div class="field"><label class="form-label">Brewer</label>
+            <select id="j-brewer">
+              <option value="">Select</option>
+              <option>French Press</option>
+              <option>Cafflano Kompresso</option>
+              <option>Moka Pot</option>
+              <option>V60</option>
+              <option>AeroPress</option>
+              <option>Espresso Machine</option>
+              <option>Cold Brew</option>
+              <option>Siphon</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field"><label class="form-label">Grinder</label>
+            <select id="j-grinder">
+              <option value="">Select</option>
+              <option value="1Zpresso Q Air">1Zpresso Q Air</option>
+              <option value="Timemore C2/C3">Timemore C2/C3</option>
+              <option value="Commandante C40">Commandante C40</option>
+              <option value="Fellow Ode">Fellow Ode</option>
+              <option value="Niche Zero">Niche Zero</option>
+              <option value="Kingrinder K6">Kingrinder K6</option>
+              <option value="Pre-ground">Pre-ground</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="field"><label class="form-label">Bean (link to your shelf)</label>
+            <select id="j-bean">
+              <option value="">— Select a bean —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row three">
+          <div class="field"><label class="form-label">Dose (g)</label><input type="number" id="j-dose"
+              placeholder="18"></div>
+          <div class="field"><label class="form-label">Yield (g)</label><input type="number" id="j-yield"
+              placeholder="36"></div>
+          <div class="field"><label class="form-label">Time (s)</label><input type="number" id="j-time" placeholder="30"
+              step="1"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label class="form-label">Water Temp (°C)</label><input type="number" id="j-temp"
+              placeholder="94"></div>
+          <div class="field"><label class="form-label">Grind Setting</label><input type="text" id="j-grind"
+              placeholder="e.g. 3.5 on Q Air"></div>
+        </div>
+        <div class="field" style="margin-bottom:.75rem">
+          <label class="form-label">Rating</label>
+          <div class="rating-stars" id="jRatingStars">
+            <span class="star" data-v="1" onclick="setRating(1)">★</span>
+            <span class="star" data-v="2" onclick="setRating(2)">★</span>
+            <span class="star" data-v="3" onclick="setRating(3)">★</span>
+            <span class="star" data-v="4" onclick="setRating(4)">★</span>
+            <span class="star" data-v="5" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:.75rem">
+          <label class="form-label">Tasting Notes (tap to select)</label>
+          <div id="tastePills" style="max-height:190px;overflow-y:auto;padding-right:.4rem;scrollbar-width:thin">
+            <div class="group-colored group-floral"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Floral</div>
+            <div class="pill-group group-colored group-floral" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Black Tea</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Chamomile</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Rose</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Jasmine</span>
+            </div>
+            <div class="group-colored group-fruity"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Fruity</div>
+            <div class="pill-group group-colored group-fruity" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Blackberry</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Raspberry</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Blueberry</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Strawberry</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Raisin</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Prune</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Coconut</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Cherry</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Pomegranate</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Pineapple</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Grape</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Apple</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Peach</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Pear</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Grapefruit</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Orange</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Lemon</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Lime</span>
+            </div>
+            <div class="group-colored group-sour"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Sour/Fermented</div>
+            <div class="pill-group group-colored group-sour" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Sour Aromatics</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Acetic Acid</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Winey</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Whiskey</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Fermented</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Overripe</span>
+            </div>
+            <div class="group-colored group-roasted"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Roasted</div>
+            <div class="pill-group group-colored group-roasted" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Tobacco</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Brown</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Roast</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Smoky</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Ashy</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Grain</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Malt</span>
+            </div>
+            <div class="group-colored group-nutty"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Nutty/Cocoa</div>
+            <div class="pill-group group-colored group-nutty" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Peanuts</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Hazelnut</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Almond</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Cocoa</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Dark Chocolate</span>
+            </div>
+            <div class="group-colored group-sweet"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:-.1rem;font-weight:600">
+              Sweet</div>
+            <div class="pill-group group-colored group-sweet">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Sweet Aromatics</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Vanilla</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Molasses</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Caramelized</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Honey</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="field"><label class="form-label">Notes</label>
+            <textarea id="j-notes" placeholder="Observations, what worked, what to tweak…"
+              style="height:64px"></textarea>
+          </div>
+        </div>
+        <input type="hidden" id="j-edit-id" value="">
+        <div style="display:flex;gap:.5rem;margin-top:.5rem">
+          <button class="btn-primary" onclick="saveJournalEntry()">Save Session</button>
+          <button class="btn-ghost" onclick="closeJModal()" style="margin-left:0">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
+        class="nav-label">Process</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
+  </nav>
+  <script src="/app.js"></script>
+</body>
+
+</html>

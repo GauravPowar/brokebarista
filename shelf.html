@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broke Barista | Shelf</title>
+  <meta name="description" content="Track your bean shelf — freshness, usage, and lifecycle.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body data-page="shelf">
+
+  <!-- OWNER LOGIN MODAL -->
+  <div id="pin-overlay" onclick="maybeHidePinModal(event)">
+    <div class="pin-card" style="position:relative">
+      <button class="pin-close-btn" onclick="hidePinModal()">✕</button>
+      <div class="pin-logo">☕</div>
+      <h2 class="pin-title">Broke <em>Barista</em></h2>
+      <p class="pin-sub">Enter owner PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key pin-blank" disabled></button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-del" onclick="pinDel()">⌫</button>
+      </div>
+      <p class="pin-error-msg" id="pinErr"></p>
+    </div>
+  </div>
+
+  <!-- SHELF PAGE -->
+  <div class="page-header">
+    <div style="display:flex;align-items:flex-start;flex:1">
+      <div>
+        <h1>The <em>Shelf</em></h1>
+        <div class="sub">Beans in rotation</div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+      <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:.7rem;color:var(--mid);letter-spacing:.09em;text-transform:uppercase">Coffee Bags</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--roast);line-height:1.1"
+        id="shelfCount">0</div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="stat-strip" style="grid-template-columns:1fr 1fr">
+      <div class="stat-card">
+        <div class="stat-num" id="shelfActive">0</div>
+        <div class="stat-label">Active Bags (Opened)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="shelfSealedCard">0</div>
+        <div class="stat-label">Sealed Bags</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setShelfFilter('available',this)">Available</button>
+      <button class="filter-btn" onclick="setShelfFilter('finished',this)">Finished</button>
+    </div>
+    <div id="shelf-list"></div>
+  </div>
+
+  <!-- BAG LIFECYCLE MODAL -->
+  <div class="bag-modal-overlay hidden" id="bagModalOverlay" onclick="closeBagModal(event)">
+    <div class="bag-modal" id="bagModalContent">
+      <div class="bag-modal-handle"></div>
+      <div class="bag-modal-title" id="bagModalTitle">Track <em>Bag</em></div>
+      <input type="hidden" id="bagModalId">
+      <div class="form-divider">Key Dates</div>
+      <div class="form-row three">
+        <div class="field">
+          <label class="form-label">🌿 Roast Date</label>
+          <input type="date" id="bm-roastDate">
+        </div>
+        <div class="field">
+          <label class="form-label">📦 Delivered Date</label>
+          <input type="date" id="bm-deliveredDate">
+        </div>
+        <div class="field">
+          <label class="form-label">☁️ Rest Days</label>
+          <input type="number" id="bm-restDays" min="0" max="30" placeholder="7" style="max-width:100%">
+          <span style="font-size:.6rem;color:var(--light);margin-top:.15rem;display:block">Degassing period after
+            roast</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label class="form-label">🔓 Opened Date</label>
+          <input type="date" id="bm-openedDate">
+        </div>
+        <div class="field">
+          <label class="form-label">✅ Finished Date</label>
+          <input type="date" id="bm-finishedDate">
+        </div>
+      </div>
+      <div class="form-divider">Brew Usage (grams)</div>
+      <div id="bm-gramSummary" style="font-size:.79rem;color:var(--mid);margin-bottom:.4rem;min-height:1.2em;"></div>
+      <div class="gram-track" id="bm-gramTrack" style="display:none;margin-bottom:.8rem;">
+        <div class="gram-fill" id="bm-gramFill" style="width:0%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 80px 120px 34px;gap:.45rem;margin-bottom:.3rem;"
+        id="bm-gramHeaders">
+        <label class="form-label">Date</label>
+        <label class="form-label">Grams</label>
+        <label class="form-label">Used For</label>
+        <span></span>
+      </div>
+      <div id="bm-gramList"></div>
+      <button class="btn-add-item" onclick="addGramEntry()" style="margin-top:.2rem;margin-bottom:.9rem">+ Add Brew
+        Entry</button>
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.3rem;">
+        <button class="btn-ghost" onclick="closeBagModal({target:$('bagModalOverlay')})">Cancel</button>
+        <button class="btn-primary" onclick="saveBagMeta()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
+        class="nav-label">Process</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
+  </nav>
+  <script src="/app.js"></script>
+</body>
+
+</html>

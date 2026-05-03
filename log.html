@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broke Barista | Log</title>
+  <meta name="description" content="Your full coffee purchase history — beans, gear, and accessories.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body data-page="log">
+
+  <!-- OWNER LOGIN MODAL -->
+  <div id="pin-overlay" onclick="maybeHidePinModal(event)">
+    <div class="pin-card" style="position:relative">
+      <button class="pin-close-btn" onclick="hidePinModal()">✕</button>
+      <div class="pin-logo">☕</div>
+      <h2 class="pin-title">Broke <em>Barista</em></h2>
+      <p class="pin-sub">Enter owner PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key pin-blank" disabled></button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-del" onclick="pinDel()">⌫</button>
+      </div>
+      <p class="pin-error-msg" id="pinErr"></p>
+    </div>
+  </div>
+
+  <!-- LOG PAGE -->
+  <div class="page-header">
+    <div style="display:flex;align-items:flex-start;flex:1">
+      <div>
+        <h1>Broke <em>Barista</em></h1>
+        <div class="sub">Your coffee journey · Gaurav</div>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+      <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:.7rem;color:var(--mid);letter-spacing:.09em;text-transform:uppercase">Total Spent</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--roast);line-height:1.1"
+        id="grandTotal">₹0</div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="stat-strip" id="logStatStrip">
+      <div class="stat-card">
+        <div class="stat-num" id="statBeans">₹0</div>
+        <div class="stat-label">Beans</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statGears">₹0</div>
+        <div class="stat-label">Gears</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statAcc">₹0</div>
+        <div class="stat-label">Accessories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statCount">0</div>
+        <div class="stat-label">Entries</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('beans',this)">Beans</button>
+      <button class="filter-btn" onclick="setFilter('gears',this)">Gears</button>
+      <button class="filter-btn" onclick="setFilter('accessories',this)">Accessories</button>
+    </div>
+    <div id="entriesList"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
+        class="nav-label">Process</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
+  </nav>
+  <script src="/app.js"></script>
+</body>
+
+</html>

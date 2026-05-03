@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broke Barista | Add Order</title>
+  <meta name="description" content="Log a new coffee purchase — beans, gear, or accessories.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body data-page="add">
+
+  <!-- OWNER LOGIN MODAL -->
+  <div id="pin-overlay" onclick="maybeHidePinModal(event)">
+    <div class="pin-card" style="position:relative">
+      <button class="pin-close-btn" onclick="hidePinModal()">✕</button>
+      <div class="pin-logo">☕</div>
+      <h2 class="pin-title">Broke <em>Barista</em></h2>
+      <p class="pin-sub">Enter owner PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key pin-blank" disabled></button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-del" onclick="pinDel()">⌫</button>
+      </div>
+      <p class="pin-error-msg" id="pinErr"></p>
+    </div>
+  </div>
+
+  <!-- ADD ORDER PAGE (content shown only to owners) -->
+  <div class="page-header">
+    <div style="display:flex;align-items:flex-start;flex:1">
+      <h1 id="addPageTitle">New <em>Order</em></h1>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+      <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
+    </div>
+  </div>
+
+  <!-- Guard container — replaced with lockout if visitor -->
+  <div id="add-main" class="page-content">
+    <div id="editBanner" class="editing-banner"></div>
+    <div class="panel">
+      <div class="panel-title" id="formTitle">Order Details</div>
+      <div class="form-row">
+        <div class="field">
+          <label class="form-label">Date</label>
+          <input type="date" id="inp-date">
+        </div>
+        <div class="field">
+          <label class="form-label">Order ID <span style="font-size:.62rem;color:var(--light)">(optional)</span></label>
+          <input type="text" id="inp-order" placeholder="e.g. 577387">
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="field">
+          <label class="form-label">Vendor / Shop</label>
+          <input type="text" id="inp-vendor" placeholder="e.g. Blue Tokai, Amazon">
+        </div>
+      </div>
+      <div class="combo-toggle">
+        <input type="checkbox" id="inp-combo" onchange="toggleCombo()">
+        <label for="inp-combo">Combo deal — one price covers all items</label>
+      </div>
+      <div class="combo-price-wrap" id="comboPriceWrap">
+        <label class="form-label">Total Combo Price (₹)</label>
+        <input type="number" id="inp-combo-price" placeholder="e.g. 1640">
+      </div>
+      <div class="form-divider">Items in this Order</div>
+      <div id="itemsList"></div>
+      <button class="btn-add-item" onclick="addItemRow()">+ Add another item</button>
+      <div>
+        <button class="btn-primary" onclick="saveOrder()" id="saveBtn">☕ Save Order</button>
+        <button class="btn-ghost" onclick="resetForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
+        class="nav-label">Process</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
+  </nav>
+  <script src="/app.js"></script>
+</body>
+
+</html>
