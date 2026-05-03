@@ -1,4 +1,4 @@
-﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CONSTANTS & STATE
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 const API = '/api/logs';
@@ -1139,13 +1139,15 @@ function renderInsights() {
   let costPerGram = 0;
   const cpg = bagsWithSize.length ? (() => {
     const totalG = bagsWithSize.reduce((s, l) => {
-      const g = parseFloat(l.size) || 0;
+      const m = String(l.size).match(/(\d+(?:\.\d+)?)\s*g/i);
+      const km = String(l.size).match(/(\d+(?:\.\d+)?)\s*kg/i);
+      const g = m ? Number(m[1]) : km ? Number(km[1]) * 1000 : 0;
       return s + g;
     }, 0);
     const totalP = bagsWithSize.reduce((s, l) => s + Number(l.price || 0), 0);
     if (totalG > 0) {
       costPerGram = totalP / totalG;
-      return Math.round(costPerGram * 100)
+      return Math.round(costPerGram * 100);
     }
     return 0;
   })() : 0;
@@ -1173,8 +1175,8 @@ function renderInsights() {
   // Total kg of beans bought
   const totalKgBought = beans.reduce((s, l) => {
     const sz = String(l.size || '');
-    const kg = sz.match(/(\\d+(?:\\.\\d+)?)\\s*kg/i);
-    const g = sz.match(/(\\d+(?:\\.\\d+)?)\\s*g/i);
+    const kg = sz.match(/(\d+(?:\.\d+)?)\s*kg/i);
+    const g = sz.match(/(\d+(?:\.\d+)?)\s*g/i);
     return s + (kg ? Number(kg[1]) : g ? Number(g[1]) / 1000 : 0);
   }, 0);
   $('ins-total-kg').textContent = totalKgBought > 0 ? totalKgBought.toFixed(2) + ' kg' : '—';
