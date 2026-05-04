@@ -15,7 +15,7 @@ const TYPEMETA = {
 const BREW_OPTS = ['French Press', 'Cafflano Kompresso', 'Moka Pot', 'V60', 'AeroPress', 'Espresso Machine', 'Cold Brew', 'Siphon'];
 const SIZE_OPTS = ['100g', '200g', '250g', '500g', '1kg'];
 
-// Process detection — maps keywords in name/notes â†’ canonical process
+// Process detection — maps keywords in name/notes → canonical process
 const PROCESS_MAP = [
   { key: 'natural', label: 'Natural', icon: 'ðŸ’', hint: 'sun-dried, dry process' },
   { key: 'washed', label: 'Washed', icon: '💧', hint: 'wet process, fully washed' },
@@ -188,7 +188,7 @@ function addItemRow(prefill = {}) {
         <label class="form-label">Process</label>
         <div class="pill-group" id="process-pills-${n}">
           ${['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown'].map(v => `<span class="pill-opt ${(prefill.process || '') === (v) ? 'selected' : ''}" data-val="${v}" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">${v}</span>`).join('')}
-          <span class="pill-opt ${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? 'selected' : ''}" data-val="__custom__" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">Customâ€¦</span>
+          <span class="pill-opt ${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? 'selected' : ''}" data-val="__custom__" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">Custom…</span>
         </div>
         <div id="custom-process-wrap-${n}" style="margin-top:.45rem;display:${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? 'block' : 'none'}">
           <input type="text" id="custom-process-${n}" placeholder="e.g. Carbonic Maceration, Extended Fermentâ€¦" value="${esc(!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? prefill.process || '' : '')}">
@@ -480,7 +480,7 @@ function renderShelf() {
     if (meta.roastDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">🌿 Roasted ${fmtDate(meta.roastDate)}</span>`);
     if (meta.deliveredDate) lifePills.push(`<span class="epill">📦 ${fmtDate(meta.deliveredDate)}</span>`);
     if (meta.openedDate) lifePills.push(`<span class="epill">🔓 ${fmtDate(meta.openedDate)}</span>`);
-    if (isDone && meta.finishedDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">âœ… ${fmtDate(meta.finishedDate)}</span>`);
+    if (isDone && meta.finishedDate) lifePills.push(`<span class="epill" style="background:var(--green-bg);color:var(--green)">✅ ${fmtDate(meta.finishedDate)}</span>`);
 
     // Gram usage bar
     const entries = meta.gramEntries || [];
@@ -527,7 +527,7 @@ function renderShelf() {
         const sealedDays = daysSinceRoast;
         const sealedPct = Math.max(0, Math.min(100, 100 - Math.round(sealedDays / SEALED_SHELF_LIFE * 100)));
         const sealedCls = sealedPct > 60 ? 'fresh-green' : sealedPct > 30 ? 'fresh-amber' : 'fresh-red';
-        const sealedLabel = sealedPct > 60 ? 'âœ… Ready to open' : sealedPct > 30 ? 'â³ Open soon' : 'âš ï¸ Open now';
+        const sealedLabel = sealedPct > 60 ? '✅ Ready to open' : sealedPct > 30 ? 'â³ Open soon' : 'âš ï¸ Open now';
         freshnessBar = `<div class="freshness-bar-wrap">
           <div class="freshness-label">${sealedLabel} · Rested ${daysSinceRoast}d since roast · sealed</div>
           <div class="freshness-track"><div class="freshness-fill ${sealedCls}" style="width:${sealedPct}%"></div></div>
@@ -1287,7 +1287,7 @@ function renderInsights() {
     : '<p style="font-size:.78rem;color:var(--light);font-style:italic">Tag your beans with a type to see this.</p>';
 
   // Beans × Brewer — built from journal entries
-  // Map: beanLabel â†’ { brewer â†’ sessionCount }
+  // Map: beanLabel → { brewer → sessionCount }
   const beanBrewerMap = {};
   journal.forEach(j => {
     if (!j.brewer || !j.beanLabel) return;
