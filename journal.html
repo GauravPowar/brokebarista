@@ -88,35 +88,30 @@
         <button class="btn-close" onclick="closeJModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-row three">
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
           <div class="field"><label class="form-label">Date</label><input type="date" id="j-date"></div>
           <div class="field"><label class="form-label">Brewer</label>
-            <select id="j-brewer">
+            <select id="j-brewer" onchange="toggleCustomBrewerField()">
               <option value="">Select</option>
-              <option>French Press</option>
-              <option>Cafflano Kompresso</option>
-              <option>Moka Pot</option>
-              <option>V60</option>
-              <option>AeroPress</option>
               <option>Espresso Machine</option>
+              <option>Americano</option>
+              <option>V60</option>
+              <option>KaldiPress</option>
+              <option>AeroPress</option>
+              <option>French Press</option>
               <option>Cold Brew</option>
-              <option>Siphon</option>
+              <option>Cafflano Kompresso</option>
               <option value="other">Other</option>
             </select>
           </div>
-          <div class="field"><label class="form-label">Grinder</label>
-            <select id="j-grinder">
-              <option value="">Select</option>
-              <option value="1Zpresso Q Air">1Zpresso Q Air</option>
-              <option value="Timemore C2/C3">Timemore C2/C3</option>
-              <option value="Commandante C40">Commandante C40</option>
-              <option value="Fellow Ode">Fellow Ode</option>
-              <option value="Niche Zero">Niche Zero</option>
-              <option value="Kingrinder K6">Kingrinder K6</option>
-              <option value="Pre-ground">Pre-ground</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+        </div>
+        <div class="field" id="j-brewer-custom-wrap" style="display:none;margin-bottom:.75rem">
+          <label class="form-label">Custom Brewer</label>
+          <input type="text" id="j-brewer-custom" placeholder="e.g. Flair 58, Chemex">
+          <label
+            style="display:flex;align-items:center;gap:0.3rem;margin-top:0.35rem;font-size:0.75rem;color:var(--mid);cursor:pointer">
+            <input type="checkbox" id="j-brewer-save" style="width:auto;accent-color:var(--caramel)"> Save to list
+          </label>
         </div>
         <div class="form-row full">
           <div class="field"><label class="form-label">Bean (link to your shelf)</label>
@@ -125,20 +120,52 @@
             </select>
           </div>
         </div>
-        <div class="form-row three">
-          <div class="field"><label class="form-label">Dose (g)</label><input type="number" id="j-dose"
-              placeholder="18"></div>
-          <div class="field"><label class="form-label">Yield (g)</label><input type="number" id="j-yield"
-              placeholder="36"></div>
-          <div class="field"><label class="form-label">Time (s)</label><input type="number" id="j-time" placeholder="30"
-              step="1"></div>
-        </div>
-        <div class="form-row">
-          <div class="field"><label class="form-label">Water Temp (°C)</label><input type="number" id="j-temp"
-              placeholder="94"></div>
-          <div class="field"><label class="form-label">Grind Setting</label><input type="text" id="j-grind"
-              placeholder="e.g. 3.5 on Q Air"></div>
-        </div>
+
+        <details
+          style="margin-bottom:.75rem;border:1px solid rgba(255,255,255,0.08);padding:.6rem;border-radius:4px;background:rgba(0,0,0,0.1)">
+          <summary
+            style="font-size:.78rem;font-weight:600;color:var(--mid);cursor:pointer;text-transform:uppercase;letter-spacing:.05em;list-style:none">
+            <span style="display:flex;align-items:center;gap:.3rem">⚙️ Advanced Brew Parameters <span
+                style="font-size:.6rem;opacity:.5">▼</span></span>
+          </summary>
+          <div style="margin-top:.75rem;display:flex;flex-direction:column;gap:.5rem">
+            <div class="form-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+              <div class="field"><label class="form-label">Grinder</label>
+                <select id="j-grinder" onchange="onGrinderChange()">
+                  <option value="">Select</option>
+                  <option value="1Zpresso Q Air">1Zpresso Q Air</option>
+                  <option value="Timemore C2/C3">Timemore C2/C3</option>
+                  <option value="Commandante C40">Commandante C40</option>
+                  <option value="Fellow Ode">Fellow Ode</option>
+                  <option value="Niche Zero">Niche Zero</option>
+                  <option value="Kingrinder K6">Kingrinder K6</option>
+                  <option value="Pre-ground">Pre-ground</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field"><label class="form-label">Grind Setting</label><input type="text" id="j-grind"
+                  placeholder="e.g. 3.5"></div>
+              <div class="field"><label class="form-label">Water Temp (°C)</label><input type="number" id="j-temp"
+                  placeholder="94"></div>
+            </div>
+            <div class="field" id="j-grinder-custom-wrap" style="display:none;margin-top:.25rem;margin-bottom:.25rem">
+              <label class="form-label">Custom Grinder</label>
+              <input type="text" id="j-grinder-custom" placeholder="e.g. DF64, Kingrinder K4">
+              <label
+                style="display:flex;align-items:center;gap:0.3rem;margin-top:0.35rem;font-size:0.75rem;color:var(--mid);cursor:pointer">
+                <input type="checkbox" id="j-grinder-save" style="width:auto;accent-color:var(--caramel)"> Save to list
+              </label>
+            </div>
+            <div class="form-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+              <div class="field"><label class="form-label">Dose (g)</label><input type="number" id="j-dose"
+                  placeholder="18"></div>
+              <div class="field"><label class="form-label">Yield (g)</label><input type="number" id="j-yield"
+                  placeholder="36"></div>
+              <div class="field"><label class="form-label">Time (s)</label><input type="number" id="j-time"
+                  placeholder="30" step="1"></div>
+            </div>
+          </div>
+        </details>
         <div class="field" style="margin-bottom:.75rem">
           <label class="form-label">Rating</label>
           <div class="rating-stars" id="jRatingStars">
@@ -150,8 +177,24 @@
           </div>
         </div>
         <div class="field" style="margin-bottom:.75rem">
-          <label class="form-label">Tasting Notes (tap to select)</label>
-          <div id="tastePills" style="max-height:190px;overflow-y:auto;padding-right:.4rem;scrollbar-width:thin">
+          <label class="form-label" style="display:flex;align-items:center;gap:.5rem;cursor:pointer">
+            <input type="checkbox" id="j-milk"
+              style="width:1rem;height:1rem;accent-color:var(--caramel);cursor:pointer">
+            <span>🥛 Milk-based drink? <small style="color:var(--mid);font-weight:400">(latte, cappuccino, flat white —
+                uses ₹250 café price)</small></span>
+          </label>
+        </div>
+        <details
+          style="margin-bottom:.75rem;border:1px solid rgba(255,255,255,0.08);padding:.6rem;border-radius:4px;background:rgba(0,0,0,0.1)">
+          <summary
+            style="font-size:.78rem;font-weight:600;color:var(--mid);cursor:pointer;text-transform:uppercase;letter-spacing:.05em;list-style:none">
+            <span style="display:flex;align-items:center;gap:.3rem">👅 Tasting Notes <span
+                style="font-size:.6rem;opacity:.5">▼</span></span>
+          </summary>
+          <div id="tastePills"
+            style="max-height:190px;overflow-y:auto;padding-right:.4rem;margin-top:.75rem;scrollbar-width:thin">
+
+            <!-- Floral -->
             <div class="group-colored group-floral"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
               Floral</div>
@@ -161,6 +204,8 @@
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Rose</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Jasmine</span>
             </div>
+
+            <!-- Fruity -->
             <div class="group-colored group-fruity"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
               Fruity</div>
@@ -184,29 +229,90 @@
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Lemon</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Lime</span>
             </div>
+
+            <!-- Sour / Fermented -->
             <div class="group-colored group-sour"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
               Sour/Fermented</div>
             <div class="pill-group group-colored group-sour" style="margin-bottom:.7rem">
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Sour Aromatics</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Acetic Acid</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Butyric Acid</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Isovaleric Acid</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Citric Acid</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Malic Acid</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Winey</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Whiskey</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Fermented</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Overripe</span>
             </div>
+
+            <!-- Green / Vegetative -->
+            <div class="group-colored group-green"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Green/Vegetative</div>
+            <div class="pill-group group-colored group-green" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Olive Oil</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Raw</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Under-ripe</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Peapod</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Fresh</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Dark Green</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Vegetative</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Hay-like</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Herb-like</span>
+            </div>
+
+            <!-- Other (defects) -->
+            <div class="group-colored group-other"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Other</div>
+            <div class="pill-group group-colored group-other" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Stale</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Cardboard</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Papery</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Woody</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Moldy/Damp</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Musty/Dusty</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Musty/Earthy</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Animalic</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Meaty/Brothy</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Phenolic</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Bitter</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Salty</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Medicinal</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Rubber</span>
+            </div>
+
+            <!-- Roasted -->
             <div class="group-colored group-roasted"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
               Roasted</div>
             <div class="pill-group group-colored group-roasted" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Pipe Tobacco</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Tobacco</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Brown</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Roast</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Smoky</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Ashy</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Acrid</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Grain</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Malt</span>
             </div>
+
+            <!-- Spices -->
+            <div class="group-colored group-spices"
+              style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
+              Spices</div>
+            <div class="pill-group group-colored group-spices" style="margin-bottom:.7rem">
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Pepper</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Anise</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Nutmeg</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Cinnamon</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Clove</span>
+            </div>
+
+            <!-- Nutty / Cocoa -->
             <div class="group-colored group-nutty"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem;font-weight:600">
               Nutty/Cocoa</div>
@@ -217,18 +323,24 @@
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Cocoa</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Dark Chocolate</span>
             </div>
+
+            <!-- Sweet -->
             <div class="group-colored group-sweet"
               style="font-size:.65rem;color:var(--p-c);letter-spacing:.05em;text-transform:uppercase;margin-bottom:-.1rem;font-weight:600">
               Sweet</div>
             <div class="pill-group group-colored group-sweet">
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Sweet Aromatics</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Overall Sweet</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Vanillin</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Vanilla</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Molasses</span>
+              <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Maple Syrup</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Caramelized</span>
               <span class="pill-opt multi" onclick="this.classList.toggle('selected')">Honey</span>
             </div>
+
           </div>
-        </div>
+        </details>
         <div class="form-row full">
           <div class="field"><label class="form-label">Notes</label>
             <textarea id="j-notes" placeholder="Observations, what worked, what to tweak…"
@@ -244,18 +356,50 @@
     </div>
   </div>
 
+  <!-- SHARE CARD OVERLAY -->
+  <div id="shareCardOverlay" class="share-overlay hidden" onclick="maybeCloseShareOverlay(event)">
+    <div class="share-sheet" id="shareSheet">
+      <div class="share-handle"></div>
+      <div class="share-header">
+        <span class="share-title">☕ Share Brew Card</span>
+        <button class="btn-close" onclick="closeShareOverlay()">✕</button>
+      </div>
+
+      <div class="share-aspect-group">
+        <button class="share-aspect-btn active" data-aspect="916" onclick="selectShareAspect(this,'916')">
+          <span class="aspect-icon">📱</span>
+          <span>9:16 Story</span>
+        </button>
+        <button class="share-aspect-btn" data-aspect="43" onclick="selectShareAspect(this,'43')">
+          <span class="aspect-icon">🖼️</span>
+          <span>4:3 Landscape</span>
+        </button>
+      </div>
+
+      <div class="share-preview-wrap" id="sharePreviewWrap">
+        <canvas id="sharePreviewCanvas"></canvas>
+      </div>
+
+      <div class="share-actions">
+        <button class="btn-primary share-download-btn" onclick="downloadShareCard()">⬇ Download JPG</button>
+        <button class="btn-ghost" onclick="closeShareOverlay()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
+
   <nav class="bottom-nav">
     <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
         class="nav-label">Log</span></a>
     <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
         class="nav-label">Shelf</span></a>
-    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
-        class="nav-label">Process</span></a>
-    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
-        class="nav-label">Journal</span></a>
     <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
         class="nav-label">Stats</span></a>
+    <a href="/recap" class="nav-link" data-page="recap"><span class="nav-icon">🎞️</span><span
+        class="nav-label">Recap</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
     <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
         class="nav-label">Add</span></a>
   </nav>
