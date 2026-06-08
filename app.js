@@ -1271,8 +1271,73 @@ async function deleteJournalEntry(id) {
   renderJournal();
 }
 
-/* ── SHARE JOURNAL ENTRY ──────────────────────────────────────────── */
+
+/* ── SHARE CARD THEMES ─────────────────────────────────────────── */
+const SHARE_THEMES = {
+  espresso: {
+    name: 'Espresso',
+    bg1: '#F5EFE0', bg2: '#EDE4CE',
+    card: '#FFFDF6', cardBorder: 'rgba(196,125,42,0.22)',
+    accent1: '#C47D2A', accent2: '#E8A83E',
+    title: '#2C1A0E', sub: '#7A5C3A', muted: '#A68A64',
+    star: '#E8A83E', pill: 'rgba(196,125,42,0.12)', pillText: '#7A3A18',
+    divider: 'rgba(196,125,42,0.25)', brand: '#C47D2A', brandSub: '#D4B483',
+    shadow: 'rgba(44,26,14,0.18)', ring: '#C47D2A',
+  },
+  midnight: {
+    name: 'Midnight',
+    bg1: '#0D1B2A', bg2: '#1B2B3A',
+    card: '#112032', cardBorder: 'rgba(180,150,80,0.25)',
+    accent1: '#B49650', accent2: '#D4B870',
+    title: '#F0E8C8', sub: '#A08C60', muted: '#6A7A8A',
+    star: '#D4B870', pill: 'rgba(180,150,80,0.15)', pillText: '#D4C080',
+    divider: 'rgba(180,150,80,0.2)', brand: '#B49650', brandSub: '#6A7A8A',
+    shadow: 'rgba(0,0,0,0.5)', ring: '#2A4060',
+  },
+  matcha: {
+    name: 'Matcha',
+    bg1: '#F0F5EC', bg2: '#E4EDE0',
+    card: '#FAFDF8', cardBorder: 'rgba(80,130,60,0.2)',
+    accent1: '#5A8A3C', accent2: '#82B45A',
+    title: '#1C3018', sub: '#4A6A38', muted: '#7A9A68',
+    star: '#82B45A', pill: 'rgba(80,130,60,0.1)', pillText: '#3A6828',
+    divider: 'rgba(80,130,60,0.2)', brand: '#5A8A3C', brandSub: '#82B45A',
+    shadow: 'rgba(20,50,10,0.14)', ring: '#5A8A3C',
+  },
+  sakura: {
+    name: 'Sakura',
+    bg1: '#FDF0F3', bg2: '#F5E0E8',
+    card: '#FFF8FA', cardBorder: 'rgba(200,100,130,0.2)',
+    accent1: '#C86482', accent2: '#E8909A',
+    title: '#3C1020', sub: '#885060', muted: '#B08090',
+    star: '#E8909A', pill: 'rgba(200,100,130,0.1)', pillText: '#9A3050',
+    divider: 'rgba(200,100,130,0.2)', brand: '#C86482', brandSub: '#B08090',
+    shadow: 'rgba(80,20,40,0.14)', ring: '#C86482',
+  },
+  slate: {
+    name: 'Slate',
+    bg1: '#F2F4F6', bg2: '#E8ECF0',
+    card: '#FAFBFC', cardBorder: 'rgba(80,110,150,0.2)',
+    accent1: '#4A6FA5', accent2: '#6A90C0',
+    title: '#1A2535', sub: '#4A5A70', muted: '#7A8A9A',
+    star: '#6A90C0', pill: 'rgba(74,111,165,0.1)', pillText: '#2A4878',
+    divider: 'rgba(74,111,165,0.2)', brand: '#4A6FA5', brandSub: '#7A8A9A',
+    shadow: 'rgba(20,35,60,0.14)', ring: '#4A6FA5',
+  },
+  obsidian: {
+    name: 'Obsidian',
+    bg1: '#0A0A0A', bg2: '#141414',
+    card: '#1C1C1C', cardBorder: 'rgba(255,255,255,0.1)',
+    accent1: '#E0E0E0', accent2: '#FFFFFF',
+    title: '#F5F5F5', sub: '#A0A0A0', muted: '#606060',
+    star: '#E0E0E0', pill: 'rgba(255,255,255,0.08)', pillText: '#D0D0D0',
+    divider: 'rgba(255,255,255,0.12)', brand: '#C0C0C0', brandSub: '#606060',
+    shadow: 'rgba(0,0,0,0.7)', ring: '#303030',
+  },
+};
+
 let _shareEntryId = null;
+let _shareTheme = 'espresso';
 
 function shareJournalEntry(id) {
   _shareEntryId = id;
@@ -1280,10 +1345,13 @@ function shareJournalEntry(id) {
   if (overlay) {
     overlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    // Reset aspect button state
     overlay.querySelectorAll('.share-aspect-btn').forEach(b => b.classList.remove('active'));
     const defaultBtn = overlay.querySelector('.share-aspect-btn[data-aspect="916"]');
     if (defaultBtn) defaultBtn.classList.add('active');
+    // Mark active theme swatch
+    overlay.querySelectorAll('.share-theme-swatch').forEach(s => {
+      s.classList.toggle('active', s.dataset.theme === _shareTheme);
+    });
     _renderSharePreview('916');
   }
 }
@@ -1299,285 +1367,301 @@ function maybeCloseShareOverlay(e) {
   if (e.target === $('shareCardOverlay')) closeShareOverlay();
 }
 
+function selectShareTheme(el, theme) {
+  _shareTheme = theme;
+  el.closest('.share-theme-row').querySelectorAll('.share-theme-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  const overlay = $('shareCardOverlay');
+  const activeAspect = overlay?.querySelector('.share-aspect-btn.active')?.dataset?.aspect || '916';
+  _renderSharePreview(activeAspect);
+}
+
 function _renderSharePreview(aspect) {
   const canvas = $('sharePreviewCanvas');
   if (!canvas || !_shareEntryId) return;
   const j = journal.find(x => String(x.id) === String(_shareEntryId));
   if (!j) return;
   const beanName = j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '' : j.beanLabel || '';
-  _drawJournalCard(canvas, j, beanName, aspect);
+  _drawJournalCard(canvas, j, beanName, aspect, SHARE_THEMES[_shareTheme] || SHARE_THEMES.espresso);
 }
 
-function _drawJournalCard(canvas, j, beanName, aspect) {
-  // Dimensions
-  const isDark = document.body.classList.contains('dark-mode');
-  let W, H;
-  if (aspect === '916') { W = 1080; H = 1920; }
-  else { W = 1200; H = 900; }
-
+function _drawJournalCard(canvas, j, beanName, aspect, theme) {
+  const W = aspect === '916' ? 1080 : 1200;
+  const H = aspect === '916' ? 1920 : 900;
   canvas.width = W;
   canvas.height = H;
-
   const ctx = canvas.getContext('2d');
-  const dpr = 1; // canvas is already HiDPI sized
 
-  // ── Background ──
-  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-  if (isDark) {
-    bgGrad.addColorStop(0, '#1A1208');
-    bgGrad.addColorStop(0.5, '#120C08');
-    bgGrad.addColorStop(1, '#1F150E');
-  } else {
-    bgGrad.addColorStop(0, '#F5EFE0');
-    bgGrad.addColorStop(0.5, '#F9F5ED');
-    bgGrad.addColorStop(1, '#EDE4CE');
-  }
+  // ── Background gradient ──
+  const bgGrad = ctx.createLinearGradient(0, 0, W * 0.6, H);
+  bgGrad.addColorStop(0, theme.bg1);
+  bgGrad.addColorStop(1, theme.bg2);
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle radial texture
-  const radial = ctx.createRadialGradient(W * 0.15, 0, 0, W * 0.15, 0, W * 0.9);
-  radial.addColorStop(0, isDark ? 'rgba(196,125,42,0.06)' : 'rgba(196,125,42,0.1)');
-  radial.addColorStop(1, 'transparent');
-  ctx.fillStyle = radial;
-  ctx.fillRect(0, 0, W, H);
-
-  // ── Decorative elements ──
-  // Top-left coffee ring
+  // ── Geometric accent shapes (top-right corner block) ──
   ctx.save();
-  ctx.globalAlpha = isDark ? 0.04 : 0.06;
-  ctx.beginPath();
-  ctx.arc(W * -0.05, H * 0.05, W * 0.35, 0, Math.PI * 2);
-  ctx.strokeStyle = '#C47D2A';
-  ctx.lineWidth = 80;
-  ctx.stroke();
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = theme.accent1;
+  ctx.fillRect(W * 0.7, 0, W * 0.3, H * 0.22);
   ctx.restore();
 
-  // Bottom-right coffee ring
   ctx.save();
-  ctx.globalAlpha = isDark ? 0.04 : 0.06;
-  ctx.beginPath();
-  ctx.arc(W * 1.05, H * 0.95, W * 0.38, 0, Math.PI * 2);
-  ctx.strokeStyle = '#C47D2A';
-  ctx.lineWidth = 80;
-  ctx.stroke();
+  ctx.globalAlpha = 0.05;
+  ctx.fillStyle = theme.accent2;
+  ctx.fillRect(W * 0.82, 0, W * 0.18, H * 0.12);
   ctx.restore();
 
-  const PAD = aspect === '916' ? 90 : 72;
+  // Bottom-left accent strip
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = theme.accent1;
+  ctx.fillRect(0, H * 0.88, W * 0.25, H * 0.12);
+  ctx.restore();
+
+  // ── Card ──
+  const PAD = aspect === '916' ? 72 : 60;
   const cardX = PAD;
   const cardW = W - PAD * 2;
-  const cardY = aspect === '916' ? H * 0.18 : H * 0.12;
-  const cardH = aspect === '916' ? H * 0.68 : H * 0.78;
+  const cardY = aspect === '916' ? H * 0.16 : H * 0.1;
+  const cardH = aspect === '916' ? H * 0.71 : H * 0.82;
+  const cardRad = 36;
 
-  // ── Card background ──
-  const cardRad = 40;
   ctx.save();
-  ctx.shadowColor = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(44,26,14,0.18)';
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 20;
+  ctx.shadowColor = theme.shadow;
+  ctx.shadowBlur = 70;
+  ctx.shadowOffsetY = 24;
   _roundRect(ctx, cardX, cardY, cardW, cardH, cardRad);
-  ctx.fillStyle = isDark ? '#1F150E' : '#FFFDF6';
+  ctx.fillStyle = theme.card;
   ctx.fill();
   ctx.restore();
 
   // Card border
   ctx.save();
   _roundRect(ctx, cardX, cardY, cardW, cardH, cardRad);
-  ctx.strokeStyle = isDark ? 'rgba(196,125,42,0.2)' : 'rgba(196,125,42,0.25)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = theme.cardBorder;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.restore();
 
-  // Left accent bar on card
+  // Top accent bar across full card width
   ctx.save();
-  _roundRect(ctx, cardX, cardY + 40, 7, cardH - 80, 4);
-  const accentGrad = ctx.createLinearGradient(0, cardY + 40, 0, cardY + cardH - 40);
-  accentGrad.addColorStop(0, '#C47D2A');
-  accentGrad.addColorStop(1, '#E8A83E');
-  ctx.fillStyle = accentGrad;
+  const topBarH = aspect === '916' ? 10 : 8;
+  _roundRect(ctx, cardX, cardY, cardW, topBarH, [cardRad, cardRad, 0, 0]);
+  const topBarGrad = ctx.createLinearGradient(cardX, 0, cardX + cardW, 0);
+  topBarGrad.addColorStop(0, theme.accent1);
+  topBarGrad.addColorStop(1, theme.accent2);
+  ctx.fillStyle = topBarGrad;
   ctx.fill();
   ctx.restore();
 
-  // Inner card content area
-  const cPad = aspect === '916' ? 72 : 60;
+  // ── Content ──
+  const cPad = aspect === '916' ? 68 : 56;
   const cX = cardX + cPad;
   const cW = cardW - cPad * 2;
-  let cY = cardY + (aspect === '916' ? 72 : 56);
+  let cY = cardY + (aspect === '916' ? 80 : 62);
 
-  // ── ☕ icon ──
-  ctx.font = aspect === '916' ? '80px serif' : '64px serif';
+  // LABEL "BREW LOG"
+  ctx.font = aspect === '916'
+    ? `500 26px "Helvetica Neue", Arial, sans-serif`
+    : `500 22px "Helvetica Neue", Arial, sans-serif`;
+  ctx.fillStyle = theme.accent1;
   ctx.textAlign = 'left';
-  ctx.fillText('☕', cX, cY + (aspect === '916' ? 72 : 56));
-  cY += aspect === '916' ? 100 : 80;
+  ctx.letterSpacing = '0.15em';
+  ctx.fillText('BREW LOG', cX, cY);
+  ctx.letterSpacing = '0';
+  cY += aspect === '916' ? 56 : 44;
 
-  // ── Bean name / title ──
+  // Title (bean name)
   const title = beanName || 'Brew Session';
-  ctx.font = aspect === '916' ? 'bold 72px Georgia, serif' : 'bold 60px Georgia, serif';
-  ctx.fillStyle = isDark ? '#E8A83E' : '#4A2C14';
+  const titleFs = aspect === '916' ? 76 : 62;
+  ctx.font = `bold ${titleFs}px Georgia, "Times New Roman", serif`;
+  ctx.fillStyle = theme.title;
   ctx.textAlign = 'left';
-  // Word wrap
-  cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 84 : 70) + (aspect === '916' ? 24 : 18);
+  cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 88 : 74);
+  cY += aspect === '916' ? 18 : 12;
 
-  // ── Stars ──
+  // Stars + date on same row
   const rating = j.rating || 0;
   const starStr = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-  ctx.font = aspect === '916' ? '54px serif' : '44px serif';
-  ctx.fillStyle = '#E8A83E';
+  const starFs = aspect === '916' ? 46 : 38;
+  ctx.font = `${starFs}px serif`;
+  ctx.fillStyle = theme.star;
   ctx.fillText(starStr, cX, cY);
-  cY += aspect === '916' ? 70 : 58;
 
-  // ── Date ──
-  const dateStr = j.date ? new Date(j.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : '';
-  ctx.font = aspect === '916' ? '36px "Courier New", monospace' : '30px "Courier New", monospace';
-  ctx.fillStyle = isDark ? '#A68A64' : '#7A5C3A';
-  ctx.fillText(dateStr, cX, cY);
-  cY += aspect === '916' ? 52 : 42;
+  const dateStr = j.date
+    ? new Date(j.date + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '';
+  const dateFs = aspect === '916' ? 30 : 25;
+  ctx.font = `${dateFs}px "Courier New", monospace`;
+  ctx.fillStyle = theme.muted;
+  ctx.textAlign = 'right';
+  ctx.fillText(dateStr, cX + cW, cY);
+  ctx.textAlign = 'left';
+  cY += aspect === '916' ? 56 : 46;
 
-  // Divider
+  // ── Solid divider ──
   ctx.save();
-  ctx.strokeStyle = isDark ? 'rgba(196,125,42,0.2)' : 'rgba(196,125,42,0.3)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([8, 8]);
+  ctx.strokeStyle = theme.divider;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([]);
   ctx.beginPath();
-  ctx.moveTo(cX, cY + 8);
-  ctx.lineTo(cX + cW, cY + 8);
+  ctx.moveTo(cX, cY);
+  ctx.lineTo(cX + cW, cY);
   ctx.stroke();
   ctx.restore();
-  cY += aspect === '916' ? 44 : 36;
+  cY += aspect === '916' ? 42 : 32;
 
-  // ── Brew params grid ──
+  // ── Brew params: 3-column layout ──
   const params = [];
-  if (j.brewer)  params.push({ icon: '☕', label: 'Brewer', val: j.brewer });
-  if (j.grinder) params.push({ icon: '⚙️', label: 'Grinder', val: j.grinder });
-  if (j.dose)    params.push({ icon: '⚖️', label: 'Dose', val: j.dose + 'g' });
-  if (j.yield)   params.push({ icon: '💧', label: 'Yield', val: j.yield + 'g' });
-  if (j.time)    params.push({ icon: '⏱️', label: 'Time', val: j.time + 's' });
-  if (j.temp)    params.push({ icon: '🌡️', label: 'Temp', val: j.temp + '°C' });
-  if (j.grind)   params.push({ icon: '🔩', label: 'Grind', val: j.grind });
+  if (j.brewer)  params.push({ label: 'BREWER',  val: j.brewer });
+  if (j.grinder) params.push({ label: 'GRINDER', val: j.grinder });
+  if (j.dose)    params.push({ label: 'DOSE',    val: j.dose + 'g' });
+  if (j.yield)   params.push({ label: 'YIELD',   val: j.yield + 'g' });
+  if (j.time)    params.push({ label: 'TIME',    val: j.time + 's' });
+  if (j.temp)    params.push({ label: 'TEMP',    val: j.temp + '°C' });
+  if (j.grind)   params.push({ label: 'GRIND',   val: j.grind });
 
   if (params.length) {
-    const cols = 2;
+    const cols = 3;
     const cellW = cW / cols;
-    const labelFs = aspect === '916' ? 28 : 24;
-    const valFs = aspect === '916' ? 36 : 30;
-    const rowH = aspect === '916' ? 80 : 66;
+    const labelFs = aspect === '916' ? 24 : 20;
+    const valFs = aspect === '916' ? 34 : 28;
+    const rowH = aspect === '916' ? 84 : 68;
     params.slice(0, 6).forEach((p, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const px = cX + col * cellW;
       const py = cY + row * rowH;
-      ctx.font = `${labelFs}px "DM Sans", sans-serif`;
-      ctx.fillStyle = isDark ? '#7A5C3A' : '#A68A64';
-      ctx.textAlign = 'left';
-      ctx.fillText(p.icon + ' ' + p.label, px, py);
-      ctx.font = `bold ${valFs}px "DM Sans", sans-serif`;
-      ctx.fillStyle = isDark ? '#E8A83E' : '#4A2C14';
+      ctx.font = `500 ${labelFs}px "Helvetica Neue", Arial, sans-serif`;
+      ctx.fillStyle = theme.muted;
+      ctx.letterSpacing = '0.1em';
+      ctx.fillText(p.label, px, py);
+      ctx.letterSpacing = '0';
+      ctx.font = `bold ${valFs}px "Helvetica Neue", Arial, sans-serif`;
+      ctx.fillStyle = theme.title;
       ctx.fillText(p.val, px, py + valFs + 4);
     });
-    cY += Math.ceil(Math.min(params.length, 6) / cols) * rowH + (aspect === '916' ? 20 : 16);
+    cY += Math.ceil(Math.min(params.length, 6) / cols) * rowH + (aspect === '916' ? 16 : 12);
   }
 
-  // ── Tasting notes ──
+  // ── Tasting notes pills ──
   const tastes = j.tastes || [];
   if (tastes.length) {
-    // Second divider
     ctx.save();
-    ctx.strokeStyle = isDark ? 'rgba(196,125,42,0.2)' : 'rgba(196,125,42,0.3)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = theme.divider;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.moveTo(cX, cY + 4);
-    ctx.lineTo(cX + cW, cY + 4);
+    ctx.moveTo(cX, cY);
+    ctx.lineTo(cX + cW, cY);
     ctx.stroke();
     ctx.restore();
-    cY += aspect === '916' ? 32 : 24;
+    cY += aspect === '916' ? 36 : 26;
 
-    ctx.font = aspect === '916' ? '28px "DM Sans", sans-serif' : '24px "DM Sans", sans-serif';
-    ctx.fillStyle = isDark ? '#7A5C3A' : '#A68A64';
-    ctx.textAlign = 'left';
+    const labelFs2 = aspect === '916' ? 24 : 20;
+    ctx.font = `500 ${labelFs2}px "Helvetica Neue", Arial, sans-serif`;
+    ctx.fillStyle = theme.muted;
+    ctx.letterSpacing = '0.1em';
     ctx.fillText('TASTING NOTES', cX, cY);
-    cY += aspect === '916' ? 38 : 30;
+    ctx.letterSpacing = '0';
+    cY += aspect === '916' ? 42 : 32;
 
-    // Pill tags
-    const pillH = aspect === '916' ? 52 : 42;
-    const pillFs = aspect === '916' ? 28 : 24;
-    const pillPad = aspect === '916' ? 28 : 22;
-    const pillGap = 14;
-    let px = cX, py = cY;
-    ctx.font = `${pillFs}px "DM Sans", sans-serif`;
+    const pillH = aspect === '916' ? 50 : 40;
+    const pillFs = aspect === '916' ? 26 : 22;
+    const pillPad = aspect === '916' ? 26 : 20;
+    const pillGap = 12;
+    ctx.font = `${pillFs}px "Helvetica Neue", Arial, sans-serif`;
+    let px2 = cX, py2 = cY;
     tastes.slice(0, 10).forEach(t => {
       const tw = ctx.measureText(t).width;
       const pillW = tw + pillPad * 2;
-      if (px + pillW > cX + cW) { px = cX; py += pillH + 10; }
-      // Pill bg
+      if (px2 + pillW > cX + cW) { px2 = cX; py2 += pillH + 10; }
       ctx.save();
-      _roundRect(ctx, px, py - pillH + 10, pillW, pillH, pillH / 2);
-      ctx.fillStyle = isDark ? 'rgba(180,122,196,0.2)' : 'rgba(122,58,138,0.1)';
+      _roundRect(ctx, px2, py2 - pillH + 10, pillW, pillH, pillH / 2);
+      ctx.fillStyle = theme.pill;
       ctx.fill();
       ctx.restore();
-      ctx.fillStyle = isDark ? '#B47AC4' : '#7A3A8A';
-      ctx.textAlign = 'left';
-      ctx.fillText(t, px + pillPad, py);
-      px += pillW + pillGap;
+      ctx.fillStyle = theme.pillText;
+      ctx.fillText(t, px2 + pillPad, py2);
+      px2 += pillW + pillGap;
     });
-    cY = py + pillH + (aspect === '916' ? 12 : 8);
+    cY = py2 + pillH + (aspect === '916' ? 10 : 6);
   }
 
   // ── Notes ──
-  if (j.notes) {
-    if (cY < cardY + cardH - (aspect === '916' ? 180 : 140)) {
-      ctx.save();
-      ctx.strokeStyle = isDark ? 'rgba(196,125,42,0.2)' : 'rgba(196,125,42,0.3)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([8, 8]);
-      ctx.beginPath();
-      ctx.moveTo(cX, cY + 4);
-      ctx.lineTo(cX + cW, cY + 4);
-      ctx.stroke();
-      ctx.restore();
-      cY += aspect === '916' ? 32 : 24;
-
-      ctx.font = `italic ${aspect === '916' ? '34px' : '28px'} Georgia, serif`;
-      ctx.fillStyle = isDark ? '#A68A64' : '#7A5C3A';
-      ctx.textAlign = 'left';
-      cY = _wrapText(ctx, '"' + j.notes + '"', cX, cY, cW, aspect === '916' ? 46 : 38);
-    }
+  if (j.notes && cY < cardY + cardH - (aspect === '916' ? 160 : 120)) {
+    ctx.save();
+    ctx.strokeStyle = theme.divider;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cX, cY);
+    ctx.lineTo(cX + cW, cY);
+    ctx.stroke();
+    ctx.restore();
+    cY += aspect === '916' ? 36 : 26;
+    ctx.font = `italic ${aspect === '916' ? '32px' : '26px'} Georgia, serif`;
+    ctx.fillStyle = theme.sub;
+    cY = _wrapText(ctx, '\u201c' + j.notes + '\u201d', cX, cY, cW, aspect === '916' ? 44 : 36);
   }
 
-  // ── Branding watermark ──
-  const brandY = aspect === '916' ? H * 0.915 : H * 0.93;
-  ctx.font = aspect === '916' ? 'bold 36px Georgia, serif' : 'bold 30px Georgia, serif';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = isDark ? '#7A5C3A' : '#D4B483';
-  ctx.fillText('☕ Broke Barista', W / 2, brandY);
-  ctx.font = aspect === '916' ? '26px "DM Sans", sans-serif' : '22px "DM Sans", sans-serif';
-  ctx.fillStyle = isDark ? '#4A2C14' : '#EDE4CE';
-  ctx.fillText('brokebarista.in', W / 2, brandY + (aspect === '916' ? 38 : 32));
+  // ── Branding footer ──
+  const footY = aspect === '916' ? H * 0.915 : H * 0.935;
+  // Accent line above brand
+  ctx.save();
+  const lineGrad = ctx.createLinearGradient(W / 2 - 120, 0, W / 2 + 120, 0);
+  lineGrad.addColorStop(0, 'transparent');
+  lineGrad.addColorStop(0.3, theme.accent1);
+  lineGrad.addColorStop(0.7, theme.accent2);
+  lineGrad.addColorStop(1, 'transparent');
+  ctx.strokeStyle = lineGrad;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(W / 2 - 120, footY - (aspect === '916' ? 28 : 22));
+  ctx.lineTo(W / 2 + 120, footY - (aspect === '916' ? 28 : 22));
+  ctx.stroke();
+  ctx.restore();
 
-  // Update preview display
+  ctx.font = aspect === '916'
+    ? `bold 34px "Helvetica Neue", Arial, sans-serif`
+    : `bold 28px "Helvetica Neue", Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = theme.brand;
+  ctx.letterSpacing = '0.06em';
+  ctx.fillText("GAURAV'S COFFEE LAB", W / 2, footY);
+  ctx.letterSpacing = '0';
+
+  ctx.font = aspect === '916'
+    ? `22px "Helvetica Neue", Arial, sans-serif`
+    : `18px "Helvetica Neue", Arial, sans-serif`;
+  ctx.fillStyle = theme.brandSub;
+  ctx.fillText('brokebarista.in', W / 2, footY + (aspect === '916' ? 34 : 28));
+
+  // ── Scale canvas preview ──
   const preview = $('sharePreviewCanvas');
   if (preview) {
     const wrap = $('sharePreviewWrap');
     if (wrap) {
-      const maxW = Math.min(wrap.clientWidth - 32, aspect === '916' ? 280 : 420);
+      const maxW = Math.min(wrap.clientWidth - 32, aspect === '916' ? 270 : 410);
       const scale = maxW / W;
-      preview.style.width = Math.round(W * scale) + 'px';
+      preview.style.width  = Math.round(W * scale) + 'px';
       preview.style.height = Math.round(H * scale) + 'px';
     }
   }
 }
 
 function _roundRect(ctx, x, y, w, h, r) {
+  const radii = Array.isArray(r) ? r : [r, r, r, r];
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.moveTo(x + radii[0], y);
+  ctx.lineTo(x + w - radii[1], y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radii[1]);
+  ctx.lineTo(x + w, y + h - radii[2]);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radii[2], y + h);
+  ctx.lineTo(x + radii[3], y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radii[3]);
+  ctx.lineTo(x, y + radii[0]);
+  ctx.quadraticCurveTo(x, y, x + radii[0], y);
   ctx.closePath();
 }
 
@@ -1612,7 +1696,7 @@ function downloadShareCard() {
   const aspect = activeBtn ? activeBtn.dataset.aspect : '916';
   const j = journal.find(x => String(x.id) === String(_shareEntryId));
   const name = (j?.beanLabel || j?.brewer || 'brew').toLowerCase().replace(/[^a-z0-9]/g, '-');
-  const filename = `bb-${name}-${aspect === '916' ? '9x16' : '4x3'}.jpg`;
+  const filename = `gcl-${name}-${aspect === '916' ? '9x16' : '4x3'}.jpg`;
   const link = document.createElement('a');
   link.download = filename;
   link.href = canvas.toDataURL('image/jpeg', 0.95);
