@@ -1488,17 +1488,20 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   ctx.fillStyle = theme.title;
   ctx.textAlign = 'left';
   cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 88 : 74);
-  cY += aspect === '916' ? 14 : 10;
 
   // Draw roaster if exists
   if (roasterName) {
+    // Tuck the roaster name closer under the large title font
+    cY -= aspect === '916' ? 20 : 16;
     const roasterFs = aspect === '916' ? 36 : 30;
     ctx.font = `italic ${roasterFs}px Georgia, serif`;
     ctx.fillStyle = theme.sub;
     cY = _wrapText(ctx, "by " + roasterName, cX, cY, cW, aspect === '916' ? 44 : 38);
-    cY += aspect === '916' ? 24 : 18;
+    // Add balanced space before the stars
+    cY += aspect === '916' ? 36 : 28;
   } else {
-    cY += aspect === '916' ? 10 : 8; // extra padding if no roaster
+    // Default spacing if no roaster
+    cY += aspect === '916' ? 24 : 18;
   }
 
   // Stars + date on same row
