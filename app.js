@@ -614,7 +614,7 @@ function renderShelf() {
 
   const alertEl = $('shelf-bean-alert');
   if (alertEl) {
-    if (totalAvailableG > 0 && totalAvailableG < LOW_BEAN_THRESHOLD) {
+    if (totalAvailableG < LOW_BEAN_THRESHOLD) {
       const urgency = totalAvailableG < 100 ? 'critical' : 'warning';
       alertEl.className = `low-bean-alert ${urgency}`;
       alertEl.innerHTML = `
@@ -622,15 +622,11 @@ function renderShelf() {
         <div class="lba-body">
           <div class="lba-title">${totalAvailableG < 100 ? 'Critically Low on Beans!' : 'Running Low on Beans'}</div>
           <div class="lba-sub">${totalAvailableG.toFixed(0)}g available across all bags · <strong>~${totalCupsLeft} cups left</strong></div>
-          ${cupsBreakdown.length > 1 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
+          ${cupsBreakdown.length > 0 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
         </div>
         <a href="/add" class="lba-cta">+ Order Beans</a>`;
       alertEl.style.display = 'flex';
-    } else if (totalAvailableG === 0 && unfinished.length > 0) {
-      alertEl.className = 'low-bean-alert critical';
-      alertEl.innerHTML = `<div class="lba-icon">☕</div><div class="lba-body"><div class="lba-title">No beans tracked!</div><div class="lba-sub">Track brew usage on bags to see your bean levels.</div></div>`;
-      alertEl.style.display = 'flex';
-    } else if (totalAvailableG >= LOW_BEAN_THRESHOLD) {
+    } else {
       // Show cups predictor summary even when not low
       alertEl.className = 'low-bean-alert ok';
       alertEl.innerHTML = `
@@ -638,11 +634,9 @@ function renderShelf() {
         <div class="lba-body">
           <div class="lba-title">Bean Supply OK</div>
           <div class="lba-sub">${totalAvailableG.toFixed(0)}g available · <strong>~${totalCupsLeft} cups ahead</strong></div>
-          ${cupsBreakdown.length ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
+          ${cupsBreakdown.length > 0 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
         </div>`;
       alertEl.style.display = 'flex';
-    } else {
-      alertEl.style.display = 'none';
     }
   }
 
