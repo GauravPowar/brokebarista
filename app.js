@@ -1540,7 +1540,7 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
       ctx.letterSpacing = '0';
       ctx.font = `bold ${valFs}px "Helvetica Neue", Arial, sans-serif`;
       ctx.fillStyle = theme.title;
-      ctx.fillText(p.val, px, py + valFs + 4);
+      ctx.fillText(p.val, px, py + valFs + 4, cellW - 20); // prevent overlap
     });
     cY += Math.ceil(Math.min(params.length, 6) / cols) * rowH + (aspect === '916' ? 16 : 12);
   }
@@ -1630,12 +1630,6 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   ctx.letterSpacing = '0.06em';
   ctx.fillText("GAURAV'S COFFEE LAB", W / 2, footY);
   ctx.letterSpacing = '0';
-
-  ctx.font = aspect === '916'
-    ? `22px "Helvetica Neue", Arial, sans-serif`
-    : `18px "Helvetica Neue", Arial, sans-serif`;
-  ctx.fillStyle = theme.brandSub;
-  ctx.fillText('brokebarista.in', W / 2, footY + (aspect === '916' ? 34 : 28));
 
   // ── Scale canvas preview ──
   const preview = $('sharePreviewCanvas');
