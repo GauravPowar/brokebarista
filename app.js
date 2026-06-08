@@ -2510,6 +2510,7 @@ function renderJournal() {
     ${tastes ? `<div class="tasting-chips" style="margin-top:.4rem">${tastes}</div>` : ''}
     ${j.notes ? `<div class="je-notes">${esc(j.notes)}</div>` : ''}
     <div class="je-actions">
+      <button class="action-btn share-btn" onclick="shareJournalEntry(${j.id})">↗ Share</button>
       <button class="action-btn" onclick="openJournalModal(${j.id})">Edit</button>
       <button class="action-btn del" onclick="deleteJournalEntry(${j.id})">✕</button>
     </div>
