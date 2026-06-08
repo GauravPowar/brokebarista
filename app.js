@@ -1345,6 +1345,14 @@ function shareJournalEntry(id) {
   if (overlay) {
     overlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+
+    // Set custom notes text
+    const j = journal.find(x => String(x.id) === String(_shareEntryId));
+    const notesInput = $('shareCustomNotes');
+    if (notesInput) {
+      notesInput.value = j ? j.notes || '' : '';
+    }
+
     overlay.querySelectorAll('.share-aspect-btn').forEach(b => b.classList.remove('active'));
     const defaultBtn = overlay.querySelector('.share-aspect-btn[data-aspect="916"]');
     if (defaultBtn) defaultBtn.classList.add('active');
@@ -1371,6 +1379,12 @@ function selectShareTheme(el, theme) {
   _shareTheme = theme;
   el.closest('.share-theme-row').querySelectorAll('.theme-swatch-wrapper').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
+  const overlay = $('shareCardOverlay');
+  const activeAspect = overlay?.querySelector('.share-aspect-btn.active')?.dataset?.aspect || '916';
+  _renderSharePreview(activeAspect);
+}
+
+function updateShareNotes() {
   const overlay = $('shareCardOverlay');
   const activeAspect = overlay?.querySelector('.share-aspect-btn.active')?.dataset?.aspect || '916';
   _renderSharePreview(activeAspect);
@@ -1472,31 +1486,41 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   ctx.letterSpacing = '0';
   cY += aspect === '916' ? 56 : 44;
 
-  // Get roaster if available
+  // Get roaster and process if available
   let roasterName = '';
+  let processName = '';
   if (j.beanId) {
     const beanLog = logs.find(l => l.id === parseInt(j.beanId));
     if (beanLog) {
       roasterName = beanLog.roaster || beanLog.vendor || '';
+      const proc = detectProcess(beanLog);
+      if (proc) processName = proc.label;
     }
   }
 
   // Title (bean name)
   const title = beanName || 'Brew Session';
-  const titleFs = aspect === '916' ? 76 : 62;
+  const titleFs = aspect === '916' ? 68 : 56;
   ctx.font = `bold ${titleFs}px Georgia, "Times New Roman", serif`;
   ctx.fillStyle = theme.title;
   ctx.textAlign = 'left';
-  cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 88 : 74);
+  cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 80 : 66);
 
-  // Draw roaster if exists
-  if (roasterName) {
-    // Tuck the roaster name closer under the large title font
+  // Draw roaster & process if exists
+  let subText = '';
+  if (roasterName) subText += "by " + roasterName;
+  if (processName) {
+    if (subText) subText += "  •  ";
+    subText += processName;
+  }
+
+  if (subText) {
+    // Tuck the subtitle closer under the large title font
     cY -= aspect === '916' ? 20 : 16;
-    const roasterFs = aspect === '916' ? 36 : 30;
-    ctx.font = `italic ${roasterFs}px Georgia, serif`;
+    const subFs = aspect === '916' ? 32 : 28;
+    ctx.font = `italic ${subFs}px Georgia, serif`;
     ctx.fillStyle = theme.sub;
-    cY = _wrapText(ctx, "by " + roasterName, cX, cY, cW, aspect === '916' ? 44 : 38);
+    cY = _wrapText(ctx, subText, cX, cY, cW, aspect === '916' ? 42 : 36);
     // Add balanced space before the stars
     cY += aspect === '916' ? 36 : 28;
   } else {
@@ -1613,7 +1637,10 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   }
 
   // ── Notes ──
-  if (j.notes && cY < cardY + cardH - (aspect === '916' ? 160 : 120)) {
+  const customNotesEl = $('shareCustomNotes');
+  const noteText = customNotesEl ? customNotesEl.value.trim() : (j.notes || '');
+
+  if (noteText && cY < cardY + cardH - (aspect === '916' ? 160 : 120)) {
     ctx.save();
     ctx.strokeStyle = theme.divider;
     ctx.lineWidth = 1;
@@ -1625,11 +1652,11 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
     cY += aspect === '916' ? 36 : 26;
     ctx.font = `italic ${aspect === '916' ? '32px' : '26px'} Georgia, serif`;
     ctx.fillStyle = theme.sub;
-    cY = _wrapText(ctx, '\u201c' + j.notes + '\u201d', cX, cY, cW, aspect === '916' ? 44 : 36);
+    cY = _wrapText(ctx, '\u201c' + noteText + '\u201d', cX, cY, cW, aspect === '916' ? 44 : 36);
   }
 
   // ── Branding footer ──
-  const footY = aspect === '916' ? H * 0.915 : H * 0.935;
+  const footY = aspect === '916' ? H * 0.88 : H * 0.89;
   // Accent line above brand
   ctx.save();
   const lineGrad = ctx.createLinearGradient(W / 2 - 120, 0, W / 2 + 120, 0);
