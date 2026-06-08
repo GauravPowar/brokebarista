@@ -576,6 +576,7 @@ function renderShelf() {
   // Calculate available grams for each unfinished bag
   let totalAvailableG = 0;
   let cupsBreakdown = [];
+  let totalCupsLeft = 0;
   unfinished.forEach(l => {
     const meta = bagMeta[l.id] || {};
     const bagSizeG = parseBagSize(l.size);
@@ -591,12 +592,26 @@ function renderShelf() {
     }
     if (availG > 0) {
       totalAvailableG += availG;
-      const cups = Math.floor(availG / STD_DOSE_G);
-      cupsBreakdown.push({ name: l.name, availG, cups, isOpened });
+      
+      let avgDose = STD_DOSE_G;
+      const beanJournals = journal.filter(j => parseInt(j.beanId) === l.id && Number(j.dose) > 0);
+      if (beanJournals.length > 0) {
+        const sumDose = beanJournals.reduce((s, j) => s + Number(j.dose), 0);
+        avgDose = sumDose / beanJournals.length;
+      } else {
+        const doseEntries = entries.filter(e => Number(e.grams) > 0 && Number(e.grams) < 40);
+        if (doseEntries.length > 0) {
+          const sumDose = doseEntries.reduce((s, e) => s + Number(e.grams), 0);
+          avgDose = sumDose / doseEntries.length;
+        }
+      }
+      
+      const cups = Math.floor(availG / avgDose);
+      totalCupsLeft += cups;
+      cupsBreakdown.push({ name: l.name, availG, cups, isOpened, avgDose });
     }
   });
 
-  const totalCupsLeft = Math.floor(totalAvailableG / STD_DOSE_G);
   const alertEl = $('shelf-bean-alert');
   if (alertEl) {
     if (totalAvailableG > 0 && totalAvailableG < LOW_BEAN_THRESHOLD) {
@@ -606,8 +621,8 @@ function renderShelf() {
         <div class="lba-icon">${totalAvailableG < 100 ? '🚨' : '⚠️'}</div>
         <div class="lba-body">
           <div class="lba-title">${totalAvailableG < 100 ? 'Critically Low on Beans!' : 'Running Low on Beans'}</div>
-          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available across all bags · <strong>~${totalCupsLeft} cups left</strong> (at ${STD_DOSE_G}g/cup)</div>
-          ${cupsBreakdown.length > 1 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c</span>`).join('') + '</div>' : ''}
+          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available across all bags · <strong>~${totalCupsLeft} cups left</strong></div>
+          ${cupsBreakdown.length > 1 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
         </div>
         <a href="/add" class="lba-cta">+ Order Beans</a>`;
       alertEl.style.display = 'flex';
@@ -622,8 +637,8 @@ function renderShelf() {
         <div class="lba-icon">✅</div>
         <div class="lba-body">
           <div class="lba-title">Bean Supply OK</div>
-          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available · <strong>~${totalCupsLeft} cups ahead</strong> (at ${STD_DOSE_G}g/cup)</div>
-          ${cupsBreakdown.length ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c</span>`).join('') + '</div>' : ''}
+          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available · <strong>~${totalCupsLeft} cups ahead</strong></div>
+          ${cupsBreakdown.length ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc(b.name.split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
         </div>`;
       alertEl.style.display = 'flex';
     } else {
