@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Broke Barista | Statistics</title>
-  <meta name="description" content="Your home brewing stats — spend analytics, savings vs café, and break-even tracking.">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <meta name="description"
+    content="Your home brewing stats — spend analytics, savings vs café, and break-even tracking.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body data-page="insights">
 
   <!-- OWNER LOGIN MODAL -->
@@ -19,8 +24,10 @@
       <h2 class="pin-title">Broke <em>Barista</em></h2>
       <p class="pin-sub">Enter owner PIN</p>
       <div class="pin-dots" id="pinDots">
-        <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
-        <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
       </div>
       <div class="pin-keypad">
         <button class="pin-key" onclick="pinPress('1')">1</button>
@@ -41,94 +48,245 @@
   </div>
 
   <!-- INSIGHTS / STATS PAGE -->
-  <div class="insights-header">
+  <div class="page-header">
     <div style="display:flex;align-items:flex-start;flex:1">
       <div>
         <h1>Broke <em>Barista</em></h1>
-        <div style="font-size:.72rem;color:var(--mid);letter-spacing:.1em;text-transform:uppercase;margin-top:.25rem;font-weight:300">Spend analytics</div>
+        <div class="sub">Spend analytics</div>
       </div>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
     </div>
-    <div style="text-align:right">
-      <div style="font-size:.7rem;color:var(--mid);letter-spacing:.09em;text-transform:uppercase">Total</div>
-      <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--roast)" id="ins-total-h">₹0</div>
+  </div>
+  <div class="stats-tabs-wrap">
+    <div class="stats-tabs">
+      <button class="stats-tab active" onclick="switchStatsTab('general')">📊 General</button>
+      <button class="stats-tab" onclick="switchStatsTab('brews')">☕ Brews</button>
+      <button class="stats-tab" onclick="switchStatsTab('beans')">🌿 Beans</button>
+      <button class="stats-tab" onclick="switchStatsTab('preparations')">⏳ Prep</button>
+      <button class="stats-tab" onclick="switchStatsTab('grinders')">⚙️ Grinders</button>
     </div>
   </div>
-  <div class="ins-strip" style="grid-template-columns:repeat(5,1fr)">
-    <div class="ins-card"><div class="ins-num" id="ins-orders">0</div><div class="ins-label">Orders</div></div>
-    <div class="ins-card"><div class="ins-num" id="ins-beans-pct">0%</div><div class="ins-label">Beans Share</div></div>
-    <div class="ins-card"><div class="ins-num" id="ins-cpg">₹0</div><div class="ins-label">Avg ₹/100g</div></div>
-    <div class="ins-card"><div class="ins-num" id="ins-ppc">—</div><div class="ins-label">Price / Cup</div></div>
-    <div class="ins-card"><div class="ins-num" id="ins-total-kg">—</div><div class="ins-label">Total kg Bought</div></div>
-  </div>
-  <div style="max-width:820px;margin:0 auto;padding:0 1.5rem .8rem" id="insCallouts"></div>
-  <div class="charts-grid single" style="margin-bottom:.9rem">
-    <div class="chart-card"><div class="chart-ttl">Monthly Spend</div><canvas id="barChart" style="max-height:180px"></canvas></div>
-  </div>
-  <div class="charts-grid" style="margin-bottom:.9rem">
-    <div class="chart-card"><div class="chart-ttl">Spend by Category</div><canvas id="pieChart" style="max-height:190px"></canvas></div>
-    <div class="chart-card"><div class="chart-ttl">Top Roasters</div><div class="bar-list" id="vendorBarList"></div></div>
-  </div>
-  <div class="charts-grid" style="margin-bottom:.9rem">
-    <div class="chart-card"><div class="chart-ttl">Coffee Type Split</div><div class="bar-list" id="typeBarList"></div></div>
-    <div class="chart-card"><div class="chart-ttl">Beans × Brewer</div><div class="bar-list" id="brewBarList"></div></div>
-  </div>
-  <div style="max-width:820px;margin:0 auto;padding:0 1.5rem .9rem">
-    <div class="chart-card"><div class="chart-ttl">Process Breakdown (Beans Spend)</div><div class="bar-list" id="processBarList"></div></div>
-  </div>
-  <!-- MONEY SAVED -->
-  <div style="max-width:820px;margin:0 auto;padding:0 1.5rem 2rem">
-    <div class="section-label" style="margin-bottom:.9rem">💰 Money Saved vs Café</div>
-    <div class="breakeven-card" id="be-card">
-      <div class="be-header">
-        <div>
-          <div class="be-title">⚖️ Gear Investment vs Brew Savings</div>
-          <div style="font-size:.7rem;color:var(--mid);margin-top:.2rem">How much of your gear cost has brewing saved you?</div>
+
+  <div id="tab-general" class="stats-pane page-content active">
+    <div class="stat-strip">
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-grinders">0</div>
+        <div class="stat-label">Grinders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-brewers">0</div>
+        <div class="stat-label">Brewers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-sessions">0</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-spend">₹0</div>
+        <div class="stat-label">Beans Spend</div>
+      </div>
+    </div>
+    <div class="stat-strip" style="grid-template-columns:repeat(2,1fr)">
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-bought">0g</div>
+        <div class="stat-label">Beans Bought</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-gen-consumed">0L</div>
+        <div class="stat-label">Consumed</div>
+      </div>
+    </div>
+
+    <!-- General tab original charts -->
+    <div id="insCallouts"></div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Monthly Spend</div><canvas id="barChart" style="max-height:180px"></canvas>
+      </div>
+    </div>
+    <div class="charts-grid" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Spend by Category</div><canvas id="pieChart" style="max-height:190px"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-ttl">Coffee Type Split</div>
+        <div class="bar-list" id="typeBarList"></div>
+      </div>
+    </div>
+
+    <!-- MONEY SAVED -->
+    <div>
+      <div
+        style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem">
+        <div class="section-label" style="margin-bottom:0">💰 Money Saved vs Café</div>
+        <div id="ins-savings-assumptions" class="savings-assumptions" style="max-width:none;flex:1;min-width:200px">
         </div>
-        <span class="be-badge in-progress" id="be-badge">In Progress</span>
       </div>
-      <div class="be-progress-wrap">
-        <div class="be-progress-labels">
-          <span>₹0</span>
-          <span id="be-progress-pct">0% recovered</span>
-          <span id="be-progress-target">₹0 invested</span>
+      <div class="breakeven-card" id="be-card">
+        <div class="be-header">
+          <div>
+            <div class="be-title">⚖️ Gear Investment vs Brew Savings</div>
+            <div style="font-size:.7rem;color:var(--mid);margin-top:.2rem">How much of your gear cost has brewing saved
+              you?</div>
+            <div style="margin-top:.5rem">
+              <button id="be-include-untracked" class="be-toggle-btn" onclick="beToggleUntracked(this)" data-active="false">
+                <span class="be-toggle-icon">📓</span> Tracked sessions only
+              </button>
+            </div>
+          </div>
+          <span class="be-badge in-progress" id="be-badge">In Progress</span>
         </div>
-        <div class="be-track"><div class="be-fill" id="be-fill" style="width:0%"></div></div>
+        <div class="be-progress-wrap">
+          <div class="be-progress-labels">
+            <span>₹0</span>
+            <span id="be-progress-pct">0% recovered</span>
+            <span id="be-progress-target">₹0 invested</span>
+          </div>
+          <div class="be-track">
+            <div class="be-fill" id="be-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="be-stats">
+          <div class="be-stat">
+            <div class="be-stat-num" id="be-gear-cost" style="color:var(--roast)">₹0</div>
+            <div class="be-stat-label">Gear + Accessories</div>
+          </div>
+          <div class="be-stat">
+            <div class="be-stat-num" id="be-saved" style="color:var(--green)">₹0</div>
+            <div class="be-stat-label">Saved so far</div>
+          </div>
+          <div class="be-stat">
+            <div class="be-stat-num" id="be-remaining">₹0</div>
+            <div class="be-stat-label" id="be-remaining-label">Still to recover</div>
+          </div>
+        </div>
+        <div class="be-eta" id="be-eta"></div>
       </div>
-      <div class="be-stats">
-        <div class="be-stat"><div class="be-stat-num" id="be-gear-cost" style="color:var(--roast)">₹0</div><div class="be-stat-label">Gear + Accessories</div></div>
-        <div class="be-stat"><div class="be-stat-num" id="be-saved" style="color:var(--green)">₹0</div><div class="be-stat-label">Saved so far</div></div>
-        <div class="be-stat"><div class="be-stat-num" id="be-remaining">₹0</div><div class="be-stat-label" id="be-remaining-label">Still to recover</div></div>
+      <div class="savings-hero">
+        <div class="savings-hero-icon">🤑</div>
+        <div class="savings-hero-body">
+          <div class="savings-hero-amount" id="ins-saved-total">₹0</div>
+          <div class="savings-hero-label">saved brewing at home vs café prices</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.68rem;color:var(--mid);letter-spacing:.08em;text-transform:uppercase">Home cost</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--roast)" id="ins-home-cost">₹0
+          </div>
+          <div style="font-size:.68rem;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem">
+            Café equiv.</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--light)" id="ins-cafe-cost">₹0
+          </div>
+        </div>
       </div>
-      <div class="be-eta" id="be-eta"></div>
+      <div class="savings-breakdown" id="ins-savings-breakdown"></div>
     </div>
-    <div class="savings-hero">
-      <div class="savings-hero-icon">🤑</div>
-      <div class="savings-hero-body">
-        <div class="savings-hero-amount" id="ins-saved-total">₹0</div>
-        <div class="savings-hero-label">saved brewing at home vs café prices</div>
+  </div>
+
+  <div id="tab-brews" class="stats-pane page-content">
+    <div class="stat-strip three">
+      <div class="stat-card">
+        <div class="stat-num" id="ins-brw-total">0</div>
+        <div class="stat-label">Total Brews</div>
       </div>
-      <div style="text-align:right">
-        <div style="font-size:.68rem;color:var(--mid);letter-spacing:.08em;text-transform:uppercase">Home cost</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--roast)" id="ins-home-cost">₹0</div>
-        <div style="font-size:.68rem;color:var(--mid);letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem">Café equiv.</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--light)" id="ins-cafe-cost">₹0</div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-brw-perday">0.0</div>
+        <div class="stat-label">Brews / Day</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-brw-consumed">0L</div>
+        <div class="stat-label">Consumed Yield</div>
       </div>
     </div>
-    <div class="savings-breakdown" id="ins-savings-breakdown"></div>
-    <div class="savings-assumptions" id="ins-savings-assumptions"></div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Brews Over Time</div><canvas id="brewsChart" style="max-height:180px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-beans" class="stats-pane page-content">
+    <div class="stat-strip">
+      <div class="stat-card">
+        <div class="stat-num">🇮🇳 India</div>
+        <div class="stat-label">Top Origin</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-bean-rating">0.0★</div>
+        <div class="stat-label">Avg India Rating</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(196,125,42,.3);background:rgba(196,125,42,.06)">
+        <div class="stat-num" id="ins-avg-cpg" style="color:var(--caramel)">—</div>
+        <div class="stat-label">Avg ₹/100g</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(94,138,58,.3);background:rgba(94,138,58,.06)">
+        <div class="stat-num" id="ins-price-cup" style="color:var(--green)">—</div>
+        <div class="stat-label">Price / Cup (15g)</div>
+      </div>
+    </div>
+    <div class="charts-grid" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Process Breakdown (Spend)</div>
+        <div class="bar-list" id="processBarList"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-ttl">Top Roasters</div>
+        <div class="bar-list" id="vendorBarList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-preparations" class="stats-pane page-content">
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Preparation Method Usage</div>
+        <div class="bar-list" id="brewBarList"></div>
+      </div>
+    </div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Usage History</div><canvas id="prepHistoryChart" style="max-height:180px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-grinders" class="stats-pane page-content">
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Total Beans Ground (g)</div>
+        <div class="bar-list" id="grinderBarList"></div>
+      </div>
+    </div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">Grinder Usage History</div><canvas id="grinderHistoryChart"
+          style="max-height:180px"></canvas>
+      </div>
+    </div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">🎯 Grind Size Recommender <span style="font-size:.6rem;font-weight:400;color:var(--mid);letter-spacing:.06em;vertical-align:middle">(Espresso · 25–35s target)</span></div>
+        <div id="grind-recommender"></div>
+      </div>
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <a href="/log"     class="nav-link" data-page="log"><span class="nav-icon">📋</span><span class="nav-label">Log</span></a>
-    <a href="/shelf"   class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span class="nav-label">Shelf</span></a>
-    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span class="nav-label">Process</span></a>
-    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span class="nav-label">Journal</span></a>
-    <a href="/"        class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></a>
-    <a href="/add"     class="nav-link" data-page="add"><span class="nav-icon">＋</span><span class="nav-label">Add</span></a>
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/recap" class="nav-link" data-page="recap"><span class="nav-icon">🎞️</span><span
+        class="nav-label">Recap</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
   </nav>
   <script src="/app.js"></script>
 </body>
+
 </html>
