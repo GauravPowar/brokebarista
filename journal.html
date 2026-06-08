@@ -406,6 +406,11 @@
         </div>
       </div>
 
+      <div class="share-notes-row" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem;">
+        <span class="share-theme-label">Card Notes</span>
+        <textarea id="shareCustomNotes" rows="2" style="width: 100%; border-radius: 8px; border: 1px solid var(--parchment); background: transparent; padding: 0.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--roast); resize: none; transition: border-color .2s ease;" placeholder="Add a note to show on the card..." oninput="updateShareNotes()"></textarea>
+      </div>
+
       <div class="share-preview-wrap" id="sharePreviewWrap">
         <canvas id="sharePreviewCanvas"></canvas>
       </div>
