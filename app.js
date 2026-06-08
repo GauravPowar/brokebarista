@@ -1349,7 +1349,7 @@ function shareJournalEntry(id) {
     const defaultBtn = overlay.querySelector('.share-aspect-btn[data-aspect="916"]');
     if (defaultBtn) defaultBtn.classList.add('active');
     // Mark active theme swatch
-    overlay.querySelectorAll('.share-theme-swatch').forEach(s => {
+    overlay.querySelectorAll('.theme-swatch-wrapper').forEach(s => {
       s.classList.toggle('active', s.dataset.theme === _shareTheme);
     });
     _renderSharePreview('916');
@@ -1369,7 +1369,7 @@ function maybeCloseShareOverlay(e) {
 
 function selectShareTheme(el, theme) {
   _shareTheme = theme;
-  el.closest('.share-theme-row').querySelectorAll('.share-theme-swatch').forEach(s => s.classList.remove('active'));
+  el.closest('.share-theme-row').querySelectorAll('.theme-swatch-wrapper').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
   const overlay = $('shareCardOverlay');
   const activeAspect = overlay?.querySelector('.share-aspect-btn.active')?.dataset?.aspect || '916';
