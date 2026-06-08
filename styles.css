@@ -1381,6 +1381,12 @@
       font-weight: 600;
     }
 
+    #shareCustomNotes:focus {
+      outline: none;
+      border-color: var(--caramel);
+      box-shadow: 0 0 0 3px rgba(196, 125, 42, .15);
+    }
+
     .share-preview-wrap {
       display: flex;
       justify-content: center;
