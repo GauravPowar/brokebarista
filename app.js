@@ -1472,6 +1472,15 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   ctx.letterSpacing = '0';
   cY += aspect === '916' ? 56 : 44;
 
+  // Get roaster if available
+  let roasterName = '';
+  if (j.beanId) {
+    const beanLog = logs.find(l => l.id === parseInt(j.beanId));
+    if (beanLog) {
+      roasterName = beanLog.roaster || beanLog.vendor || '';
+    }
+  }
+
   // Title (bean name)
   const title = beanName || 'Brew Session';
   const titleFs = aspect === '916' ? 76 : 62;
@@ -1479,7 +1488,18 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   ctx.fillStyle = theme.title;
   ctx.textAlign = 'left';
   cY = _wrapText(ctx, title, cX, cY, cW, aspect === '916' ? 88 : 74);
-  cY += aspect === '916' ? 18 : 12;
+  cY += aspect === '916' ? 14 : 10;
+
+  // Draw roaster if exists
+  if (roasterName) {
+    const roasterFs = aspect === '916' ? 36 : 30;
+    ctx.font = `italic ${roasterFs}px Georgia, serif`;
+    ctx.fillStyle = theme.sub;
+    cY = _wrapText(ctx, "by " + roasterName, cX, cY, cW, aspect === '916' ? 44 : 38);
+    cY += aspect === '916' ? 24 : 18;
+  } else {
+    cY += aspect === '916' ? 10 : 8; // extra padding if no roaster
+  }
 
   // Stars + date on same row
   const rating = j.rating || 0;
