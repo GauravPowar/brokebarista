@@ -570,75 +570,110 @@ function renderShelf() {
   $('shelfActive').textContent = opened.length;
   $('shelfSealedCard').textContent = sealed.length;
 
-  // ── Low-bean alert + cups predictor ─────────────────────────────
+  // ── Bean Predictor + Low-Supply Alert ───────────────────────────────────
   const LOW_BEAN_THRESHOLD = 300; // grams
+  const STD = typeof STD_DOSE_G !== 'undefined' ? STD_DOSE_G : 15;
 
-  // Calculate available grams for each unfinished bag
   let totalAvailableG = 0;
-  let cupsBreakdown = [];
   let totalCupsLeft = 0;
+  let cupsBreakdown = [];
+  let unknownSizeBags = 0;
+
   unfinished.forEach(l => {
     const meta = bagMeta[l.id] || {};
     const bagSizeG = parseBagSize(l.size);
     const entries = meta.gramEntries || [];
     const usedG = entries.reduce((s, e) => s + Number(e.grams || 0), 0);
     const isOpened = !!meta.openedDate;
+
+    // Grams remaining in this bag
     let availG = 0;
     if (bagSizeG) {
       availG = Math.max(0, bagSizeG - usedG);
-    } else if (!isOpened) {
-      // Unknown size sealed bag — skip from total but flag
-      availG = 0;
+    } else {
+      // Size not parseable — count but can't predict cups
+      unknownSizeBags++;
+      return; // skip for total calc
     }
-    if (availG > 0) {
-      totalAvailableG += availG;
-      
-      let avgDose = STD_DOSE_G;
-      const beanJournals = journal.filter(j => parseInt(j.beanId) === l.id && Number(j.dose) > 0);
-      if (beanJournals.length > 0) {
-        const sumDose = beanJournals.reduce((s, j) => s + Number(j.dose), 0);
-        avgDose = sumDose / beanJournals.length;
-      } else {
-        const doseEntries = entries.filter(e => Number(e.grams) > 0 && Number(e.grams) < 40);
-        if (doseEntries.length > 0) {
-          const sumDose = doseEntries.reduce((s, e) => s + Number(e.grams), 0);
-          avgDose = sumDose / doseEntries.length;
-        }
+
+    // Average dose: prefer journal history → gramEntry history → fallback
+    let avgDose = STD;
+    const beanJournals = journal.filter(j => {
+      const jBeanId = j.beanId !== undefined ? j.beanId : j.bean_id;
+      return Number(jBeanId) === l.id && Number(j.dose) > 0;
+    });
+    if (beanJournals.length > 0) {
+      const sumDose = beanJournals.reduce((s, j) => s + Number(j.dose), 0);
+      avgDose = sumDose / beanJournals.length;
+    } else {
+      // Use per-brew gram entries (those in range 8–40g are single-dose)
+      const doseEntries = entries.filter(e => Number(e.grams) >= 8 && Number(e.grams) <= 40);
+      if (doseEntries.length > 0) {
+        avgDose = doseEntries.reduce((s, e) => s + Number(e.grams), 0) / doseEntries.length;
       }
-      
-      const cups = Math.floor(availG / avgDose);
-      totalCupsLeft += cups;
-      cupsBreakdown.push({ name: l.name, availG, cups, isOpened, avgDose });
     }
+
+    totalAvailableG += availG;
+    const cups = Math.floor(availG / avgDose);
+    totalCupsLeft += cups;
+    cupsBreakdown.push({
+      name: l.name,
+      availG,
+      cups,
+      isOpened,
+      avgDose,
+      fromJournal: beanJournals.length > 0,
+    });
   });
 
-  const alertEl = $('shelf-bean-alert');
+  // Render the widget — always show it
+  const alertEl = document.getElementById('shelf-bean-alert');
   if (alertEl) {
-    if (totalAvailableG < LOW_BEAN_THRESHOLD) {
-      const urgency = totalAvailableG < 100 ? 'critical' : 'warning';
-      alertEl.className = `low-bean-alert ${urgency}`;
-      alertEl.innerHTML = `
-        <div class="lba-icon">${totalAvailableG < 100 ? '🚨' : '⚠️'}</div>
-        <div class="lba-body">
-          <div class="lba-title">${totalAvailableG < 100 ? 'Critically Low on Beans!' : 'Running Low on Beans'}</div>
-          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available across all bags · <strong>~${totalCupsLeft} cups left</strong></div>
-          ${cupsBreakdown.length > 0 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
-        </div>
-        <a href="/add" class="lba-cta">+ Order Beans</a>`;
-      alertEl.style.display = 'flex';
+    const isLow = totalAvailableG < LOW_BEAN_THRESHOLD;
+    const isCritical = totalAvailableG < 100;
+    const hasNoData = unfinished.length === 0;
+
+    let level, icon, title, sub;
+    if (hasNoData) {
+      level = 'ok'; icon = '🫙';
+      title = 'No active bags';
+      sub = 'Add beans to your shelf to start tracking';
+    } else if (isCritical) {
+      level = 'critical'; icon = '🚨';
+      title = 'Critically Low on Beans!';
+      sub = `Only <strong>${totalAvailableG.toFixed(0)}g</strong> remaining · ~${totalCupsLeft} cups left`;
+    } else if (isLow) {
+      level = 'warning'; icon = '⚠️';
+      title = 'Running Low on Beans';
+      sub = `<strong>${totalAvailableG.toFixed(0)}g</strong> available · ~${totalCupsLeft} cups left`;
     } else {
-      // Show cups predictor summary even when not low
-      alertEl.className = 'low-bean-alert ok';
-      alertEl.innerHTML = `
-        <div class="lba-icon">✅</div>
-        <div class="lba-body">
-          <div class="lba-title">Bean Supply OK</div>
-          <div class="lba-sub">${totalAvailableG.toFixed(0)}g available · <strong>~${totalCupsLeft} cups ahead</strong></div>
-          ${cupsBreakdown.length > 0 ? '<div class="lba-breakdown">' + cupsBreakdown.map(b => `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}: ~${b.cups}c <span style="opacity:0.6;font-size:0.85em">(@${b.avgDose.toFixed(1)}g)</span></span>`).join('') + '</div>' : ''}
-        </div>`;
-      alertEl.style.display = 'flex';
+      level = 'ok'; icon = '✅';
+      title = 'Bean Supply OK';
+      sub = `<strong>${totalAvailableG.toFixed(0)}g</strong> available · ~<strong>${totalCupsLeft} cups</strong> ahead`;
     }
+
+    const breakdownHtml = cupsBreakdown.length > 0
+      ? `<div class="lba-breakdown">${cupsBreakdown.map(b =>
+          `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}:
+           ~${b.cups}c <span style="opacity:0.6;font-size:0.82em">(@${b.avgDose.toFixed(1)}g${b.fromJournal ? '*' : ''})</span></span>`
+        ).join('')}${unknownSizeBags > 0 ? `<span style="opacity:0.5">+${unknownSizeBags} bag(s) unweighed</span>` : ''}</div>`
+      : (unknownSizeBags > 0 ? `<div class="lba-sub" style="margin-top:.3rem;opacity:.7">${unknownSizeBags} bag(s) have no size set — add size to track grams</div>` : '');
+
+    const ctaHtml = (isLow && !hasNoData) ? `<a href="/add" class="lba-cta">+ Order Beans</a>` : '';
+
+    alertEl.className = `low-bean-alert ${level}`;
+    alertEl.innerHTML = `
+      <div class="lba-icon">${icon}</div>
+      <div class="lba-body">
+        <div class="lba-title">${title}</div>
+        <div class="lba-sub">${sub}</div>
+        ${breakdownHtml}
+        ${cupsBreakdown.some(b => b.fromJournal) ? '<div style="font-size:.68rem;opacity:.5;margin-top:.3rem">* avg dose from journal history</div>' : ''}
+      </div>
+      ${ctaHtml}`;
+    alertEl.style.display = 'flex';
   }
+
 
   const renderBag = (l, isDone) => {
     const meta = bagMeta[l.id] || {};
