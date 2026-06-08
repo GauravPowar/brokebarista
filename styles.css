@@ -1904,13 +1904,21 @@
     }
 
     /* â”€â”€ VISITOR MODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-    body.visitor-mode .action-btn,
+    body.visitor-mode .action-btn:not(.share-btn),
     body.visitor-mode #nav-add,
     body.visitor-mode .btn-finish,
-    body.visitor-mode .je-actions,
     body.visitor-mode #page-add,
     body.visitor-mode #page-journal .btn-primary {
       display: none !important;
+    }
+
+    /* Share button stays visible for everyone — read-only action */
+    body.visitor-mode .je-actions {
+      display: flex !important;
+    }
+
+    body.visitor-mode .action-btn.share-btn {
+      display: inline-flex !important;
     }
 
     .owner-btn {
