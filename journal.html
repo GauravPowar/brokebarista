@@ -47,15 +47,15 @@
 
   <!-- JOURNAL PAGE -->
   <div class="page-header">
-    <div style="display:flex;align-items:flex-start;flex:1">
-      <div>
-        <h1>Brew <em>Journal</em></h1>
-        <div class="sub">Sessions, tasting notes, ratings</div>
-      </div>
+    <div>
+      <h1>Brew <em>Journal</em></h1>
+      <div class="sub">Sessions, tasting notes, ratings</div>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center">
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
+      <button class="btn-primary" onclick="openJournalModal()">+ New Session</button>
     </div>
-    <button class="btn-primary" onclick="openJournalModal()">+ New Session</button>
   </div>
   <div class="page-content">
     <div class="stat-strip" style="grid-template-columns:repeat(4,1fr)">
@@ -158,9 +158,9 @@
             </div>
             <div class="form-row" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
               <div class="field"><label class="form-label">Dose (g)</label><input type="number" id="j-dose"
-                  placeholder="18"></div>
+                  placeholder="18" step="0.1" min="0"></div>
               <div class="field"><label class="form-label">Yield (g)</label><input type="number" id="j-yield"
-                  placeholder="36"></div>
+                  placeholder="36" step="0.1" min="0"></div>
               <div class="field"><label class="form-label">Time (s)</label><input type="number" id="j-time"
                   placeholder="30" step="1"></div>
             </div>
@@ -408,7 +408,9 @@
 
       <div class="share-notes-row" style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem;">
         <span class="share-theme-label">Card Notes</span>
-        <textarea id="shareCustomNotes" rows="2" style="width: 100%; border-radius: 8px; border: 1px solid var(--parchment); background: transparent; padding: 0.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--roast); resize: none; transition: border-color .2s ease;" placeholder="Add a note to show on the card..." oninput="updateShareNotes()"></textarea>
+        <textarea id="shareCustomNotes" rows="2"
+          style="width: 100%; border-radius: 8px; border: 1px solid var(--parchment); background: transparent; padding: 0.8rem; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--roast); resize: none; transition: border-color .2s ease;"
+          placeholder="Add a note to show on the card..." oninput="updateShareNotes()"></textarea>
       </div>
 
       <div class="share-preview-wrap" id="sharePreviewWrap">
