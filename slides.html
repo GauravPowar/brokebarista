@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brew Recap — Broke Barista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --c1:#1a0a00;--c2:#2d1200;--amber:#e8a83e;--caramel:#c47d2a;
+  --cream:#f5efe0;--red:#c0392b;--green:#27ae60;--purple:#8e44ad;
+  --blue:#2980b9;--teal:#16a085;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--c1);color:var(--cream);overflow:hidden;height:100vh;width:100vw;user-select:none}
+
+#deck{width:100%;height:100%;position:relative}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s,transform .5s;
+  transform:translateY(40px);padding:2rem;text-align:center;overflow:hidden;
+}
+.slide.active{opacity:1;pointer-events:all;transform:translateY(0)}
+.slide.out{opacity:0;transform:translateY(-40px)}
+
+.slide-0{background:radial-gradient(ellipse at 30% 40%,#3d1a00 0%,#0d0500 70%)}
+.slide-1{background:radial-gradient(ellipse at 70% 30%,#1a2d00 0%,#050d00 70%)}
+.slide-2{background:radial-gradient(ellipse at 50% 60%,#1a001a 0%,#050005 70%)}
+.slide-3{background:radial-gradient(ellipse at 20% 50%,#001a2d 0%,#000508 70%)}
+.slide-4{background:radial-gradient(ellipse at 80% 40%,#2d1a00 0%,#0a0500 70%)}
+.slide-5{background:radial-gradient(ellipse at 50% 50%,#001a0a 0%,#000503 70%)}
+.slide-6{background:radial-gradient(ellipse at 30% 60%,#1a1a00 0%,#050500 70%)}
+.slide-7{background:radial-gradient(ellipse at 60% 40%,#0a001a 0%,#020005 70%)}
+.slide-8{background:radial-gradient(ellipse at 50% 50%,#1a0500 0%,#0a0200 70%)}
+
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:float linear infinite;opacity:.15;}
+@keyframes float{0%{transform:translateY(100vh) rotate(0deg)}100%{transform:translateY(-20px) rotate(720deg)}}
+
+.label{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:1rem;font-weight:600;}
+.bignum{
+  font-size:clamp(4rem,20vw,9rem);font-weight:900;line-height:1;
+  background:linear-gradient(135deg,var(--amber),var(--caramel),#fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:pop .6s cubic-bezier(.175,.885,.32,1.275) both;
+}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.headline{font-family:'DM Serif Display',serif;font-size:clamp(1.4rem,5vw,2.4rem);line-height:1.2;margin:.5rem 0 1rem;}
+.sub{font-size:1rem;opacity:.65;max-width:480px;line-height:1.6}
+.highlight{color:var(--amber);font-weight:700;-webkit-text-fill-color:var(--amber)}
+.pill{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:.4rem 1.2rem;font-size:.9rem;margin:.3rem;backdrop-filter:blur(8px);}
+.bar-item{display:flex;align-items:center;gap:1rem;margin:.5rem 0;width:min(400px,90vw)}
+.bar-item .name{font-size:.85rem;width:120px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;background:rgba(255,255,255,.08);border-radius:4px;height:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.bar-item .val{font-size:.8rem;opacity:.6;width:40px;flex-shrink:0}
+
+#monthPicker{
+  position:fixed;top:1.2rem;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;padding:.4rem 1.2rem;
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.85rem;
+  cursor:pointer;z-index:999;backdrop-filter:blur(8px);outline:none;
+}
+#backBtn{
+  position:fixed;top:1.1rem;left:1rem;z-index:999;
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;padding:.35rem .9rem;color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:.75rem;letter-spacing:.05em;
+  text-decoration:none;backdrop-filter:blur(8px);transition:background .2s;
+}
+#backBtn:hover{background:rgba(255,255,255,.1)}
+
+#dots{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;z-index:999;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .3s;}
+.dot.active{background:var(--amber);transform:scale(1.4)}
+
+#navL,#navR{
+  position:fixed;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,.06);border:none;color:var(--cream);
+  font-size:1.5rem;cursor:pointer;z-index:999;width:44px;height:44px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;
+}
+#navL:hover,#navR:hover{background:rgba(255,255,255,.15)}
+#navL{left:1rem}#navR{right:1rem}
+
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--amber);transition:width .4s;z-index:9999;}
+
+.steam{position:absolute;bottom:45%;left:50%;width:3px;background:rgba(255,255,255,.12);border-radius:2px;animation:steam 2s ease-in-out infinite;transform-origin:bottom center;}
+@keyframes steam{0%{height:0;opacity:.2;transform:translateX(-50%) scaleX(1)}50%{height:60px;opacity:.5;transform:translateX(-50%) scaleX(1.5) rotate(5deg)}100%{height:0;opacity:0;transform:translateX(-50%) scaleX(0.5) rotate(-3deg)}}
+.coffee-cup{font-size:5rem;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+#loader{position:fixed;inset:0;background:var(--c1);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;transition:opacity .5s;}
+.loader-cup{font-size:3rem;animation:spin 1.5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.taste-chip{display:inline-block;padding:.35rem .9rem;margin:.25rem;border-radius:999px;font-size:.8rem;font-weight:600;animation:pop .4s cubic-bezier(.175,.885,.32,1.275) both;}
+.glow{text-shadow:0 0 40px var(--amber),0 0 80px rgba(232,168,62,.4);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{text-shadow:0 0 40px var(--amber),0 0 80px rgba(232,168,62,.3)}50%{text-shadow:0 0 60px var(--amber),0 0 120px rgba(232,168,62,.6)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .6s both}
+.delay-1{animation-delay:.15s}.delay-2{animation-delay:.3s}.delay-3{animation-delay:.45s}
+.delay-4{animation-delay:.6s}.delay-5{animation-delay:.75s}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<a id="backBtn" href="index.html">← All Recaps</a>
+<select id="monthPicker"></select>
+<div id="dots"></div>
+<button id="navL">‹</button>
+<button id="navR">›</button>
+
+<div id="loader">
+  <div class="loader-cup">☕</div>
+  <div style="font-size:.9rem;opacity:.5">Brewing your recap…</div>
+</div>
+
+<div id="deck"></div>
+
+<script>
+const API='/api';
+let journal=[], logs=[], shelf=[], openedBeanIds=new Set(), current=0, total=0;
+
+async function fetchData(){
+  try{
+    const [jRes,lRes,sRes]=await Promise.all([
+      fetch(`${API}/journal`).then(r=>r.json()),
+      fetch(`${API}/logs`).then(r=>r.json()),
+      fetch(`${API}/shelf`).then(r=>r.json()).catch(()=>({shelf:[]}))
+    ]);
+    journal=jRes.journal||jRes||[];
+    logs=lRes.logs||lRes||[];
+    shelf=sRes.shelf||sRes||[];
+    shelf.forEach(s=>{
+      if(s.opened_date||s.openedDate||s.is_finished)
+        openedBeanIds.add(String(s.log_id));
+    });
+  }catch(e){console.error(e)}
+}
+
+function initMonthPicker(){
+  const months=[...new Set(
+    journal.map(j=>j.date.slice(0,7)).filter(m=>m>='2026-03')
+  )].sort().reverse();
+  if(!months.length) months.push(new Date().toISOString().slice(0,7));
+  const urlMonth=new URLSearchParams(location.search).get('month');
+  const active=months.includes(urlMonth)?urlMonth:months[0];
+  const sel=document.getElementById('monthPicker');
+  sel.innerHTML=months.map(m=>{
+    const [y,mo]=m.split('-');
+    const label=new Date(+y,+mo-1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+    return `<option value="${m}" ${m===active?'selected':''}>${label}</option>`;
+  }).join('');
+  sel.onchange=()=>{history.replaceState(null,'',`?month=${sel.value}`);buildRecap(sel.value);};
+  return active;
+}
+
+function computeStats(month){
+  const allBrews=journal.filter(j=>j.date.startsWith(month));
+  const brews=allBrews.filter(j=>{
+    const bid=String(j.bean_id||j.beanId||'');
+    return !bid||openedBeanIds.has(bid);
+  });
+  const allTastes=brews.flatMap(j=>{try{return JSON.parse(j.tastes||'[]')}catch{return[]}});
+  const tasteCount={};
+  allTastes.forEach(t=>{tasteCount[t]=(tasteCount[t]||0)+1});
+  const topTastes=Object.entries(tasteCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const brewerCount={};
+  brews.forEach(j=>{if(j.brewer) brewerCount[j.brewer]=(brewerCount[j.brewer]||0)+1});
+  const topBrewers=Object.entries(brewerCount).sort((a,b)=>b[1]-a[1]);
+  const beanCount={};
+  brews.forEach(j=>{const k=(j.bean_label||j.beanLabel||'Unknown').split('(')[0].trim();beanCount[k]=(beanCount[k]||0)+1;});
+  const topBeans=Object.entries(beanCount).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const totalYield=brews.reduce((s,j)=>s+Number(j.yield||0),0);
+  const avgRating=brews.length?(brews.reduce((s,j)=>s+Number(j.rating||0),0)/brews.length):0;
+  const rated5=brews.filter(j=>Number(j.rating)===5);
+  const dates=[...new Set(brews.map(j=>j.date))].sort();
+  let streak=dates.length?1:0,max=dates.length?1:0,cur=dates.length?1:0;
+  for(let i=1;i<dates.length;i++){const diff=(new Date(dates[i])-new Date(dates[i-1]))/86400000;if(diff===1){cur++;max=Math.max(max,cur)}else cur=1;}
+  streak=max;
+  const beans=logs.filter(l=>l.category==='beans');
+  const beanSpend=beans.filter(l=>l.date.startsWith(month)).reduce((s,l)=>s+Number(l.price||0),0);
+  const MARKET = {
+    'V60': 200, 'Pour Over': 200, 'Chemex': 200,
+    'Espresso Machine': 200, 'Cafflano Kompresso': 175,
+    'Cold Brew': 200, 'AeroPress': 150, 'Moka Pot': 100,
+    'KaldiPress': 150, 'French Press': 150, 'Americano': 210, 'Siphon': 150,
+  };
+  const cafeCost = brews.reduce((s, j) => {
+    if (j.is_milk_based || j.isMilkBased) return s + 250;
+    return s + (MARKET[j.brewer] || 150);
+  }, 0);
+  const homeCost=brews.reduce((s,j)=>{
+    const bean=logs.find(l=>String(l.id)===String(j.bean_id||j.beanId));
+    const sz=String(bean?.size||'');
+    const gM=sz.match(/(\d+(?:\.\d+)?)\s*g/i),kgM=sz.match(/(\d+(?:\.\d+)?)\s*kg/i);
+    const g=gM?Number(gM[1]):kgM?Number(kgM[1])*1000:0;
+    return s+Number(j.dose||0)*(bean&&g?Number(bean.price||0)/g:0);
+  },0);
+  return{brews,topTastes,topBrewers,topBeans,totalYield,avgRating,rated5,streak,beanSpend,cafeCost,homeCost};
+}
+
+const CHIP_COLORS=['#e8a83e','#c47d2a','#16a085','#8e44ad','#c0392b','#2980b9','#27ae60','#d35400'];
+
+function makeParticles(container,count=8){
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');p.className='particle';
+    const size=Math.random()*6+2;
+    p.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;background:${CHIP_COLORS[Math.floor(Math.random()*CHIP_COLORS.length)]};animation-duration:${Math.random()*10+8}s;animation-delay:-${Math.random()*10}s`;
+    container.appendChild(p);
+  }
+}
+
+function buildRecap(month){
+  const [y,m]=month.split('-');
+  const monthLabel=new Date(+y,+m-1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  const s=computeStats(month);
+  document.title=`${monthLabel} Recap — Broke Barista`;
+
+  const slides=[
+    /* 0 INTRO */`
+      <div class="steam" style="margin-left:-8px"></div>
+      <div class="steam" style="margin-left:8px;animation-delay:.7s"></div>
+      <div class="coffee-cup">☕</div>
+      <div class="label fade-up delay-1">Your Monthly Recap</div>
+      <div class="headline fade-up delay-2" style="font-size:clamp(1.8rem,7vw,3.2rem)">${monthLabel}</div>
+      <div class="sub fade-up delay-3">${s.brews.length} brews. ${s.topBeans[0]?`<span class="highlight">${s.topBeans[0][0]}</span> on rotation.`:''} Let's look back.</div>`,
+
+    /* 1 BREWED */`
+      <div class="label fade-up">Brews This Month</div>
+      <div class="bignum fade-up delay-1">${s.brews.length}</div>
+      <div class="headline fade-up delay-2">cups of <em>pure intention</em></div>
+      <div class="sub fade-up delay-3">${s.brews.length>=20?'You basically run a café at this point.':s.brews.length>=10?'Consistent and caffeinated.':'Quality over quantity — we respect it.'}</div>`,
+
+    /* 2 BREWERS */s.topBrewers.length?`
+      <div class="label fade-up">Your Brewer Lineup</div>
+      <div class="headline fade-up delay-1">You reached for <span class="highlight">${s.topBrewers[0][0]}</span> most</div>
+      <div style="margin-top:1.5rem">${s.topBrewers.slice(0,4).map(([b,c],i)=>`
+        <div class="bar-item fade-up delay-${i+1}">
+          <div class="name">${b}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(c/s.topBrewers[0][1]*100).toFixed(0)}%;background:${['#e8a83e','#c47d2a','#16a085','#8e44ad'][i]||'#888'}"></div></div>
+          <div class="val">${c}×</div>
+        </div>`).join('')}</div>`
+      :`<div class="headline">No brewer data</div>`,
+
+    /* 3 BEANS */s.topBeans.length?`
+      <div class="label fade-up">Top Beans</div>
+      <div class="headline fade-up delay-1"><em>${s.topBeans[0][0]}</em><br>was your top bean</div>
+      <div style="margin-top:1.2rem;display:flex;flex-wrap:wrap;justify-content:center;max-width:500px">
+        ${s.topBeans.map(([b,c],i)=>`<div class="pill fade-up delay-${i+1}">${b} <span style="opacity:.5">×${c}</span></div>`).join('')}
+      </div>
+      ${s.beanSpend>0?`<div class="sub fade-up delay-5" style="margin-top:1rem">You spent <span class="highlight">₹${s.beanSpend.toLocaleString('en-IN')}</span> on new beans</div>`:''}`
+      :`<div class="headline">No bean data</div>`,
+
+    /* 4 YIELD */`
+      <div class="label fade-up">Coffee Brewed</div>
+      <div class="bignum fade-up delay-1">${(s.totalYield/1000).toFixed(2)}<span style="font-size:.4em">L</span></div>
+      <div class="headline fade-up delay-2">of liquid <em>craft</em></div>
+      <div class="sub fade-up delay-3">~${Math.round(s.totalYield/250)} cups of coffee.<br>
+        ${s.avgRating>0?`Averaging <span class="highlight">${s.avgRating.toFixed(1)}/5</span> per brew.`:'Keep rating your brews!'}</div>
+      ${s.rated5.length?`<div class="pill fade-up delay-4" style="margin-top:1rem">⭐ ${s.rated5.length} perfect brew${s.rated5.length>1?'s':''}</div>`:''}`,
+
+    /* 5 TASTES */s.topTastes.length?`
+      <div class="label fade-up">Your Palate This Month</div>
+      <div class="headline fade-up delay-1">You kept tasting <span class="highlight">${s.topTastes[0][0]}</span></div>
+      <div style="margin-top:1.5rem;max-width:440px">
+        ${s.topTastes.map(([t,c],i)=>`<div class="taste-chip fade-up delay-${Math.min(i+1,5)}" style="background:${CHIP_COLORS[i]}22;border:1px solid ${CHIP_COLORS[i]}55;color:${CHIP_COLORS[i]}">${t} <span style="opacity:.6">×${c}</span></div>`).join('')}
+      </div>`
+      :`<div class="headline">No tasting notes yet</div><div class="sub">Add tastes to your journal sessions!</div>`,
+
+    /* 6 STREAK */`
+      <div class="label fade-up">Consistency</div>
+      <div class="bignum fade-up delay-1">${s.streak}</div>
+      <div class="headline fade-up delay-2">${s.streak>=7?'🔥':s.streak>=4?'💪':s.streak>=2?'✨':'☕'} day streak</div>
+      <div class="sub fade-up delay-3">${s.streak>=7?'A full week of consecutive brews.':s.streak>=4?'Nearly a work-week of daily brews.':s.streak>=2?'Back-to-back brewing days.':'Every brew counts. Aim for a streak next month.'}</div>`,
+
+    /* 7 SAVINGS */(()=>{const saved=Math.round(s.cafeCost-s.homeCost);const pct=s.cafeCost>0?Math.round(saved/s.cafeCost*100):0;return`
+      <div class="label fade-up">Money Saved vs Café</div>
+      <div class="bignum fade-up delay-1" style="font-size:clamp(3rem,15vw,7rem)">₹${saved.toLocaleString('en-IN')}</div>
+      <div class="headline fade-up delay-2">saved this month</div>
+      <div class="sub fade-up delay-3">Café: <span class="highlight">₹${Math.round(s.cafeCost).toLocaleString('en-IN')}</span> · You paid: <span class="highlight">₹${Math.round(s.homeCost).toLocaleString('en-IN')}</span><br>
+        ${pct>0?`That's <span class="highlight">${pct}% cheaper</span> than going out.`:''}</div>`;})(),
+
+    /* 8 OUTRO */`
+      <div class="headline glow fade-up" style="font-size:clamp(2rem,8vw,3.5rem)">See you next month ☕</div>
+      <div class="sub fade-up delay-2" style="margin-top:1rem">${monthLabel} — ${s.brews.length} brews${s.topBeans[0]?`, ${s.topBeans[0][0]}`:', great beans'}, a whole lot of craft.</div>
+      <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;max-width:400px">
+        <div class="pill fade-up delay-3">☕ ${s.brews.length} brews</div>
+        ${s.streak>1?`<div class="pill fade-up delay-3">🔥 ${s.streak}-day streak</div>`:''}
+        ${Math.round(s.cafeCost-s.homeCost)>0?`<div class="pill fade-up delay-4">💰 ₹${Math.round(s.cafeCost-s.homeCost).toLocaleString('en-IN')} saved</div>`:''}
+        ${s.topTastes[0]?`<div class="pill fade-up delay-5">🍓 ${s.topTastes[0][0]}</div>`:''}
+      </div>
+      <a href="index.html" class="pill fade-up delay-5" style="margin-top:1.5rem;display:inline-block">← All Recaps</a>`
+  ];
+
+  const deck=document.getElementById('deck');
+  deck.innerHTML='';
+  slides.forEach((html,i)=>{
+    const div=document.createElement('div');
+    div.className=`slide slide-${i}`;
+    div.innerHTML=html;
+    makeParticles(div);
+    deck.appendChild(div);
+  });
+  total=slides.length;
+  buildDots();
+  goTo(0);
+}
+
+function buildDots(){
+  const c=document.getElementById('dots');c.innerHTML='';
+  for(let i=0;i<total;i++){const d=document.createElement('div');d.className='dot';d.onclick=()=>goTo(i);c.appendChild(d);}
+}
+
+function goTo(n){
+  const slides=document.querySelectorAll('.slide');
+  slides[current]?.classList.remove('active');
+  slides[current]?.classList.add('out');
+  setTimeout(()=>slides[current]?.classList.remove('out'),500);
+  current=n;
+  slides[current]?.classList.add('active');
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  document.getElementById('progress').style.width=`${((current+1)/total*100).toFixed(1)}%`;
+}
+
+document.getElementById('navR').onclick=()=>goTo(Math.min(current+1,total-1));
+document.getElementById('navL').onclick=()=>goTo(Math.max(current-1,0));
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo(Math.min(current+1,total-1));
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') goTo(Math.max(current-1,0));
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?goTo(Math.min(current+1,total-1)):goTo(Math.max(current-1,0))}});
+
+(async()=>{
+  await fetchData();
+  const month=initMonthPicker();
+  buildRecap(month);
+  const loader=document.getElementById('loader');
+  loader.style.opacity='0';
+  setTimeout(()=>loader.style.display='none',500);
+})();
+</script>
+</body>
+</html>
