@@ -49,11 +49,11 @@
 
   <!-- INSIGHTS / STATS PAGE -->
   <div class="page-header">
-    <div style="display:flex;align-items:flex-start;flex:1">
-      <div>
-        <h1>Broke <em>Barista</em></h1>
-        <div class="sub">Spend analytics</div>
-      </div>
+    <div>
+      <h1>Broke <em>Barista</em></h1>
+      <div class="sub">Spend analytics</div>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center">
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
     </div>
@@ -130,7 +130,8 @@
             <div style="font-size:.7rem;color:var(--mid);margin-top:.2rem">How much of your gear cost has brewing saved
               you?</div>
             <div style="margin-top:.5rem">
-              <button id="be-include-untracked" class="be-toggle-btn" onclick="beToggleUntracked(this)" data-active="false">
+              <button id="be-include-untracked" class="be-toggle-btn" onclick="beToggleUntracked(this)"
+                data-active="false">
                 <span class="be-toggle-icon">📓</span> Tracked sessions only
               </button>
             </div>
@@ -265,7 +266,9 @@
     </div>
     <div class="charts-grid single" style="margin-bottom:.9rem">
       <div class="chart-card">
-        <div class="chart-ttl">🎯 Grind Size Recommender <span style="font-size:.6rem;font-weight:400;color:var(--mid);letter-spacing:.06em;vertical-align:middle">(Espresso · 25–35s target)</span></div>
+        <div class="chart-ttl">🎯 Grind Size Recommender <span
+            style="font-size:.6rem;font-weight:400;color:var(--mid);letter-spacing:.06em;vertical-align:middle">(Espresso
+            · 25–35s target)</span></div>
         <div id="grind-recommender"></div>
       </div>
     </div>
