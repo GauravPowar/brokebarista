@@ -47,18 +47,13 @@
 
   <!-- LOG PAGE -->
   <div class="page-header">
-    <div style="display:flex;align-items:flex-start;flex:1">
-      <div>
-        <h1>Broke <em>Barista</em></h1>
-        <div class="sub">Your coffee journey · Gaurav</div>
-      </div>
+    <div>
+      <h1>Broke <em>Barista</em></h1>
+      <div class="sub">Your coffee journey · Gaurav</div>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center">
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:.7rem;color:var(--mid);letter-spacing:.09em;text-transform:uppercase">Total Spent</div>
-      <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--roast);line-height:1.1"
-        id="grandTotal">₹0</div>
     </div>
   </div>
   <div class="page-content">
@@ -95,12 +90,12 @@
         class="nav-label">Log</span></a>
     <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
         class="nav-label">Shelf</span></a>
-    <a href="/process" class="nav-link" data-page="process"><span class="nav-icon">🌿</span><span
-        class="nav-label">Process</span></a>
-    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
-        class="nav-label">Journal</span></a>
     <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
         class="nav-label">Stats</span></a>
+    <a href="/recap" class="nav-link" data-page="recap"><span class="nav-icon">🎞️</span><span
+        class="nav-label">Recap</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
     <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
         class="nav-label">Add</span></a>
   </nav>
