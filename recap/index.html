@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Brew Recaps — Broke Barista</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* Recap-specific overrides */
+    .hero {
+      padding: 1.5rem 1.5rem 0.5rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .hero-label {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      opacity: .45;
+      margin-bottom: .5rem;
+    }
+
+    .hero-sub {
+      opacity: .5;
+      font-size: .9rem;
+      line-height: 1.6;
+      margin-top: .3rem;
+    }
+
+    /* Grid */
+    .recap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+      max-width: 820px;
+      margin: 1.25rem auto 4rem;
+      padding: 0 1.5rem;
+    }
+
+    .month-card {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 14px;
+      padding: 1.4rem;
+      cursor: pointer;
+      transition: transform .25s, box-shadow .25s, border-color .25s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .month-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 20%, rgba(196, 125, 42, .08) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    .month-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px var(--shadow);
+      border-color: var(--caramel);
+    }
+
+    .month-card:hover::before { opacity: 1; }
+
+    .card-month {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 400;
+      color: var(--espresso);
+      line-height: 1;
+    }
+
+    .card-year {
+      font-size: .82rem;
+      color: var(--mid);
+      margin-top: .1rem;
+    }
+
+    .card-stats {
+      display: flex;
+      gap: .65rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip {
+      font-size: .72rem;
+      color: var(--mid);
+      background: var(--cream);
+      border: 1px solid var(--parchment);
+      border-radius: 999px;
+      padding: .18rem .6rem;
+    }
+
+    .card-top-bean {
+      font-size: .78rem;
+      color: var(--mid);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-bar {
+      height: 3px;
+      background: var(--parchment);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: .15rem;
+    }
+
+    .card-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--caramel), var(--honey));
+      border-radius: 2px;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 1rem;
+      color: var(--light);
+      opacity: .4;
+      transition: opacity .3s, transform .3s;
+    }
+
+    .month-card:hover .card-arrow {
+      opacity: .8;
+      transform: translateX(4px);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--mid);
+      font-size: .9rem;
+      line-height: 1.8;
+      grid-column: 1 / -1;
+    }
+
+    /* Loader */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: .75rem;
+      z-index: 999;
+      transition: opacity .4s;
+    }
+
+    .loader-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--caramel);
+      display: inline-block;
+      margin: 0 3px;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    .loader-dot:nth-child(2) { animation-delay: .2s; }
+    .loader-dot:nth-child(3) { animation-delay: .4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: .2; }
+      40% { opacity: 1; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-in { animation: fadeUp .5s both; }
+  </style>
+</head>
+
+<body data-page="recap">
+
+  <div id="loader">
+    <div style="font-size:1.5rem">☕</div>
+    <div><span class="loader-dot"></span><span class="loader-dot"></span><span class="loader-dot"></span></div>
+  </div>
+
+  <!-- RECAP PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>Brew <em>Recaps</em></h1>
+      <div class="sub">Month-by-month coffee archive</div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
+  </div>
+
+  <div class="hero">
+    <div class="hero-label">Archive</div>
+    <div class="hero-sub">A month-by-month look at your coffee journey. Pick a month to dive in.</div>
+  </div>
+
+  <div class="recap-grid" id="grid"></div>
+
+  <script src="/app.js"></script>
+  <script>
+    const RECAP_API = '/api/logs';
+
+    // Always hide the loader — called in finally so it runs even on error
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      if (!loader) return;
+      loader.style.opacity = '0';
+      setTimeout(() => loader.style.display = 'none', 400);
+    }
+
+    // Fetch all data; each call is individually guarded so one failure doesn't kill the rest
+    async function fetchAll() {
+      const safe = p => p.catch(() => ({}));
+      const [jRes, lRes, sRes] = await Promise.all([
+        safe(fetch(`${RECAP_API}?route=journal`).then(r => r.json())),
+        safe(fetch(RECAP_API).then(r => r.json())),
+        safe(fetch(`${RECAP_API}?route=shelf`).then(r => r.json())),
+      ]);
+      return {
+        journal: Array.isArray(jRes.journal) ? jRes.journal : [],
+        logs: Array.isArray(lRes.logs) ? lRes.logs : [],
+        shelf: Array.isArray(sRes.shelf) ? sRes.shelf : [],
+      };
+    }
+
+    function openedIds(shelf) {
+      const ids = new Set();
+      (shelf || []).forEach(s => {
+        if (s.opened_date || s.openedDate || s.is_finished) ids.add(String(s.log_id));
+      });
+      return ids;
+    }
+
+    function computeMonthStats(month, journal, logs, openedBeanIds) {
+      const brews = journal.filter(j => j.date && j.date.startsWith(month));
+      // Only count brews whose linked bean has been opened
+      const validBrews = brews.filter(j => {
+        if (!j.bean_id && !j.beanId) return true; // unlinked entry — include
+        return openedBeanIds.has(String(j.bean_id || j.beanId));
+      });
+
+      // Top bean
+      const beanCount = {};
+      validBrews.forEach(j => {
+        const k = (j.bean_label || j.beanLabel || 'Unknown').split('(')[0].trim();
+        beanCount[k] = (beanCount[k] || 0) + 1;
+      });
+      const topBean = Object.entries(beanCount).sort((a, b) => b[1] - a[1])[0];
+
+      // Top taste
+      const allTastes = validBrews.flatMap(j => { try { return JSON.parse(j.tastes || '[]'); } catch { return []; } });
+      const tasteCount = {};
+      allTastes.forEach(t => { tasteCount[t] = (tasteCount[t] || 0) + 1; });
+      const topTaste = Object.entries(tasteCount).sort((a, b) => b[1] - a[1])[0];
+
+      // Savings
+      const MKTPRICE = {
+        'V60': 200, 'Pour Over': 200, 'Chemex': 200,
+        'Espresso Machine': 200, 'Cafflano Kompresso': 175,
+        'Cold Brew': 200, 'AeroPress': 150, 'Moka Pot': 100,
+        'KaldiPress': 150, 'French Press': 150, 'Americano': 210, 'Siphon': 150,
+      };
+      const cafeCost = validBrews.reduce((s, j) => {
+        if (j.is_milk_based || j.isMilkBased) return s + 250;
+        return s + (MKTPRICE[j.brewer] || 150);
+      }, 0);
+      const homeCost = validBrews.reduce((s, j) => {
+        const bid = String(j.bean_id || j.beanId);
+        const bean = logs.find(l => String(l.id) === bid);
+        if (!bean || !bean.size) return s;
+        const sz = String(bean.size);
+        const gM = sz.match(/(\d+(?:\.\d+)?)\s*g/i), kgM = sz.match(/(\d+(?:\.\d+)?)\s*kg/i);
+        const g = gM ? Number(gM[1]) : kgM ? Number(kgM[1]) * 1000 : 0;
+        const cpg = g && bean.price ? Number(bean.price) / g : 0;
+        return s + Number(j.dose || 0) * cpg;
+      }, 0);
+
+      return {
+        count: validBrews.length,
+        topBean: topBean ? topBean[0] : null,
+        topTaste: topTaste ? topTaste[0] : null,
+        saved: Math.round(cafeCost - homeCost),
+      };
+    }
+
+    function renderCards(months, journal, logs, openedBeanIds) {
+      const grid = document.getElementById('grid');
+      if (!months.length) {
+        grid.innerHTML = `<div class="empty">No journal entries found.<br>Start logging your brews to see recaps here.</div>`;
+        return;
+      }
+
+      // Months with hand-crafted editorial slide decks
+      const EDITORIAL = {
+        '2026-05': 'may_2026.html',
+        '2026-04': 'april_2026.html',
+      };
+
+      const maxBrews = Math.max(...months.map(m => computeMonthStats(m, journal, logs, openedBeanIds).count), 1);
+      grid.innerHTML = '';
+      months.forEach((month, i) => {
+        const [y, mo] = month.split('-');
+        const label = new Date(+y, +mo - 1).toLocaleString('en-IN', { month: 'long' });
+        const stats = computeMonthStats(month, journal, logs, openedBeanIds);
+        const pct = Math.round(stats.count / maxBrews * 100);
+        const editorial = EDITORIAL[month];
+
+        const card = document.createElement('a');
+        card.href = editorial || `slides.html?month=${month}`;
+        card.className = 'month-card card-in';
+        card.style.animationDelay = `${i * 0.08}s`;
+        card.innerHTML = `
+      <span class="card-arrow">→</span>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+        <div>
+          <div class="card-month">${label}</div>
+          <div class="card-year">${y}</div>
+        </div>
+        ${editorial ? `<span style="font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(196,125,42,.12);color:var(--caramel);border:1px solid rgba(196,125,42,.25);border-radius:6px;padding:.15rem .45rem;flex-shrink:0;margin-top:.15rem;font-weight:500">✦ Editorial</span>` : ''}
+      </div>
+      <div class="card-stats">
+        <span class="stat-chip">☕ ${stats.count} brews</span>
+        ${stats.saved > 0 ? `<span class="stat-chip">💰 ₹${stats.saved.toLocaleString('en-IN')}</span>` : ''}
+        ${stats.topTaste ? `<span class="stat-chip">🍓 ${stats.topTaste}</span>` : ''}
+      </div>
+      ${stats.topBean ? `<div class="card-top-bean">Top: ${stats.topBean}</div>` : ''}
+      <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    (async () => {
+      try {
+        const { journal, logs, shelf } = await fetchAll();
+        const openedBeanIds = openedIds(shelf);
+
+        // Collect months with journal entries, from March 2026 onwards
+        const months = [...new Set(
+          journal
+            .filter(j => j.date)
+            .map(j => j.date.slice(0, 7))
+            .filter(m => m >= '2026-03')
+        )].sort().reverse();
+
+        renderCards(months, journal, logs, openedBeanIds);
+      } catch (e) {
+        console.error('Recap index error:', e);
+        const grid = document.getElementById('grid');
+        if (grid) grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Couldn't load recap data.<br><span style="font-size:.8rem;opacity:.5">${e.message}</span></div>`;
+      } finally {
+        hideLoader();
+      }
+    })();
+  </script>
+  <nav class="bottom-nav">
+    <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
+        class="nav-label">Log</span></a>
+    <a href="/shelf" class="nav-link" data-page="shelf"><span class="nav-icon">🫙</span><span
+        class="nav-label">Shelf</span></a>
+    <a href="/" class="nav-link" data-page="insights"><span class="nav-icon">📊</span><span
+        class="nav-label">Stats</span></a>
+    <a href="/recap" class="nav-link" data-page="recap"><span class="nav-icon">🎞️</span><span
+        class="nav-label">Recap</span></a>
+    <a href="/journal" class="nav-link" data-page="journal"><span class="nav-icon">📓</span><span
+        class="nav-label">Journal</span></a>
+    <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
+        class="nav-label">Add</span></a>
+  </nav>
+</body>
+
+</html>
