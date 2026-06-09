@@ -700,14 +700,16 @@ function renderShelf() {
     const bagSizeG = parseBagSize(l.size);
     let gramBar = '';
     if (!isDone && totalUsed > 0) {
+      const dispUsed = +Number(totalUsed).toFixed(1);
       if (bagSizeG) {
         const pct = Math.min(100, Math.round(totalUsed / bagSizeG * 100));
+        const dispLeft = +Number(Math.max(0, bagSizeG - totalUsed)).toFixed(1);
         gramBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${totalUsed}g brewed · ${bagSizeG - totalUsed > 0 ? (bagSizeG - totalUsed) + 'g left' : 'bag empty'}</div>
+          <div class="freshness-label">${dispUsed}g brewed · ${bagSizeG - totalUsed > 0 ? dispLeft + 'g left' : 'bag empty'}</div>
           <div class="freshness-track"><div class="freshness-fill ${pct >= 100 ? 'fresh-red' : 'fresh-amber'}" style="width:${pct}%"></div></div>
         </div>`;
       } else {
-        gramBar = `<div class="freshness-bar-wrap"><div class="freshness-label">${totalUsed}g brewed total</div></div>`;
+        gramBar = `<div class="freshness-bar-wrap"><div class="freshness-label">${dispUsed}g brewed total</div></div>`;
       }
     }
 
@@ -890,10 +892,12 @@ function _updateGramUI(id) {
     $('bm-gramFill').className = 'gram-fill' + (totalUsed > bagSizeG ? ' over' : '');
     $('bm-gramTrack').style.display = '';
     const rem = bagSizeG - totalUsed;
-    $('bm-gramSummary').textContent = `${totalUsed}g used of ${bagSizeG}g · ${rem > 0 ? rem + 'g remaining' : 'bag empty'}`;
+    const dispUsed = +Number(totalUsed).toFixed(1);
+    const dispRem  = +Number(Math.abs(rem)).toFixed(1);
+    $('bm-gramSummary').textContent = `${dispUsed}g used of ${bagSizeG}g · ${rem > 0 ? dispRem + 'g remaining' : 'bag empty'}`;
   } else {
     $('bm-gramTrack').style.display = 'none';
-    $('bm-gramSummary').textContent = totalUsed > 0 ? `${totalUsed}g used total` : '';
+    $('bm-gramSummary').textContent = totalUsed > 0 ? `${+Number(totalUsed).toFixed(1)}g used total` : '';
   }
 }
 
@@ -906,7 +910,7 @@ function renderGramEntries(id) {
     <div class="gram-entry-row" style="grid-template-columns:1fr 80px 120px 34px">
       <input type="date" value="${e.date || ''}"
         onchange="updateGramEntry(${i},'date',this.value)">
-      <input type="number" value="${e.grams || ''}" placeholder="g" min="0" step="0.1"
+      <input type="number" value="${e.grams !== '' && e.grams != null ? parseFloat(Number(e.grams).toFixed(1)) : ''}" placeholder="g" min="0" step="0.1"
         oninput="updateGramEntry(${i},'grams',this.value)">
       <select onchange="updateGramEntry(${i},'usedFor',this.value)" style="font-size:.75rem;padding:.45rem .5rem">
         <option value="">— for —</option>
@@ -936,7 +940,9 @@ function removeGramEntry(idx) {
 function updateGramEntry(idx, field, val) {
   const id = Number($('bagModalId').value);
   if (!bagMeta[id]?.gramEntries?.[idx] === undefined) return;
-  bagMeta[id].gramEntries[idx][field] = field === 'grams' ? Number(val) || '' : val;
+  bagMeta[id].gramEntries[idx][field] = field === 'grams'
+    ? (val !== '' ? parseFloat(parseFloat(val).toFixed(1)) : '')
+    : val;
   _updateGramUI(id);
   _syncShelf(id);
 }
@@ -1087,8 +1093,8 @@ function renderJournal() {
     const meta = [];
     if (j.brewer) meta.push(`<span class="epill brew">☕ ${esc(j.brewer)}</span>`);
     if (j.is_milk_based) meta.push(`<span class="epill" style="color:var(--caramel);font-weight:600">🥛 Milk-based</span>`);
-    if (j.dose) meta.push(`<span class="epill">${j.dose}g dose</span>`);
-    if (j.yield) meta.push(`<span class="epill">${j.yield}g yield</span>`);
+    if (j.dose)  meta.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
+    if (j.yield) meta.push(`<span class="epill">${parseFloat(Number(j.yield).toFixed(1))}g yield</span>`);
     if (j.time) meta.push(`<span class="epill">${j.time}s</span>`);
     if (j.temp) meta.push(`<span class="epill">${j.temp}°C</span>`);
     if (j.grinder) meta.push(`<span class="epill">⚙️ ${esc(j.grinder)}</span>`);
@@ -1161,8 +1167,8 @@ function openJournalModal(editId) {
     }
 
     $('j-bean').value = j.beanId || '';
-    $('j-dose').value = j.dose || '';
-    $('j-yield').value = j.yield || '';
+    $('j-dose').value = j.dose  ? parseFloat(Number(j.dose).toFixed(1))  : '';
+    $('j-yield').value = j.yield ? parseFloat(Number(j.yield).toFixed(1)) : '';
     $('j-time').value = j.time || '';
     $('j-temp').value = j.temp || '';
     $('j-grind').value = j.grind || '';
@@ -1266,8 +1272,9 @@ async function saveJournalEntry() {
 
   const beanId = $('j-bean').value;
   const beanLabel = beanId ? $('j-bean').options[$('j-bean').selectedIndex].text : '';
-  const dose = parseFloat($('j-dose').value) || 0;
-  const yld = parseFloat($('j-yield').value) || 0;
+  const dose = val => parseFloat(parseFloat(val).toFixed(1)) || 0;
+  const doseG  = dose($('j-dose').value);
+  const yld    = dose($('j-yield').value);
   const time = parseFloat($('j-time').value) || 0;
   const temp = parseFloat($('j-temp').value) || 0;
   const grind = $('j-grind').value.trim();
@@ -1277,7 +1284,7 @@ async function saveJournalEntry() {
 
   const entry = {
     id: jEditId || Date.now(),
-    date, brewer, grinder, beanId, beanLabel, dose, yield: yld, time, temp, grind, notes,
+    date, brewer, grinder, beanId, beanLabel, dose: doseG, yield: yld, time, temp, grind, notes,
     rating: jRating, tastes, is_milk_based
   };
 
@@ -1607,8 +1614,8 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
   const params = [];
   if (j.brewer)  params.push({ label: 'BREWER',  val: j.brewer });
   if (j.grinder) params.push({ label: 'GRINDER', val: j.grinder });
-  if (j.dose)    params.push({ label: 'DOSE',    val: j.dose + 'g' });
-  if (j.yield)   params.push({ label: 'YIELD',   val: j.yield + 'g' });
+  if (j.dose)    params.push({ label: 'DOSE',    val: parseFloat(Number(j.dose).toFixed(1))  + 'g' });
+  if (j.yield)   params.push({ label: 'YIELD',   val: parseFloat(Number(j.yield).toFixed(1)) + 'g' });
   if (j.time)    params.push({ label: 'TIME',    val: j.time + 's' });
   if (j.temp)    params.push({ label: 'TEMP',    val: j.temp + '°C' });
   if (j.grind)   params.push({ label: 'GRIND',   val: j.grind });
@@ -2658,8 +2665,8 @@ function renderJournal() {
       if (j.is_milk_based) metaBrewer.push(`<span class="epill" style="color:var(--caramel);font-weight:600">🥛 Milk-based</span>`);
 
       const metaExtract = [];
-      if (j.dose) metaExtract.push(`<span class="epill">${j.dose}g dose</span>`);
-      if (j.yield) metaExtract.push(`<span class="epill">${j.yield}g yield</span>`);
+      if (j.dose)  metaExtract.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
+      if (j.yield) metaExtract.push(`<span class="epill">${parseFloat(Number(j.yield).toFixed(1))}g yield</span>`);
       if (j.time) metaExtract.push(`<span class="epill">${j.time}s</span>`);
       if (j.temp) metaExtract.push(`<span class="epill">${j.temp}°C</span>`);
 
