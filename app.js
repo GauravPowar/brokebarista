@@ -2324,6 +2324,8 @@ function renderInsights() {
     const topBeanMeta = $('ins-bean-top-meta');
     if (topBeanCard && topBeanLog) {
       topBeanCard.style.display = '';
+      topBeanCard.style.cursor = 'pointer';
+      topBeanCard.setAttribute('onclick', `window.location.href='/journal?bean=${encodeURIComponent(topBeanEntry[0])}'`);
       if (topBeanName) topBeanName.textContent = '🏆 ' + topBeanLog.name;
       const avgR = beanBrewRating[topBeanEntry[0]];
       const avgRStr = avgR ? ' · ' + (avgR.sum/avgR.cnt).toFixed(1) + '★ avg' : '';
@@ -2333,7 +2335,7 @@ function renderInsights() {
 
   const maxV = topRoasters[0]?.[1] || 1;
   $('vendorBarList').innerHTML = topRoasters.slice(0, 8).map(([v, a]) =>
-    `<div class="bar-row"><span class="bar-label">${esc(v)}</span><div class="bar-track"><div class="bar-fill" style="width:${(a / maxV * 100).toFixed(1)}%"></div></div><span class="bar-val">${fmt(a)} · ${roasterBags[v] || 0} bag${(roasterBags[v] || 0) !== 1 ? 's' : ''}</span></div>`).join('');
+    `<div class="bar-row" style="cursor:pointer" onclick="window.location.href='/journal?search=${encodeURIComponent(v)}'"><span class="bar-label">${esc(v)}</span><div class="bar-track"><div class="bar-fill" style="width:${(a / maxV * 100).toFixed(1)}%"></div></div><span class="bar-val">${fmt(a)} · ${roasterBags[v] || 0} bag${(roasterBags[v] || 0) !== 1 ? 's' : ''}</span></div>`).join('');
 
   const procTot = {};
   beans.forEach(l => { const p = detectProcess(l); const k = p ? p.label : 'Untagged'; procTot[k] = (procTot[k] || 0) + Number(l.price || 0); });
@@ -2358,7 +2360,7 @@ function renderInsights() {
   const mE = Object.entries(methodCount).sort((a, b) => b[1] - a[1]);
   const maxM = mE[0]?.[1] || 1;
   $('brewBarList').innerHTML = mE.length ? mE.map(([k, a], i) =>
-    `<div class="bar-row"><span class="bar-label">${esc(k)}</span><div class="bar-track"><div class="bar-fill ${pCls[i] || ''}" style="width:${(a / maxM * 100).toFixed(1)}%"></div></div><span class="bar-val">${a}</span></div>`).join('')
+    `<div class="bar-row" style="cursor:pointer" onclick="window.location.href='/journal?brewer=${encodeURIComponent(k)}'"><span class="bar-label">${esc(k)}</span><div class="bar-track"><div class="bar-fill ${pCls[i] || ''}" style="width:${(a / maxM * 100).toFixed(1)}%"></div></div><span class="bar-val">${a}</span></div>`).join('')
     : '<p style="font-size:.78rem;color:var(--light);font-style:italic">Log brew sessions to see usage.</p>';
 
   const pSortedM = Object.keys(methodHistory).sort();
@@ -2396,7 +2398,7 @@ function renderInsights() {
   const gE = Object.entries(grinderGround).sort((a, b) => b[1] - a[1]);
   const maxGr = gE[0]?.[1] || 1;
   $('grinderBarList').innerHTML = gE.length ? gE.map(([k, a], i) =>
-    `<div class="bar-row"><span class="bar-label">${esc(k)}</span><div class="bar-track"><div class="bar-fill ${pCls[i] || ''}" style="width:${(a / maxGr * 100).toFixed(1)}%"></div></div><span class="bar-val">${a.toFixed(0)}g</span></div>`).join('')
+    `<div class="bar-row" style="cursor:pointer" onclick="window.location.href='/journal?grinder=${encodeURIComponent(k)}'"><span class="bar-label">${esc(k)}</span><div class="bar-track"><div class="bar-fill ${pCls[i] || ''}" style="width:${(a / maxGr * 100).toFixed(1)}%"></div></div><span class="bar-val">${a.toFixed(0)}g</span></div>`).join('')
     : '<p style="font-size:.78rem;color:var(--light);font-style:italic">Log brew sessions to see usage.</p>';
 
   const gSortedM = Object.keys(grinderHistory).sort();
@@ -2723,10 +2725,46 @@ let jPage = 0;
 const J_PER_PAGE = 10;
 let jFilteredEntries = null; // null = no filter active, shows all
 
+let jFiltersInitialized = false;
+
+function _initJournalFiltersFromUrl() {
+  if (jFiltersInitialized) return;
+  const params = new URLSearchParams(window.location.search);
+  const search = params.get('search');
+  const brewer = params.get('brewer');
+  const grinder = params.get('grinder');
+  const rating = params.get('rating');
+  const bean = params.get('bean');
+  const sort = params.get('sort');
+
+  if (search && $('jFilterSearch')) $('jFilterSearch').value = search;
+  if (brewer && $('jFilterBrewer')) $('jFilterBrewer').value = brewer;
+  if (grinder && $('jFilterGrinder')) $('jFilterGrinder').value = grinder;
+  if (rating && $('jFilterRating')) $('jFilterRating').value = rating;
+  if (sort && $('jFilterSort')) $('jFilterSort').value = sort;
+
+  if (bean && $('jFilterBean')) {
+    const select = $('jFilterBean');
+    const option = Array.from(select.options).find(opt => 
+      opt.value === bean || opt.value === `id:${bean}` || opt.value === `label:${bean}`
+    );
+    if (option) select.value = option.value;
+  }
+
+  jFiltersInitialized = true;
+  try {
+    const cleanUrl = window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  } catch (e) {
+    console.error('Failed to clean url', e);
+  }
+}
+
 function _getJournalFilterValues() {
   return {
     search: ($('jFilterSearch')?.value || '').toLowerCase().trim(),
     brewer: ($('jFilterBrewer')?.value || ''),
+    grinder: ($('jFilterGrinder')?.value || ''),
     rating: parseInt($('jFilterRating')?.value || '0', 10),
     bean: ($('jFilterBean')?.value || ''),
     sort: ($('jFilterSort')?.value || 'date-desc'),
@@ -2735,14 +2773,21 @@ function _getJournalFilterValues() {
 
 function _populateJournalFilterDropdowns() {
   const brewerSel = $('jFilterBrewer');
+  const grinderSel = $('jFilterGrinder');
   const beanSel = $('jFilterBean');
   if (!brewerSel || !beanSel) return;
 
   const brewers = [...new Set(journal.map(j => j.brewer).filter(Boolean))].sort();
   const currentBrewer = brewerSel.value;
-  // Use data-val instead of escaping — value must match exactly for comparison
-  brewerSel.innerHTML = '<option value="">\u2615 All Brewers</option>' +
+  brewerSel.innerHTML = '<option value="">☕ All Brewers</option>' +
     brewers.map(b => `<option value="${b.replace(/"/g, '&quot;')}"${currentBrewer === b ? ' selected' : ''}>${esc(b)}</option>`).join('');
+
+  if (grinderSel) {
+    const grinders = [...new Set(journal.map(j => j.grinder).filter(Boolean))].sort();
+    const currentGrinder = grinderSel.value;
+    grinderSel.innerHTML = '<option value="">⚙️ All Grinders</option>' +
+      grinders.map(g => `<option value="${g.replace(/"/g, '&quot;')}"${currentGrinder === g ? ' selected' : ''}>${esc(g)}</option>`).join('');
+  }
 
   // Bean dropdown — use 'id:N' or 'label:name' as stable keys
   const beanMap = new Map(); // key -> display name
@@ -2758,7 +2803,7 @@ function _populateJournalFilterDropdowns() {
   });
   const currentBean = beanSel.value;
   const beanEntries = [...beanMap.entries()].sort((a, b) => a[1].localeCompare(b[1]));
-  beanSel.innerHTML = '<option value="">\ud83e\uded8 All Beans</option>' +
+  beanSel.innerHTML = '<option value="">🫘 All Beans</option>' +
     beanEntries.map(([key, name]) => `<option value="${key.replace(/"/g, '&quot;')}"${currentBean === key ? ' selected' : ''}>${esc(name)}</option>`).join('');
 }
 
@@ -2782,6 +2827,7 @@ function applyJournalFilter() {
 function clearJournalFilter() {
   if ($('jFilterSearch'))  $('jFilterSearch').value  = '';
   if ($('jFilterBrewer'))  $('jFilterBrewer').value  = '';
+  if ($('jFilterGrinder')) $('jFilterGrinder').value = '';
   if ($('jFilterRating'))  $('jFilterRating').value  = '';
   if ($('jFilterBean'))    $('jFilterBean').value    = '';
   if ($('jFilterSort'))    $('jFilterSort').value    = 'date-desc';
@@ -2794,6 +2840,9 @@ const _renderJournalOrig = renderJournal;
 function renderJournal() {
   // Populate dropdowns fresh
   _populateJournalFilterDropdowns();
+
+  // Initialize filters from URL parameters on first load
+  _initJournalFiltersFromUrl();
 
   // Stats (always from full dataset)
   const total = journal.length;
@@ -2812,7 +2861,7 @@ function renderJournal() {
 
   // --- Apply filters ---
   const f = _getJournalFilterValues();
-  const hasFilter = f.search || f.brewer || f.rating || f.bean;
+  const hasFilter = f.search || f.brewer || f.grinder || f.rating || f.bean;
 
   // Show/hide clear button
   if ($('jFilterClearBtn')) $('jFilterClearBtn').style.display = hasFilter ? 'flex' : 'none';
@@ -2821,6 +2870,9 @@ function renderJournal() {
 
   if (f.brewer) {
     filtered = filtered.filter(j => (j.brewer || '') === f.brewer);
+  }
+  if (f.grinder) {
+    filtered = filtered.filter(j => (j.grinder || '') === f.grinder);
   }
   if (f.rating) {
     filtered = filtered.filter(j => (j.rating || 0) >= f.rating);

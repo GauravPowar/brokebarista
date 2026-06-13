@@ -76,6 +76,41 @@
         <div class="stat-label">Total Saved</div>
       </div>
     </div>
+
+    <!-- JOURNAL FILTER BAR -->
+    <div class="j-filter-bar" id="journalFilterBar">
+      <div class="j-filter-search-wrap">
+        <span class="j-filter-icon">🔍</span>
+        <input type="text" id="jFilterSearch" class="j-filter-search" placeholder="Search beans, notes, tastes…" oninput="applyJournalFilter()" autocomplete="off">
+        <button class="j-filter-clear-btn" id="jFilterClearBtn" onclick="clearJournalFilter()" title="Clear all filters" style="display:none">✕</button>
+      </div>
+      <div class="j-filter-chips">
+        <select id="jFilterBrewer" class="j-filter-chip-select" onchange="applyJournalFilter()">
+          <option value="">☕ All Brewers</option>
+        </select>
+        <select id="jFilterGrinder" class="j-filter-chip-select" onchange="applyJournalFilter()">
+          <option value="">⚙️ All Grinders</option>
+        </select>
+        <select id="jFilterRating" class="j-filter-chip-select" onchange="applyJournalFilter()">
+          <option value="">★ Any Rating</option>
+          <option value="5">★★★★★ 5 stars</option>
+          <option value="4">★★★★☆ 4+</option>
+          <option value="3">★★★☆☆ 3+</option>
+          <option value="2">★★☆☆☆ 2+</option>
+        </select>
+        <select id="jFilterBean" class="j-filter-chip-select" onchange="applyJournalFilter()">
+          <option value="">🫘 All Beans</option>
+        </select>
+        <select id="jFilterSort" class="j-filter-chip-select" onchange="applyJournalFilter()">
+          <option value="date-desc">📅 Newest First</option>
+          <option value="date-asc">📅 Oldest First</option>
+          <option value="rating-desc">★ Highest Rated</option>
+          <option value="rating-asc">★ Lowest Rated</option>
+        </select>
+      </div>
+      <div id="jFilterSummary" class="j-filter-summary" style="display:none"></div>
+    </div>
+
     <div id="journalList"></div>
     <div id="journalPagination"></div>
   </div>
