@@ -229,14 +229,22 @@
 
     // Fetch all data; each call is individually guarded so one failure doesn't kill the rest
     async function fetchAll() {
-      const safe = p => p.catch(() => ({}));
+      const safe = p => p.catch(e => ({ _err: e.message }));
       const [jRes, lRes, sRes] = await Promise.all([
         safe(fetch(`${RECAP_API}?route=journal`).then(r => r.json())),
         safe(fetch(RECAP_API).then(r => r.json())),
         safe(fetch(`${RECAP_API}?route=shelf`).then(r => r.json())),
       ]);
+      // Normalise journal entries: parse tastes JSON string from DB
+      const rawJournal = Array.isArray(jRes.journal) ? jRes.journal : [];
       return {
-        journal: Array.isArray(jRes.journal) ? jRes.journal : [],
+        journal: rawJournal.map(j => ({
+          ...j,
+          beanId: j.beanId || j.bean_id,
+          beanLabel: j.beanLabel || j.bean_label,
+          brewer: j.brewer || '',
+          tastes: typeof j.tastes === 'string' ? (() => { try { return JSON.parse(j.tastes || '[]'); } catch { return []; } })() : (j.tastes || []),
+        })),
         logs: Array.isArray(lRes.logs) ? lRes.logs : [],
         shelf: Array.isArray(sRes.shelf) ? sRes.shelf : [],
       };
@@ -281,7 +289,7 @@
       };
       const cafeCost = validBrews.reduce((s, j) => {
         if (j.is_milk_based || j.isMilkBased) return s + 250;
-        return s + (MKTPRICE[j.brewer] || 150);
+        return s + (MKTPRICE[j.brewer || ''] || 150);
       }, 0);
       const homeCost = validBrews.reduce((s, j) => {
         const bid = String(j.bean_id || j.beanId);
@@ -353,12 +361,11 @@
         const { journal, logs, shelf } = await fetchAll();
         const openedBeanIds = openedIds(shelf);
 
-        // Collect months with journal entries, from March 2026 onwards
+        // Collect ALL months with journal entries (no date cutoff)
         const months = [...new Set(
           journal
-            .filter(j => j.date)
+            .filter(j => j.date && j.date.length >= 7)
             .map(j => j.date.slice(0, 7))
-            .filter(m => m >= '2026-03')
         )].sort().reverse();
 
         renderCards(months, journal, logs, openedBeanIds);
