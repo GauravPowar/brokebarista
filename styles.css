@@ -2603,3 +2603,112 @@ body.dark-mode .low-bean-alert.critical .lba-title { color: #e85c4a; }
   font-style: italic;
 }
 
+/* ── JOURNAL FILTER BAR ─────────────────────────────────── */
+.j-filter-bar {
+  background: var(--steam);
+  border: 1.5px solid var(--parchment);
+  border-radius: 14px;
+  padding: .85rem 1rem .75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+
+.j-filter-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--cream);
+  border: 1.5px solid var(--parchment);
+  border-radius: 10px;
+  padding: .38rem .65rem;
+  transition: border-color .2s;
+}
+
+.j-filter-search-wrap:focus-within {
+  border-color: var(--caramel);
+  box-shadow: 0 0 0 3px rgba(196,125,42,.08);
+}
+
+.j-filter-icon {
+  font-size: .9rem;
+  opacity: .55;
+  flex-shrink: 0;
+}
+
+.j-filter-search {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .83rem;
+  color: var(--espresso);
+  outline: none;
+  min-width: 0;
+}
+
+.j-filter-search::placeholder { color: var(--light); }
+
+.j-filter-clear-btn {
+  background: none;
+  border: none;
+  color: var(--light);
+  cursor: pointer;
+  font-size: .8rem;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.j-filter-clear-btn:hover {
+  color: var(--roast);
+  background: var(--parchment);
+}
+
+.j-filter-chips {
+  display: flex;
+  gap: .45rem;
+  flex-wrap: wrap;
+}
+
+.j-filter-chip-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--cream) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a68a64'/%3E%3C/svg%3E") no-repeat right .55rem center / 8px;
+  border: 1.5px solid var(--parchment);
+  border-radius: 999px;
+  padding: .28rem .95rem .28rem .65rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .73rem;
+  color: var(--mid);
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.j-filter-chip-select:focus {
+  outline: none;
+  border-color: var(--caramel);
+}
+
+.j-filter-chip-select:hover {
+  border-color: var(--caramel);
+  color: var(--roast);
+}
+
+.j-filter-summary {
+  font-size: .72rem;
+  color: var(--caramel);
+  font-weight: 500;
+  letter-spacing: .03em;
+  padding: .1rem 0 0;
+}
+
+body.dark-mode .j-filter-search-wrap,
+body.dark-mode .j-filter-chip-select {
+  background-color: var(--steam);
+}
