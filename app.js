@@ -2740,18 +2740,26 @@ function _populateJournalFilterDropdowns() {
 
   const brewers = [...new Set(journal.map(j => j.brewer).filter(Boolean))].sort();
   const currentBrewer = brewerSel.value;
-  brewerSel.innerHTML = '<option value="">☕ All Brewers</option>' +
-    brewers.map(b => `<option value="${esc(b)}"${currentBrewer === b ? ' selected' : ''}>${esc(b)}</option>`).join('');
+  // Use data-val instead of escaping — value must match exactly for comparison
+  brewerSel.innerHTML = '<option value="">\u2615 All Brewers</option>' +
+    brewers.map(b => `<option value="${b.replace(/"/g, '&quot;')}"${currentBrewer === b ? ' selected' : ''}>${esc(b)}</option>`).join('');
 
-  const beanNames = {};
+  // Bean dropdown — use 'id:N' or 'label:name' as stable keys
+  const beanMap = new Map(); // key -> display name
   journal.forEach(j => {
-    const name = j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '' : j.beanLabel || '';
-    if (name) beanNames[name] = j.beanId || name;
+    if (j.beanId) {
+      const name = logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '';
+      const key = 'id:' + j.beanId;
+      if (name && !beanMap.has(key)) beanMap.set(key, name);
+    } else if (j.beanLabel) {
+      const key = 'label:' + j.beanLabel;
+      if (!beanMap.has(key)) beanMap.set(key, j.beanLabel);
+    }
   });
   const currentBean = beanSel.value;
-  const beanEntries = Object.entries(beanNames).sort((a, b) => a[0].localeCompare(b[0]));
-  beanSel.innerHTML = '<option value="">🫘 All Beans</option>' +
-    beanEntries.map(([name, id]) => `<option value="${esc(String(id))}"${currentBean === String(id) ? ' selected' : ''}>${esc(name)}</option>`).join('');
+  const beanEntries = [...beanMap.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  beanSel.innerHTML = '<option value="">\ud83e\uded8 All Beans</option>' +
+    beanEntries.map(([key, name]) => `<option value="${key.replace(/"/g, '&quot;')}"${currentBean === key ? ' selected' : ''}>${esc(name)}</option>`).join('');
 }
 
 function _applyJournalSort(arr, sortKey) {
@@ -2819,9 +2827,14 @@ function renderJournal() {
   }
   if (f.bean) {
     filtered = filtered.filter(j => {
-      const bId = j.beanId ? String(j.beanId) : null;
-      const bLabel = j.beanLabel || (j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || '' : '');
-      return bId === f.bean || bLabel === f.bean;
+      if (f.bean.startsWith('id:')) {
+        const keyId = f.bean.slice(3);
+        return j.beanId && String(j.beanId) === keyId;
+      } else if (f.bean.startsWith('label:')) {
+        const keyLabel = f.bean.slice(6);
+        return (j.beanLabel || '') === keyLabel;
+      }
+      return false;
     });
   }
   if (f.search) {
