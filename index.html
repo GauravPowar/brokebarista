@@ -185,7 +185,7 @@
   </div>
 
   <div id="tab-brews" class="stats-pane page-content">
-    <div class="stat-strip three">
+    <div class="stat-strip" style="grid-template-columns:repeat(4,1fr)">
       <div class="stat-card">
         <div class="stat-num" id="ins-brw-total">0</div>
         <div class="stat-label">Total Brews</div>
@@ -195,8 +195,22 @@
         <div class="stat-label">Brews / Day</div>
       </div>
       <div class="stat-card">
+        <div class="stat-num" id="ins-brw-streak">0</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-num" id="ins-brw-consumed">0L</div>
         <div class="stat-label">Consumed Yield</div>
+      </div>
+    </div>
+    <div class="stat-strip" style="grid-template-columns:repeat(2,1fr);margin-bottom:.9rem">
+      <div class="stat-card">
+        <div class="stat-num" id="ins-brw-best-day">—</div>
+        <div class="stat-label">Best Day (Brews)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="ins-brw-longest-streak">0 days</div>
+        <div class="stat-label">Longest Streak</div>
       </div>
     </div>
     <div class="charts-grid single" style="margin-bottom:.9rem">
@@ -204,17 +218,23 @@
         <div class="chart-ttl">Brews Over Time</div><canvas id="brewsChart" style="max-height:180px"></canvas>
       </div>
     </div>
+    <div class="charts-grid single" style="margin-bottom:.9rem">
+      <div class="chart-card">
+        <div class="chart-ttl">☕ Rating Distribution</div>
+        <div class="bar-list" id="ratingDistBarList"></div>
+      </div>
+    </div>
   </div>
 
   <div id="tab-beans" class="stats-pane page-content">
     <div class="stat-strip">
       <div class="stat-card">
-        <div class="stat-num">🇮🇳 India</div>
+        <div class="stat-num" id="ins-bean-top-origin">—</div>
         <div class="stat-label">Top Origin</div>
       </div>
       <div class="stat-card">
         <div class="stat-num" id="ins-bean-rating">0.0★</div>
-        <div class="stat-label">Avg India Rating</div>
+        <div class="stat-label">Avg Rating</div>
       </div>
       <div class="stat-card" style="border-color:rgba(196,125,42,.3);background:rgba(196,125,42,.06)">
         <div class="stat-num" id="ins-avg-cpg" style="color:var(--caramel)">—</div>
@@ -223,6 +243,12 @@
       <div class="stat-card" style="border-color:rgba(94,138,58,.3);background:rgba(94,138,58,.06)">
         <div class="stat-num" id="ins-price-cup" style="color:var(--green)">—</div>
         <div class="stat-label">Price / Cup (15g)</div>
+      </div>
+    </div>
+    <div class="stat-strip" style="grid-template-columns:1fr;margin-bottom:.9rem" id="ins-bean-top-card-wrap">
+      <div class="stat-card" id="ins-bean-top-card" style="display:none">
+        <div class="stat-num" id="ins-bean-top-name" style="font-size:.95rem"></div>
+        <div class="stat-label" id="ins-bean-top-meta"></div>
       </div>
     </div>
     <div class="charts-grid" style="margin-bottom:.9rem">
