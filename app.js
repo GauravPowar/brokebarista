@@ -654,9 +654,9 @@ function renderShelf() {
 
     const breakdownHtml = cupsBreakdown.length > 0
       ? `<div class="lba-breakdown">${cupsBreakdown.map(b =>
-          `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}:
+        `<span>${b.isOpened ? '🔓' : '📦'} ${esc((b.name || 'Bean').split(' ').slice(0, 2).join(' '))}:
            ~${b.cups}c <span style="opacity:0.6;font-size:0.82em">(@${b.avgDose.toFixed(1)}g${b.fromJournal ? '*' : ''})</span></span>`
-        ).join('')}${unknownSizeBags > 0 ? `<span style="opacity:0.5">+${unknownSizeBags} bag(s) unweighed</span>` : ''}</div>`
+      ).join('')}${unknownSizeBags > 0 ? `<span style="opacity:0.5">+${unknownSizeBags} bag(s) unweighed</span>` : ''}</div>`
       : (unknownSizeBags > 0 ? `<div class="lba-sub" style="margin-top:.3rem;opacity:.7">${unknownSizeBags} bag(s) have no size set — add size to track grams</div>` : '');
 
     const ctaHtml = (isLow && !hasNoData) ? `<a href="/add" class="lba-cta">+ Order Beans</a>` : '';
@@ -893,7 +893,7 @@ function _updateGramUI(id) {
     $('bm-gramTrack').style.display = '';
     const rem = bagSizeG - totalUsed;
     const dispUsed = +Number(totalUsed).toFixed(1);
-    const dispRem  = +Number(Math.abs(rem)).toFixed(1);
+    const dispRem = +Number(Math.abs(rem)).toFixed(1);
     $('bm-gramSummary').textContent = `${dispUsed}g used of ${bagSizeG}g · ${rem > 0 ? dispRem + 'g remaining' : 'bag empty'}`;
   } else {
     $('bm-gramTrack').style.display = 'none';
@@ -1093,7 +1093,7 @@ function renderJournal() {
     const meta = [];
     if (j.brewer) meta.push(`<span class="epill brew">☕ ${esc(j.brewer)}</span>`);
     if (j.is_milk_based) meta.push(`<span class="epill" style="color:var(--caramel);font-weight:600">🥛 Milk-based</span>`);
-    if (j.dose)  meta.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
+    if (j.dose) meta.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
     if (j.yield) meta.push(`<span class="epill">${parseFloat(Number(j.yield).toFixed(1))}g yield</span>`);
     if (j.time) meta.push(`<span class="epill">${j.time}s</span>`);
     if (j.temp) meta.push(`<span class="epill">${j.temp}°C</span>`);
@@ -1167,7 +1167,7 @@ function openJournalModal(editId) {
     }
 
     $('j-bean').value = j.beanId || '';
-    $('j-dose').value = j.dose  ? parseFloat(Number(j.dose).toFixed(1))  : '';
+    $('j-dose').value = j.dose ? parseFloat(Number(j.dose).toFixed(1)) : '';
     $('j-yield').value = j.yield ? parseFloat(Number(j.yield).toFixed(1)) : '';
     $('j-time').value = j.time || '';
     $('j-temp').value = j.temp || '';
@@ -1273,8 +1273,8 @@ async function saveJournalEntry() {
   const beanId = $('j-bean').value;
   const beanLabel = beanId ? $('j-bean').options[$('j-bean').selectedIndex].text : '';
   const dose = val => parseFloat(parseFloat(val).toFixed(1)) || 0;
-  const doseG  = dose($('j-dose').value);
-  const yld    = dose($('j-yield').value);
+  const doseG = dose($('j-dose').value);
+  const yld = dose($('j-yield').value);
   const time = parseFloat($('j-time').value) || 0;
   const temp = parseFloat($('j-temp').value) || 0;
   const grind = $('j-grind').value.trim();
@@ -1612,13 +1612,13 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
 
   // ── Brew params: 3-column layout ──
   const params = [];
-  if (j.brewer)  params.push({ label: 'BREWER',  val: j.brewer });
+  if (j.brewer) params.push({ label: 'BREWER', val: j.brewer });
   if (j.grinder) params.push({ label: 'GRINDER', val: j.grinder });
-  if (j.dose)    params.push({ label: 'DOSE',    val: parseFloat(Number(j.dose).toFixed(1))  + 'g' });
-  if (j.yield)   params.push({ label: 'YIELD',   val: parseFloat(Number(j.yield).toFixed(1)) + 'g' });
-  if (j.time)    params.push({ label: 'TIME',    val: j.time + 's' });
-  if (j.temp)    params.push({ label: 'TEMP',    val: j.temp + '°C' });
-  if (j.grind)   params.push({ label: 'GRIND',   val: j.grind });
+  if (j.dose) params.push({ label: 'DOSE', val: parseFloat(Number(j.dose).toFixed(1)) + 'g' });
+  if (j.yield) params.push({ label: 'YIELD', val: parseFloat(Number(j.yield).toFixed(1)) + 'g' });
+  if (j.time) params.push({ label: 'TIME', val: j.time + 's' });
+  if (j.temp) params.push({ label: 'TEMP', val: j.temp + '°C' });
+  if (j.grind) params.push({ label: 'GRIND', val: j.grind });
 
   if (params.length) {
     const cols = 3;
@@ -1739,7 +1739,7 @@ function _drawJournalCard(canvas, j, beanName, aspect, theme) {
     if (wrap) {
       const maxW = Math.min(wrap.clientWidth - 32, aspect === '916' ? 270 : 410);
       const scale = maxW / W;
-      preview.style.width  = Math.round(W * scale) + 'px';
+      preview.style.width = Math.round(W * scale) + 'px';
       preview.style.height = Math.round(H * scale) + 'px';
     }
   }
@@ -2197,14 +2197,60 @@ function renderInsights() {
 
   // --- BREWS TAB ---
   let brewsPerDay = 0;
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let bestDayCount = 0;
+  let bestDayLabel = '—';
+
   if (journal.length > 0) {
-    const dates = journal.map(j => new Date(j.date)).sort((a, b) => a - b);
+    const dates = journal.map(j => new Date(j.date + 'T00:00:00')).sort((a, b) => a - b);
     const spanDays = Math.max(1, Math.floor((new Date() - dates[0]) / 86400000));
     brewsPerDay = journal.length / spanDays;
+
+    // Group by date
+    const byDate = {};
+    journal.forEach(j => {
+      const d = j.date.slice(0, 10);
+      byDate[d] = (byDate[d] || 0) + 1;
+    });
+    const allDates = Object.keys(byDate).sort();
+
+    // Best day
+    const bestEntry = Object.entries(byDate).sort((a, b) => b[1] - a[1])[0];
+    if (bestEntry) {
+      bestDayCount = bestEntry[1];
+      const d = new Date(bestEntry[0] + 'T00:00:00');
+      bestDayLabel = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ' · ' + bestDayCount + ' brew' + (bestDayCount !== 1 ? 's' : '');
+    }
+
+    // Streak calc (consecutive calendar days up to today)
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    let streak = 0;
+    let check = byDate[today.toISOString().slice(0,10)] ? new Date(today) : new Date(yesterday);
+    while (byDate[check.toISOString().slice(0,10)]) {
+      streak++;
+      check.setDate(check.getDate() - 1);
+    }
+    currentStreak = streak;
+
+    // Longest streak
+    let run = 1;
+    for (let i = 1; i < allDates.length; i++) {
+      const prev = new Date(allDates[i-1] + 'T00:00:00');
+      const curr = new Date(allDates[i]   + 'T00:00:00');
+      const diff = Math.round((curr - prev) / 86400000);
+      if (diff === 1) { run++; longestStreak = Math.max(longestStreak, run); }
+      else { run = 1; }
+    }
+    longestStreak = Math.max(longestStreak, run);
   }
-  $('ins-brw-total').textContent = journal.length;
-  $('ins-brw-perday').textContent = brewsPerDay.toFixed(1);
-  $('ins-brw-consumed').textContent = totalConsumedL.toFixed(1) + 'L';
+  if ($('ins-brw-total'))         $('ins-brw-total').textContent         = journal.length;
+  if ($('ins-brw-perday'))        $('ins-brw-perday').textContent        = brewsPerDay.toFixed(1);
+  if ($('ins-brw-streak'))        $('ins-brw-streak').textContent        = currentStreak + (currentStreak === 1 ? ' day' : ' days');
+  if ($('ins-brw-consumed'))      $('ins-brw-consumed').textContent      = totalConsumedL.toFixed(1) + 'L';
+  if ($('ins-brw-best-day'))      $('ins-brw-best-day').textContent      = bestDayLabel;
+  if ($('ins-brw-longest-streak')) $('ins-brw-longest-streak').textContent = longestStreak + ' days';
 
   const brewsByMonth = {};
   journal.forEach(j => {
@@ -2226,15 +2272,64 @@ function renderInsights() {
     }
   });
 
+  // Rating distribution
+  const ratingDist = {1:0, 2:0, 3:0, 4:0, 5:0};
+  journal.forEach(j => { if (j.rating >= 1 && j.rating <= 5) ratingDist[j.rating]++; });
+  const maxRatD = Math.max(...Object.values(ratingDist), 1);
+  const ratingEl = $('ratingDistBarList');
+  if (ratingEl) {
+    ratingEl.innerHTML = [5,4,3,2,1].map(r => {
+      const cnt = ratingDist[r];
+      return `<div class="bar-row"><span class="bar-label">${'★'.repeat(r)}${'\u2606'.repeat(5-r)}</span><div class="bar-track"><div class="bar-fill" style="width:${(cnt/maxRatD*100).toFixed(1)}%;background:var(--caramel)"></div></div><span class="bar-val">${cnt}</span></div>`;
+    }).join('');
+  }
+
   // --- BEANS TAB ---
+  // Dynamic top origin
+  const originCount = {};
+  beans.forEach(l => { const o = l.origin || ''; if (o) originCount[o] = (originCount[o] || 0) + 1; });
+  const topOriginEntry = Object.entries(originCount).sort((a,b) => b[1]-a[1])[0];
+  if ($('ins-bean-top-origin')) {
+    $('ins-bean-top-origin').textContent = topOriginEntry ? topOriginEntry[0] : (beans.length ? '🇮🇳 India' : '—');
+  }
+
+  // Avg rating
   const rated = journal.filter(j => j.rating > 0);
   const avgIndia = rated.length ? (rated.reduce((s, j) => s + j.rating, 0) / rated.length).toFixed(1) : '0.0';
-  $('ins-bean-rating').textContent = avgIndia + '★';
+  if ($('ins-bean-rating')) $('ins-bean-rating').textContent = avgIndia + '★';
 
   // Avg ₹/100g and Price/Cup
-  const avgCpg = globalCostPerGram(); // ₹/g
+  const avgCpg = globalCostPerGram();
   if ($('ins-avg-cpg')) $('ins-avg-cpg').textContent = avgCpg > 0 ? '₹' + (avgCpg * 100).toFixed(0) : '—';
   if ($('ins-price-cup')) $('ins-price-cup').textContent = avgCpg > 0 ? '₹' + (avgCpg * STD_DOSE_G).toFixed(0) : '—';
+
+  // Top bean by brews
+  const beanBrewCount = {};
+  const beanBrewRating = {};
+  journal.forEach(j => {
+    const bid = j.beanId ? String(j.beanId) : null;
+    if (!bid) return;
+    beanBrewCount[bid] = (beanBrewCount[bid] || 0) + 1;
+    if (j.rating > 0) {
+      if (!beanBrewRating[bid]) beanBrewRating[bid] = {sum:0,cnt:0};
+      beanBrewRating[bid].sum += j.rating;
+      beanBrewRating[bid].cnt++;
+    }
+  });
+  const topBeanEntry = Object.entries(beanBrewCount).sort((a,b)=>b[1]-a[1])[0];
+  if (topBeanEntry) {
+    const topBeanLog = logs.find(l => String(l.id) === topBeanEntry[0]);
+    const topBeanCard = $('ins-bean-top-card');
+    const topBeanName = $('ins-bean-top-name');
+    const topBeanMeta = $('ins-bean-top-meta');
+    if (topBeanCard && topBeanLog) {
+      topBeanCard.style.display = '';
+      if (topBeanName) topBeanName.textContent = '🏆 ' + topBeanLog.name;
+      const avgR = beanBrewRating[topBeanEntry[0]];
+      const avgRStr = avgR ? ' · ' + (avgR.sum/avgR.cnt).toFixed(1) + '★ avg' : '';
+      if (topBeanMeta) topBeanMeta.textContent = `Most brewed: ${topBeanEntry[1]} session${topBeanEntry[1]!==1?'s':''}${avgRStr} · ${topBeanLog.roaster||topBeanLog.vendor||''}`;
+    }
+  }
 
   const maxV = topRoasters[0]?.[1] || 1;
   $('vendorBarList').innerHTML = topRoasters.slice(0, 8).map(([v, a]) =>
@@ -2622,36 +2717,147 @@ function renderAll() { renderStats(); renderEntries(); }
 
 
 /* ═══════════════════════════════════════════════════════════
-   JOURNAL PAGINATION
+   JOURNAL FILTER + PAGINATION
 ═══════════════════════════════════════════════════════════ */
 let jPage = 0;
 const J_PER_PAGE = 10;
+let jFilteredEntries = null; // null = no filter active, shows all
 
-// Wrap existing renderJournal to add pagination
+function _getJournalFilterValues() {
+  return {
+    search: ($('jFilterSearch')?.value || '').toLowerCase().trim(),
+    brewer: ($('jFilterBrewer')?.value || ''),
+    rating: parseInt($('jFilterRating')?.value || '0', 10),
+    bean: ($('jFilterBean')?.value || ''),
+    sort: ($('jFilterSort')?.value || 'date-desc'),
+  };
+}
+
+function _populateJournalFilterDropdowns() {
+  const brewerSel = $('jFilterBrewer');
+  const beanSel = $('jFilterBean');
+  if (!brewerSel || !beanSel) return;
+
+  const brewers = [...new Set(journal.map(j => j.brewer).filter(Boolean))].sort();
+  const currentBrewer = brewerSel.value;
+  brewerSel.innerHTML = '<option value="">☕ All Brewers</option>' +
+    brewers.map(b => `<option value="${esc(b)}"${currentBrewer === b ? ' selected' : ''}>${esc(b)}</option>`).join('');
+
+  const beanNames = {};
+  journal.forEach(j => {
+    const name = j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '' : j.beanLabel || '';
+    if (name) beanNames[name] = j.beanId || name;
+  });
+  const currentBean = beanSel.value;
+  const beanEntries = Object.entries(beanNames).sort((a, b) => a[0].localeCompare(b[0]));
+  beanSel.innerHTML = '<option value="">🫘 All Beans</option>' +
+    beanEntries.map(([name, id]) => `<option value="${esc(String(id))}"${currentBean === String(id) ? ' selected' : ''}>${esc(name)}</option>`).join('');
+}
+
+function _applyJournalSort(arr, sortKey) {
+  const sorted = [...arr];
+  switch (sortKey) {
+    case 'date-asc':    sorted.sort((a, b) => new Date(a.date) - new Date(b.date)); break;
+    case 'date-desc':   sorted.sort((a, b) => new Date(b.date) - new Date(a.date)); break;
+    case 'rating-desc': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.date) - new Date(a.date)); break;
+    case 'rating-asc':  sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0) || new Date(b.date) - new Date(a.date)); break;
+    default:            sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+  return sorted;
+}
+
+function applyJournalFilter() {
+  jPage = 0;
+  renderJournal();
+}
+
+function clearJournalFilter() {
+  if ($('jFilterSearch'))  $('jFilterSearch').value  = '';
+  if ($('jFilterBrewer'))  $('jFilterBrewer').value  = '';
+  if ($('jFilterRating'))  $('jFilterRating').value  = '';
+  if ($('jFilterBean'))    $('jFilterBean').value    = '';
+  if ($('jFilterSort'))    $('jFilterSort').value    = 'date-desc';
+  jPage = 0;
+  renderJournal();
+}
+
+// Wrap existing renderJournal to add filter + pagination
 const _renderJournalOrig = renderJournal;
 function renderJournal() {
-  // Stats
+  // Populate dropdowns fresh
+  _populateJournalFilterDropdowns();
+
+  // Stats (always from full dataset)
   const total = journal.length;
   const rated = journal.filter(j => j.rating > 0);
   const avgR = rated.length ? (rated.reduce((s, j) => s + j.rating, 0) / rated.length).toFixed(1) : '—';
   const brCount = {};
   journal.forEach(j => { if (j.brewer) brCount[j.brewer] = (brCount[j.brewer] || 0) + 1; });
   const favBr = Object.entries(brCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
-  if ($('jsTotal')) $('jsTotal').textContent = total;
-  if ($('jsAvgRating')) $('jsAvgRating').textContent = avgR;
+  if ($('jsTotal'))     $('jsTotal').textContent     = total;
+  if ($('jsAvgRating')) $('jsAvgRating').textContent = avgR !== '—' ? avgR + '★' : '—';
   if ($('jsFavMethod')) $('jsFavMethod').textContent = favBr.split(' ')[0];
   // Savings
   const { totalSaved } = calcMoneySaved();
   if ($('jsSaved')) $('jsSaved').textContent = (totalSaved >= 0 ? '₹' : '-₹') +
     Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
-  const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // --- Apply filters ---
+  const f = _getJournalFilterValues();
+  const hasFilter = f.search || f.brewer || f.rating || f.bean;
+
+  // Show/hide clear button
+  if ($('jFilterClearBtn')) $('jFilterClearBtn').style.display = hasFilter ? 'flex' : 'none';
+
+  let filtered = [...journal];
+
+  if (f.brewer) {
+    filtered = filtered.filter(j => (j.brewer || '') === f.brewer);
+  }
+  if (f.rating) {
+    filtered = filtered.filter(j => (j.rating || 0) >= f.rating);
+  }
+  if (f.bean) {
+    filtered = filtered.filter(j => {
+      const bId = j.beanId ? String(j.beanId) : null;
+      const bLabel = j.beanLabel || (j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || '' : '');
+      return bId === f.bean || bLabel === f.bean;
+    });
+  }
+  if (f.search) {
+    filtered = filtered.filter(j => {
+      const beanName = j.beanId ? (logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '') : (j.beanLabel || '');
+      const haystack = [
+        beanName, j.brewer || '', j.grinder || '', j.notes || '',
+        ...(j.tastes || []),
+      ].join(' ').toLowerCase();
+      return haystack.includes(f.search);
+    });
+  }
+
+  // Sort
+  const sorted = _applyJournalSort(filtered, f.sort);
+
+  // Filter summary
+  const summaryEl = $('jFilterSummary');
+  if (summaryEl) {
+    if (hasFilter && sorted.length !== total) {
+      summaryEl.style.display = 'block';
+      summaryEl.textContent = `Showing ${sorted.length} of ${total} session${total !== 1 ? 's' : ''}`;
+    } else if (hasFilter && sorted.length === 0) {
+      summaryEl.style.display = 'block';
+      summaryEl.textContent = 'No sessions match your filters';
+    } else {
+      summaryEl.style.display = 'none';
+    }
+  }
+
   const totalPages = Math.max(1, Math.ceil(sorted.length / J_PER_PAGE));
   jPage = Math.min(jPage, totalPages - 1);
   const slice = sorted.slice(jPage * J_PER_PAGE, (jPage + 1) * J_PER_PAGE);
 
   if (!slice.length) {
-    if ($('journalList')) $('journalList').innerHTML = '<div class="empty-state"><div class="icon">📓</div><p>No brew sessions yet. Log your first cup!</p></div>';
+    if ($('journalList')) $('journalList').innerHTML = `<div class="empty-state"><div class="icon">📓</div><p>${hasFilter ? 'No sessions match your filters.' : 'No brew sessions yet. Log your first cup!'}</p>${hasFilter ? '<button class="btn-ghost" onclick="clearJournalFilter()" style="margin-top:.75rem">Clear filters</button>' : ''}</div>`;
     if ($('journalPagination')) $('journalPagination').innerHTML = '';
     return;
   }
@@ -2665,14 +2871,14 @@ function renderJournal() {
       if (j.is_milk_based) metaBrewer.push(`<span class="epill" style="color:var(--caramel);font-weight:600">🥛 Milk-based</span>`);
 
       const metaExtract = [];
-      if (j.dose)  metaExtract.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
+      if (j.dose) metaExtract.push(`<span class="epill">${parseFloat(Number(j.dose).toFixed(1))}g dose</span>`);
       if (j.yield) metaExtract.push(`<span class="epill">${parseFloat(Number(j.yield).toFixed(1))}g yield</span>`);
       if (j.time) metaExtract.push(`<span class="epill">${j.time}s</span>`);
       if (j.temp) metaExtract.push(`<span class="epill">${j.temp}°C</span>`);
 
       const metaGrinder = [];
       if (j.grinder) metaGrinder.push(`<span class="epill">⚙️ ${esc(j.grinder)}</span>`);
-      if (j.grind) metaGrinder.push(`<span class="epill">📏 ${esc(j.grind)}</span>`);
+      if (j.grind)   metaGrinder.push(`<span class="epill">📏 ${esc(j.grind)}</span>`);
 
       const beanName = j.beanId ? logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '' : j.beanLabel || '';
       return `<div class="journal-entry">
@@ -2703,11 +2909,11 @@ function renderJournal() {
     if (totalPages > 1) {
       pagEl.innerHTML = `<div class="pag-bar">
         <button class="pag-btn" onclick="jPage=Math.max(0,jPage-1);renderJournal()" ${jPage === 0 ? 'disabled' : ''}>← Prev</button>
-        <span class="pag-info">Page ${jPage + 1} of ${totalPages} · ${total} sessions</span>
+        <span class="pag-info">Page ${jPage + 1} of ${totalPages} · ${sorted.length} session${sorted.length !== 1 ? 's' : ''}</span>
         <button class="pag-btn" onclick="jPage=Math.min(${totalPages - 1},jPage+1);renderJournal()" ${jPage === totalPages - 1 ? 'disabled' : ''}>Next →</button>
       </div>`;
     } else {
-      pagEl.innerHTML = `<div class="pag-info" style="text-align:center;padding:.5rem 0;font-size:.75rem;color:var(--mid)">${total} session${total !== 1 ? 's' : ''}</div>`;
+      pagEl.innerHTML = `<div class="pag-info" style="text-align:center;padding:.5rem 0;font-size:.75rem;color:var(--mid)">${sorted.length} session${sorted.length !== 1 ? 's' : ''}</div>`;
     }
   }
 }
