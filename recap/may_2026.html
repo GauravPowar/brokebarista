@@ -576,7 +576,7 @@
     <div class="label fu">Dialling In</div>
     <div class="headline fu d1">Grind arc across <em>May</em></div>
     <div class="chart-container fu d2"><canvas id="grindChart"></canvas></div>
-    <div class="sub fu d3">Started at 0.9 → went finer to 0.7 · K6 grinder debuted May 31<br><span style="opacity:.4;font-size:.85rem">Y-axis inverted — lower = finer</span></div>`},
+    <div class="sub fu d3">Started at 0.9.0 → went finer to 0.7.0 · K6 grinder debuted May 31<br><span style="opacity:.4;font-size:.85rem">Y-axis inverted — lower = finer</span></div>`},
 
       /* 5 — FLAVORS */
       {
@@ -714,6 +714,13 @@
       const TEXT = 'rgba(245,239,224,0.35)'; const GRID = 'rgba(232,168,62,0.06)';
       const AMBER = '#e8a83e'; const GREEN = '#16a085'; const PURPLE = '#8e44ad';
 
+      const formatGrind = v => {
+        if (typeof v !== 'number') return v;
+        const s = v.toFixed(2);
+        const parts = s.split('.');
+        return parts.length === 2 ? `${parts[0]}.${parts[1][0]}.${parts[1][1]}` : s;
+      };
+
       Chart.defaults.font.family = "'DM Sans',sans-serif";
       Chart.defaults.font.size = 11; Chart.defaults.color = TEXT;
 
@@ -723,7 +730,7 @@
         type: 'line', data: {
           labels: ['May 1', 'May 2', 'May 4', 'May 7', 'May 8', 'May 9', 'May 10', 'May 11', 'May 12', 'May 14', 'May 15', 'May 16', 'May 17', 'May 18', 'May 20', 'May 21', 'May 24', 'May 25', 'May 26', 'May 27', 'May 28', 'May 29'],
           datasets: [{ data: [0.82, 0.81, 0.80, 0.72, 0.80, 0.72, 0.70, 0.70, 0.70, 0.62, 0.90, 0.80, 0.81, 0.80, 0.82, 0.82, 0.81, 0.80, 0.81, 0.80, 0.72, 0.72], borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.08)', pointBackgroundColor: AMBER, pointRadius: 4, tension: 0.4, fill: true }]
-        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' Grind ' + c.raw.toFixed(2) } } }, scales: { x: { ticks: { color: TEXT, font: { size: 9 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false }, border: { color: 'rgba(232,168,62,0.1)' } }, y: { ticks: { color: TEXT, callback: v => v.toFixed(2) }, grid: { color: GRID }, border: { display: false }, min: 0.55, max: 0.95, reverse: true } } }
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' Grind ' + formatGrind(c.raw) } } }, scales: { x: { ticks: { color: TEXT, font: { size: 9 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false }, border: { color: 'rgba(232,168,62,0.1)' } }, y: { ticks: { color: TEXT, callback: v => formatGrind(v) }, grid: { color: GRID }, border: { display: false }, min: 0.55, max: 0.95, reverse: true } } }
       });
 
       // Day chart
