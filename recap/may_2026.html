@@ -718,7 +718,10 @@
         if (typeof v !== 'number') return v;
         const s = v.toFixed(2);
         const parts = s.split('.');
-        return parts.length === 2 ? `${parts[0]}.${parts[1][0]}.${parts[1][1]}` : s;
+        if (parts.length !== 2) return s;
+        const z = parseInt(parts[1][1], 10);
+        if (z > 2) return ''; // hide interpolated ticks with invalid z values
+        return `${parts[0]}.${parts[1][0]}.${parts[1][1]}`;
       };
 
       Chart.defaults.font.family = "'DM Sans',sans-serif";
