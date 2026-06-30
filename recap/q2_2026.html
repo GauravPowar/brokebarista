@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Q2 2026 — Quarterly Brew Recap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600;800;900&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box }
+    :root { --amber: #e8a83e; --caramel: #c47d2a; --cream: #f5efe0; --c1: #1a0a00 }
+    body { font-family: 'DM Sans', sans-serif; background: var(--c1); color: var(--cream); overflow: hidden; height: 100vh; width: 100vw; user-select: none }
+
+    #deck { width: 100%; height: 100%; position: relative }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s, transform .5s; transform: translateY(40px); padding: 2rem; text-align: center; overflow-y: auto; overflow-x: hidden }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0) }
+    .slide.out { opacity: 0; transform: translateY(-40px) }
+
+    .s0  { background: radial-gradient(ellipse at 30% 40%, #3d1a00, #0d0500 70%) }
+    .s1  { background: radial-gradient(ellipse at 70% 30%, #1a2d00, #050d00 70%) }
+    .s2  { background: radial-gradient(ellipse at 50% 60%, #1a001a, #050005 70%) }
+    .s3  { background: radial-gradient(ellipse at 20% 50%, #001a2d, #000508 70%) }
+    .s4  { background: radial-gradient(ellipse at 80% 40%, #2d1a00, #0a0500 70%) }
+    .s5  { background: radial-gradient(ellipse at 50% 50%, #001a0a, #000503 70%) }
+    .s6  { background: radial-gradient(ellipse at 30% 60%, #1a1a00, #050500 70%) }
+    .s7  { background: radial-gradient(ellipse at 60% 40%, #0a001a, #020005 70%) }
+    .s8  { background: radial-gradient(ellipse at 50% 50%, #1a0500, #0a0200 70%) }
+    .s9  { background: radial-gradient(ellipse at 40% 30%, #001a1a, #000505 70%) }
+    .s10 { background: radial-gradient(ellipse at 60% 50%, #0a1a00, #020500 70%) }
+    .s11 { background: radial-gradient(ellipse at 40% 50%, #1a0a00, #050200 70%) }
+
+    .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: float linear infinite; opacity: .15 }
+    @keyframes float { 0% { transform: translateY(100vh) rotate(0deg) } 100% { transform: translateY(-20px) rotate(720deg) } }
+
+    .label { font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; opacity: .55; margin-bottom: 1rem; font-weight: 600 }
+    .bignum { font-size: clamp(4rem, 20vw, 9rem); font-weight: 900; line-height: 1; background: linear-gradient(135deg, var(--amber), var(--caramel), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pop .6s cubic-bezier(.175,.885,.32,1.275) both }
+    @keyframes pop { from { transform: scale(.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    .headline { font-family: 'DM Serif Display', serif; font-size: clamp(1.4rem, 5vw, 2.4rem); line-height: 1.2; margin: .5rem 0 1rem }
+    .sub { font-size: 1rem; opacity: .65; max-width: 520px; line-height: 1.6 }
+    .hi { color: var(--amber); font-weight: 700; -webkit-text-fill-color: var(--amber) }
+    .pill { display: inline-block; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: .4rem 1.2rem; font-size: .9rem; margin: .3rem; backdrop-filter: blur(8px) }
+
+    .bar-item { display: flex; align-items: center; gap: 1rem; margin: .4rem 0; width: min(420px, 90vw) }
+    .bname { font-size: .85rem; width: 130px; text-align: right; flex-shrink: 0; line-height: 1.2 }
+    .btrack { flex: 1; background: rgba(255,255,255,.08); border-radius: 4px; height: 10px; overflow: hidden }
+    .bfill { height: 100%; border-radius: 4px }
+    .bval { font-size: .8rem; opacity: .6; width: 30px; flex-shrink: 0 }
+
+    .tag { display: inline-block; font-size: .75rem; padding: .3rem .8rem; border-radius: 999px; margin: .2rem; font-weight: 600 }
+
+    .moment-item { display: flex; align-items: flex-start; gap: .9rem; text-align: left; margin: .6rem 0; max-width: 480px; width: 90vw }
+    .mdot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .65rem; border: 0.5px solid }
+    .mdot-good { background: rgba(90,158,114,.15); border-color: rgba(90,158,114,.4); color: #7ac494 }
+    .mdot-bad { background: rgba(192,80,58,.15); border-color: rgba(192,80,58,.4); color: #e06050 }
+    .mbody .date { font-size: .68rem; opacity: .4; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .15rem }
+    .mbody .note { font-family: 'DM Serif Display', serif; font-size: 1.05rem; font-style: italic; line-height: 1.25 }
+    .mbody .note.good { color: #7ac494 }
+    .mbody .note.bad { color: #e06050 }
+    .mbody .detail { font-size: .75rem; opacity: .5; margin-top: .2rem; line-height: 1.5 }
+
+    .chart-container { width: min(480px, 90vw); height: 220px; position: relative }
+
+    #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--amber); transition: width .4s; z-index: 9999 }
+    #backBtn { position: fixed; top: 1.1rem; left: 1rem; z-index: 999; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .35rem .9rem; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: .75rem; letter-spacing: .05em; text-decoration: none; backdrop-filter: blur(8px); transition: background .2s }
+    #backBtn:hover { background: rgba(255,255,255,.1) }
+    #dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: .5rem; z-index: 999 }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); cursor: pointer; transition: all .3s }
+    .dot.active { background: var(--amber); transform: scale(1.4) }
+    #navL, #navR { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.06); border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; z-index: 999; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .2s }
+    #navL:hover, #navR:hover { background: rgba(255,255,255,.15) }
+    #navL { left: 1rem }
+    #navR { right: 1rem }
+
+    .coffee-cup { font-size: 5rem; animation: bounce 2s ease-in-out infinite }
+    @keyframes bounce { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-12px) } }
+    .steam { position: absolute; bottom: 44%; left: 50%; width: 3px; background: rgba(255,255,255,.12); border-radius: 2px; animation: steam 2s ease-in-out infinite; transform-origin: bottom center }
+    @keyframes steam { 0% { height: 0; opacity: .2; transform: translateX(-50%) } 50% { height: 60px; opacity: .5; transform: translateX(-50%) scaleX(1.5) rotate(4deg) } 100% { height: 0; opacity: 0; transform: translateX(-50%) } }
+    .glow { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.4); animation: pulse 2s ease-in-out infinite }
+    @keyframes pulse { 0%,100% { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.3) } 50% { text-shadow: 0 0 60px var(--amber), 0 0 120px rgba(232,168,62,.6) } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+    .fu { animation: fadeUp .6s both }
+    .d1 { animation-delay: .15s } .d2 { animation-delay: .3s } .d3 { animation-delay: .45s } .d4 { animation-delay: .6s } .d5 { animation-delay: .75s }
+
+    .month-bar { display: flex; align-items: flex-end; gap: 1.5rem; margin-top: 1.5rem }
+    .month-col { display: flex; flex-direction: column; align-items: center; gap: .4rem }
+    .month-fill { width: 56px; border-radius: 6px 6px 0 0; transition: height .6s cubic-bezier(.175,.885,.32,1.275) }
+    .month-label { font-size: .75rem; opacity: .5 }
+    .month-val { font-size: 1.1rem; font-weight: 800 }
+  </style>
+</head>
+
+<body>
+  <div id="progress"></div>
+  <a id="backBtn" href="index.html">← All Recaps</a>
+  <div id="dots"></div>
+  <button id="navL">‹</button>
+  <button id="navR">›</button>
+  <div id="deck"></div>
+
+  <script>
+    const COLORS = ['#e8a83e','#c47d2a','#16a085','#8e44ad','#c0392b','#2980b9','#27ae60','#d35400'];
+    const AMBER = '#e8a83e', GREEN = '#16a085', PURPLE = '#8e44ad', BLUE = '#2980b9', RED = '#c0392b';
+    let cur = 0, tot = 0;
+
+    function particles(el) {
+      for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div'); p.className = 'particle';
+        const s = Math.random() * 6 + 2;
+        p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${COLORS[Math.floor(Math.random()*COLORS.length)]};animation-duration:${Math.random()*10+8}s;animation-delay:-${Math.random()*10}s`;
+        el.appendChild(p);
+      }
+    }
+
+    const SLIDES = [
+      /* 0 — INTRO */
+      { cls: 's0', html: `
+    <div class="steam" style="margin-left:-8px"></div>
+    <div class="steam" style="margin-left:8px;animation-delay:.7s"></div>
+    <div class="coffee-cup">☕</div>
+    <div class="label fu d1">Quarterly Recap</div>
+    <div class="headline fu d2" style="font-size:clamp(2rem,8vw,3.8rem)">Q2 <span style="color:var(--amber)">2026</span></div>
+    <div class="sub fu d3">121 brews across 3 months.<br>April · May · June — the quarter you went <em>all in</em> on espresso.</div>`},
+
+      /* 1 — SESSIONS */
+      { cls: 's1', html: `
+    <div class="label fu">Total Sessions</div>
+    <div class="bignum fu d1">121</div>
+    <div class="headline fu d2">cups in <em>91 days</em></div>
+    <div class="sub fu d3">Brewed on <span class="hi">75 out of 91 days</span> — averaging 1.3 brews a day.<br>27 perfect shots. 10 different beans. Two grinders.</div>
+    <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center" class="fu d4">
+      <div class="pill">⭐ 27 five-stars</div>
+      <div class="pill">📊 3.8★ avg</div>
+      <div class="pill">🫘 10 beans</div>
+      <div class="pill">🔧 2 grinders</div>
+    </div>`},
+
+      /* 2 — MONTHLY BREAKDOWN */
+      { cls: 's2', html: `
+    <div class="label fu">Month by Month</div>
+    <div class="headline fu d1">June was the <span class="hi">busiest month</span></div>
+    <div class="month-bar fu d2">
+      <div class="month-col"><div class="month-val">40</div><div class="month-fill" style="height:120px;background:${AMBER}"></div><div class="month-label">April</div></div>
+      <div class="month-col"><div class="month-val">37</div><div class="month-fill" style="height:111px;background:${GREEN}"></div><div class="month-label">May</div></div>
+      <div class="month-col"><div class="month-val">44</div><div class="month-fill" style="height:132px;background:${PURPLE}"></div><div class="month-label">June</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:1.2rem">24 active days → 23 days → <span class="hi">28 days</span><br>Consistency improved every month.</div>`},
+
+      /* 3 — ESPRESSO BREWERS */
+      { cls: 's3', html: `
+    <div class="label fu">Espresso Brewers</div>
+    <div class="headline fu d1"><span class="hi">101</span> espresso-style brews</div>
+    <div style="margin-top:1.5rem" class="fu d2">
+      <div class="bar-item"><div class="bname">Espresso Machine</div><div class="btrack"><div class="bfill" style="width:100%;background:${AMBER}"></div></div><div class="bval">90×</div></div>
+      <div class="bar-item"><div class="bname">Kompresso</div><div class="btrack"><div class="bfill" style="width:12%;background:${PURPLE}"></div></div><div class="bval">11×</div></div>
+    </div>
+    <div class="chart-container fu d3" style="margin-top:1rem;height:180px"><canvas id="espBrewerChart"></canvas></div>
+    <div class="sub fu d4" style="margin-top:.5rem"><span style="color:${AMBER}">■</span> Espresso Machine <span style="color:${PURPLE}">■</span> Kompresso · <span style="font-size:.85rem;opacity:.5">per month</span></div>`},
+
+      /* 4 — FILTER BREWERS */
+      { cls: 's4', html: `
+    <div class="label fu">Filter Brewers</div>
+    <div class="headline fu d1"><span class="hi">26</span> filter brews — pour over territory</div>
+    <div style="margin-top:1.5rem" class="fu d2">
+      <div class="bar-item"><div class="bname">V60</div><div class="btrack"><div class="bfill" style="width:100%;background:${GREEN}"></div></div><div class="bval">24×</div></div>
+      <div class="bar-item"><div class="bname">KaldiPress</div><div class="btrack"><div class="bfill" style="width:4%;background:${BLUE}"></div></div><div class="bval">1×</div></div>
+      <div class="bar-item"><div class="bname">French Press</div><div class="btrack"><div class="bfill" style="width:4%;background:#27ae60"></div></div><div class="bval">1×</div></div>
+    </div>
+    <div class="chart-container fu d3" style="margin-top:1rem;height:180px"><canvas id="filterBrewerChart"></canvas></div>
+    <div class="sub fu d4" style="margin-top:.5rem"><span style="color:${GREEN}">■</span> V60 <span style="color:${BLUE}">■</span> KaldiPress <span style="color:#27ae60">■</span> French Press · <span style="font-size:.85rem;opacity:.5">per month</span></div>`},
+
+      /* 5 — BEANS */
+      { cls: 's5', html: `
+    <div class="label fu">Bean Rotation</div>
+    <div class="headline fu d1"><span class="hi">10 beans</span> — Aranya Gold was king</div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Aranya Gold</div><div class="btrack"><div class="bfill" style="width:100%;background:${AMBER}"></div></div><div class="bval">31×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Dunduga Estate</div><div class="btrack"><div class="bfill" style="width:55%;background:#c47d2a"></div></div><div class="bval">17×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Daily Driver</div><div class="btrack"><div class="bfill" style="width:55%;background:${GREEN}"></div></div><div class="bval">17×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Berry Dawn</div><div class="btrack"><div class="bfill" style="width:45%;background:${PURPLE}"></div></div><div class="bval">14×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Attikan Estate</div><div class="btrack"><div class="bfill" style="width:39%;background:${BLUE}"></div></div><div class="bval">12×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">St. Joseph</div><div class="btrack"><div class="bfill" style="width:32%;background:${RED}"></div></div><div class="bval">10×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Baarbara Estate</div><div class="btrack"><div class="bfill" style="width:26%;background:#d35400"></div></div><div class="bval">8×</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.72rem">Raxidi Lobo</div><div class="btrack"><div class="bfill" style="width:26%;background:#27ae60"></div></div><div class="bval">8×</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:.6rem;font-size:.85rem">+ Baarbara Washed 4× · Surā 3×</div>`},
+
+      /* 6 — Q AIR GRIND (espresso) */
+      { cls: 's6', html: `
+    <div class="label fu">1Zpresso Q Air — Espresso Grind</div>
+    <div class="headline fu d1">The Q Air era: <em>April → May</em></div>
+    <div class="chart-container fu d2"><canvas id="qAirEspChart"></canvas></div>
+    <div class="sub fu d3">Started at 0.9.0, went finer to 0.6.2 · Retired May 31<br><span style="opacity:.4;font-size:.85rem">Y-axis inverted — lower = finer · format: ring.notch.sub</span></div>`},
+
+      /* 7 — K6 GRIND (espresso) */
+      { cls: 's7', html: `
+    <div class="label fu">KINGrinder K6 — Espresso Grind</div>
+    <div class="headline fu d1">The K6 era: <em>May 31 → June</em></div>
+    <div class="chart-container fu d2"><canvas id="k6EspChart"></canvas></div>
+    <div class="sub fu d3">Kompresso: 33–40 clicks · Espresso Machine: 25–32 clicks<br><span style="opacity:.4;font-size:.85rem">Lower = finer · <span style="color:${AMBER}">■</span> Espresso Machine <span style="color:${PURPLE}">■</span> Kompresso</span></div>`},
+
+      /* 8 — FLAVORS */
+      { cls: 's8', html: `
+    <div class="label fu">Your Palate This Quarter</div>
+    <div class="headline fu d1"><span class="hi">Overall Sweet</span> dominated Q2</div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <span class="tag" style="background:#e8a83e22;border:1px solid #e8a83e55;color:#e8a83e">Overall Sweet ×14</span>
+      <span class="tag" style="background:#16a08522;border:1px solid #16a08555;color:#7ac494">Clove ×9</span>
+      <span class="tag" style="background:#c47d2a22;border:1px solid #c47d2a55;color:#c47d2a">Dark Chocolate ×7</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Black Tea ×5</span>
+      <span class="tag" style="background:#c0392b22;border:1px solid #c0392b55;color:#e07868">Cherry ×4</span>
+      <span class="tag" style="background:#8e44ad22;border:1px solid #8e44ad55;color:#b07fd6">Molasses ×3</span>
+      <span class="tag" style="background:#27ae6022;border:1px solid #27ae6055;color:#7ac494">Apple ×3</span>
+      <span class="tag" style="background:#d3540022;border:1px solid #d3540055;color:#e07840">Cocoa ×3</span>
+      <span class="tag" style="background:#c47d2a22;border:1px solid #c47d2a55;color:#c47d2a">Strawberry ×2</span>
+      <span class="tag" style="background:#16a08522;border:1px solid #16a08555;color:#7ac494">Honey ×2</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Lime ×2</span>
+      <span class="tag" style="background:#e8a83e22;border:1px solid #e8a83e55;color:#e8a83e">Raisin ×2</span>
+    </div>
+    <div class="sub fu d3" style="margin-top:.6rem;font-size:.8rem;opacity:.4">+ Bitter, Jasmine, Hazelnut, Almond, Maple Syrup, Cinnamon, Whiskey, Vanilla, Raspberry, Pear…</div>`},
+
+      /* 9 — STANDOUT MOMENTS */
+      { cls: 's9', html: `
+    <div class="label fu">Standout Moments</div>
+    <div style="margin-top:.8rem">
+      <div class="moment-item fu d1">
+        <div class="mdot mdot-good">✦</div>
+        <div class="mbody"><div class="date">Apr 7 · Espresso</div>
+        <div class="note good">"PEAK." — Jasmine, Hazelnut ⭐⭐⭐⭐⭐</div>
+        <div class="detail">Dunduga Estate · 13g→33g · 35s · the shot that set the standard</div></div>
+      </div>
+      <div class="moment-item fu d2">
+        <div class="mdot mdot-good">✦</div>
+        <div class="mbody"><div class="date">May 15 · V60</div>
+        <div class="note good">"Tastes like lemonade." ⭐⭐⭐⭐⭐</div>
+        <div class="detail">Attikan Estate · 15g→255g · 180s · 93°C · bright, clean, stunning</div></div>
+      </div>
+      <div class="moment-item fu d3">
+        <div class="mdot mdot-good">✦</div>
+        <div class="mbody"><div class="date">Jun 24 · Espresso</div>
+        <div class="note good">"Perfect flow." ⭐⭐⭐⭐⭐</div>
+        <div class="detail">Daily Driver · 15g→30.7g · 30s · K6 at 31 clicks · the sweet spot</div></div>
+      </div>
+      <div class="moment-item fu d4">
+        <div class="mdot mdot-bad">✕</div>
+        <div class="mbody"><div class="date">May 29 · The machine dies</div>
+        <div class="note bad">"FUCK THIS." ⭐</div>
+        <div class="detail">Pump failure · steam mode stuck · 21:26 IST · the darkest hour</div></div>
+      </div>
+    </div>`},
+
+      /* 10 — SAVINGS */
+      { cls: 's10', html: `
+    <div class="label fu">Money Saved vs Café</div>
+    <div class="bignum fu d1" style="font-size:clamp(3rem,14vw,7rem)">₹16,550</div>
+    <div class="headline fu d2">saved this quarter</div>
+    <div class="sub fu d3">Café equiv: <span class="hi">₹23,150</span> · Home cost: <span class="hi">~₹6,600</span><br><span style="font-size:.8rem;opacity:.5">(90 espresso × ₹200 + 11 kompresso × ₹175 + 24 V60 × ₹200 + 2 other × ₹150) − beans</span><br>That's roughly ₹5,500 saved per month. Coffee pays for itself.</div>`},
+
+      /* 11 — OUTRO */
+      { cls: 's11', html: `
+    <div class="headline glow fu" style="font-size:clamp(2rem,8vw,3.2rem)">That was Q2 ☕</div>
+    <div class="sub fu d2" style="margin-top:1rem">121 brews · 27 perfect shots · 10 beans · 2 grinders.<br>Machine died and came back. Q Air retired. K6 took over.<br>You brewed 75 out of 91 days. No days off.</div>
+    <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center" class="fu d3">
+      <div class="pill">☕ 121 brews</div>
+      <div class="pill">🔥 75/91 days</div>
+      <div class="pill">⭐ 27 five-stars</div>
+      <div class="pill">💰 ₹16,550 saved</div>
+      <div class="pill">🫘 10 beans</div>
+      <div class="pill">🔧 Q Air → K6</div>
+    </div>
+    <a href="index.html" class="pill fu d4" style="margin-top:1.5rem;display:inline-block">← All Recaps</a>`},
+    ];
+
+    function buildDeck() {
+      const deck = document.getElementById('deck');
+      SLIDES.forEach(({ cls, html }) => {
+        const div = document.createElement('div');
+        div.className = `slide ${cls}`; div.innerHTML = html;
+        particles(div); deck.appendChild(div);
+      });
+      tot = SLIDES.length;
+      const dots = document.getElementById('dots');
+      for (let i = 0; i < tot; i++) { const d = document.createElement('div'); d.className = 'dot'; d.onclick = () => goTo(i); dots.appendChild(d); }
+      goTo(0);
+      requestAnimationFrame(initCharts);
+    }
+
+    function goTo(n) {
+      const slides = document.querySelectorAll('.slide');
+      slides[cur]?.classList.remove('active'); slides[cur]?.classList.add('out');
+      setTimeout(() => slides[cur]?.classList.remove('out'), 500);
+      cur = n; slides[cur]?.classList.add('active');
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+      document.getElementById('progress').style.width = `${((cur + 1) / tot * 100).toFixed(1)}%`;
+    }
+
+    function navNext() { if (cur >= tot - 1) { window.location.href = 'index.html'; } else { goTo(cur + 1); } }
+    function navPrev() { goTo(Math.max(cur - 1, 0)); }
+    document.getElementById('navR').onclick = navNext;
+    document.getElementById('navL').onclick = navPrev;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navNext();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navPrev();
+    });
+    let tx = 0;
+    document.addEventListener('touchstart', e => { tx = e.touches[0].clientX }, { passive: true });
+    document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) { dx < 0 ? navNext() : navPrev() } });
+
+    function initCharts() {
+      const TEXT = 'rgba(245,239,224,0.35)';
+      const GRID = 'rgba(232,168,62,0.06)';
+      Chart.defaults.font.family = "'DM Sans',sans-serif";
+      Chart.defaults.font.size = 11; Chart.defaults.color = TEXT;
+
+      // === Espresso brewer chart (stacked bar, monthly) ===
+      const ebc = document.getElementById('espBrewerChart');
+      if (ebc) new Chart(ebc, {
+        type: 'bar', data: {
+          labels: ['April', 'May', 'June'],
+          datasets: [
+            { label: 'Espresso Machine', data: [35, 31, 20], backgroundColor: AMBER, borderRadius: 4, stack: 'a' },
+            { label: 'Kompresso', data: [0, 1, 10], backgroundColor: PURPLE, borderRadius: 4, stack: 'a' }
+          ]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: TEXT }, grid: { display: false } }, y: { stacked: true, ticks: { color: TEXT, stepSize: 10 }, grid: { color: GRID }, min: 0, max: 40 } } }
+      });
+
+      // === Filter brewer chart (stacked bar, monthly) ===
+      const fbc = document.getElementById('filterBrewerChart');
+      if (fbc) new Chart(fbc, {
+        type: 'bar', data: {
+          labels: ['April', 'May', 'June'],
+          datasets: [
+            { label: 'V60', data: [5, 5, 12], backgroundColor: GREEN, borderRadius: 4, stack: 'a' },
+            { label: 'KaldiPress', data: [0, 0, 1], backgroundColor: BLUE, borderRadius: 4, stack: 'a' },
+            { label: 'French Press', data: [0, 0, 1], backgroundColor: '#27ae60', borderRadius: 4, stack: 'a' }
+          ]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: TEXT }, grid: { display: false } }, y: { stacked: true, ticks: { color: TEXT, stepSize: 5 }, grid: { color: GRID }, min: 0, max: 15 } } }
+      });
+
+      // === Q Air Espresso Grind Chart ===
+      // Format: 0.ring.notch → numeric: ring + notch*0.1 (for plotting)
+      // Data points: representative one-per-day from April → May
+      const qAirLabels = ['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6','Apr 7','Apr 8','Apr 9','Apr 10','Apr 11','Apr 12','Apr 13','Apr 17','Apr 18','Apr 20','Apr 21','Apr 22','Apr 23','Apr 24','Apr 25','Apr 28','Apr 30','May 1','May 2','May 4','May 7','May 8','May 9','May 10','May 11','May 12','May 14','May 15','May 16','May 17','May 18','May 20','May 21','May 24','May 25','May 26','May 27','May 28','May 29'];
+      const qAirData =   [0.90, 0.90, 0.90, 0.90, 0.90, 0.81, 0.81, 0.81, 0.82, 0.82, 0.90, 0.90, 0.80, 0.90, 0.82, 0.90, 0.90, 0.90, 0.90, 0.80, 0.80, 0.80, 0.71, 0.82, 0.81, 0.80, 0.72, 0.80, 0.72, 0.70, 0.70, 0.70, 0.62, 0.90, 0.80, 0.81, 0.80, 0.82, 0.82, 0.81, 0.80, 0.81, 0.80, 0.62, 0.71];
+      const formatGrind = v => {
+        if (typeof v !== 'number') return v;
+        const s = v.toFixed(2); const parts = s.split('.');
+        if (parts.length !== 2) return s;
+        return `${parts[0]}.${parts[1][0]}.${parts[1][1]}`;
+      };
+      const qc = document.getElementById('qAirEspChart');
+      if (qc) new Chart(qc, {
+        type: 'line', data: {
+          labels: qAirLabels,
+          datasets: [{ data: qAirData, borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.08)', pointBackgroundColor: AMBER, pointRadius: 2.5, tension: 0.3, fill: true }]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' Grind ' + formatGrind(c.raw) } } }, scales: { x: { ticks: { color: TEXT, font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }, grid: { display: false } }, y: { ticks: { color: TEXT, callback: v => formatGrind(v) }, grid: { color: GRID }, min: 0.55, max: 0.95, reverse: true } } }
+      });
+
+      // === K6 Espresso Grind Chart ===
+      // Two datasets: Espresso Machine and Kompresso
+      const k6Labels = ['May 31','Jun 1','Jun 3','Jun 3b','Jun 4','Jun 6','Jun 7','Jun 8','Jun 10','Jun 12','Jun 19','Jun 20','Jun 20b','Jun 20c','Jun 21','Jun 22','Jun 22b','Jun 23','Jun 24','Jun 24b','Jun 25','Jun 25b','Jun 25c','Jun 26','Jun 27','Jun 28','Jun 28b','Jun 29','Jun 30','Jun 30b'];
+      const k6Esp =    [27, null,null,null,null,null,null,null,null,null,30,25,25,30,30,30,30,30,30,31,31,31,28,31,31,30,30,31,32,31];
+      const k6Kmp =    [null,35,33,60,37,35,37,35,35,40,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
+      const kc = document.getElementById('k6EspChart');
+      if (kc) new Chart(kc, {
+        type: 'line', data: {
+          labels: k6Labels,
+          datasets: [
+            { label: 'Espresso Machine', data: k6Esp, borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.06)', pointBackgroundColor: AMBER, pointRadius: 3.5, tension: 0.3, fill: false, spanGaps: false },
+            { label: 'Kompresso', data: k6Kmp, borderColor: PURPLE, backgroundColor: 'rgba(142,68,173,0.06)', pointBackgroundColor: PURPLE, pointRadius: 3.5, tension: 0.3, fill: false, spanGaps: false }
+          ]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw ? ` ${c.dataset.label}: ${c.raw} clicks` : '' } } }, scales: { x: { ticks: { color: TEXT, font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }, grid: { display: false } }, y: { ticks: { color: TEXT, callback: v => v + ' clicks' }, grid: { color: GRID }, min: 20, max: 65, reverse: true } } }
+      });
+    }
+
+    buildDeck();
+  </script>
+</body>
+
+</html>
