@@ -501,7 +501,7 @@
 
 <body>
   <div id="progress"></div>
-  <a id="backBtn" href="../index.html">← All Recaps</a>
+  <a id="backBtn" href="index.html">← All Recaps</a>
   <div id="dots"></div>
   <button id="navL">‹</button>
   <button id="navR">›</button>
@@ -680,7 +680,7 @@
       <div class="pill">💰 ₹6,275 saved</div>
       <div class="pill">🔧 Dedica revived</div>
     </div>
-    <a href="../index.html" class="pill fu d4" style="margin-top:1.5rem;display:inline-block">← All Recaps</a>`},
+    <a href="index.html" class="pill fu d4" style="margin-top:1.5rem;display:inline-block">← All Recaps</a>`},
     ];
 
     function buildDeck() {
@@ -706,15 +706,17 @@
       document.getElementById('progress').style.width = `${((cur + 1) / tot * 100).toFixed(1)}%`;
     }
 
-    document.getElementById('navR').onclick = () => goTo(Math.min(cur + 1, tot - 1));
-    document.getElementById('navL').onclick = () => goTo(Math.max(cur - 1, 0));
+    function navNext() { if (cur >= tot - 1) { window.location.href = 'index.html'; } else { goTo(cur + 1); } }
+    function navPrev() { goTo(Math.max(cur - 1, 0)); }
+    document.getElementById('navR').onclick = navNext;
+    document.getElementById('navL').onclick = navPrev;
     document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(Math.min(cur + 1, tot - 1));
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(Math.max(cur - 1, 0));
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navNext();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navPrev();
     });
     let tx = 0;
     document.addEventListener('touchstart', e => { tx = e.touches[0].clientX }, { passive: true });
-    document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) { dx < 0 ? goTo(Math.min(cur + 1, tot - 1)) : goTo(Math.max(cur - 1, 0)) } });
+    document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) { dx < 0 ? navNext() : navPrev() } });
 
     function initCharts() {
       const TEXT = 'rgba(245,239,224,0.35)'; const GRID = 'rgba(232,168,62,0.06)';
