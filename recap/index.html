@@ -324,6 +324,11 @@
         '2026-04': 'april_2026.html',
       };
 
+      // Quarterly recaps shown as special cards
+      const QUARTERLY = [
+        { label: 'Q2 2026', sub: 'Apr · May · Jun', href: 'q2_2026.html', brews: 121, saved: 16550 },
+      ];
+
       const maxBrews = Math.max(...months.map(m => computeMonthStats(m, journal, logs, openedBeanIds).count), 1);
       grid.innerHTML = '';
       months.forEach((month, i) => {
