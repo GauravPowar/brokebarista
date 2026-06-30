@@ -5,55 +5,284 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Brew Recaps — Broke Barista</title>
+  <meta name="description" content="Your month-by-month coffee journey archive — brews, savings, and flavor highlights.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <style>
-    /* Recap-specific overrides */
-    .hero {
-      padding: 1.5rem 1.5rem 0.5rem;
+    /* ── Recap index overrides ─────────────────────────── */
+
+    /* Hero banner */
+    .recap-hero {
+      position: relative;
       max-width: 820px;
       margin: 0 auto;
+      padding: 2rem 1.5rem 1.8rem;
+      overflow: hidden;
     }
 
-    .hero-label {
-      font-size: .75rem;
-      letter-spacing: .2em;
+    .recap-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -15%;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(196,125,42,.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: heroGlow 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroGlow {
+      0%   { transform: translate(0, 0) scale(1); opacity: .6; }
+      100% { transform: translate(-30px, 20px) scale(1.15); opacity: 1; }
+    }
+
+    .recap-hero .label {
+      font-size: .7rem;
+      letter-spacing: .22em;
       text-transform: uppercase;
-      opacity: .45;
-      margin-bottom: .5rem;
+      color: var(--caramel);
+      font-weight: 600;
+      margin-bottom: .6rem;
+      display: flex;
+      align-items: center;
+      gap: .45rem;
     }
 
-    .hero-sub {
-      opacity: .5;
-      font-size: .9rem;
-      line-height: 1.6;
-      margin-top: .3rem;
+    .recap-hero .label::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 2px;
+      background: var(--caramel);
+      border-radius: 1px;
     }
 
-    /* Grid */
-    .recap-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1.25rem;
+    .recap-hero h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 5vw, 2.1rem);
+      font-weight: 400;
+      color: var(--espresso);
+      line-height: 1.15;
+      margin-bottom: .45rem;
+    }
+
+    .recap-hero h2 em {
+      color: var(--caramel);
+      font-style: italic;
+    }
+
+    .recap-hero .desc {
+      font-size: .85rem;
+      color: var(--mid);
+      line-height: 1.65;
+      max-width: 480px;
+    }
+
+    /* Summary strip */
+    .summary-strip {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 12px;
+      padding: .5rem .85rem;
+      transition: transform .25s, box-shadow .25s;
+    }
+
+    .summary-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .summary-num {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--espresso);
+      line-height: 1;
+    }
+
+    .summary-label {
+      font-size: .68rem;
+      color: var(--mid);
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* Year sections */
+    .year-group {
       max-width: 820px;
-      margin: 1.25rem auto 4rem;
+      margin: 0 auto;
       padding: 0 1.5rem;
     }
 
+    .year-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin: 1.8rem 0 .9rem;
+    }
+
+    .year-header .yr {
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      font-weight: 400;
+      color: var(--mid);
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+
+    .year-header .line {
+      flex: 1;
+      height: 1px;
+      background: var(--parchment);
+    }
+
+    .year-header .count {
+      font-size: .68rem;
+      color: var(--light);
+      flex-shrink: 0;
+    }
+
+    /* Quarterly banner */
+    .quarterly-card {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      background: linear-gradient(135deg, rgba(196,125,42,.08) 0%, rgba(232,168,62,.04) 100%);
+      border: 1px solid rgba(196,125,42,.2);
+      border-radius: 16px;
+      padding: 1.1rem 1.3rem;
+      margin-bottom: 1rem;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+
+    .quarterly-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(196,125,42,.15);
+      border-color: var(--caramel);
+    }
+
+    .quarterly-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+      transform: skewX(-15deg);
+      animation: shimmer 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    body.dark-mode .quarterly-card::after {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent);
+    }
+
+    @keyframes shimmer {
+      0%, 100% { left: -75%; }
+      50%      { left: 125%; }
+    }
+
+    .q-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--caramel), var(--honey));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(196,125,42,.25);
+    }
+
+    .q-body { flex: 1; min-width: 0; }
+
+    .q-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--espresso);
+      line-height: 1.2;
+    }
+
+    .q-sub {
+      font-size: .72rem;
+      color: var(--mid);
+      margin-top: .2rem;
+    }
+
+    .q-stats {
+      display: flex;
+      gap: .5rem;
+      margin-top: .45rem;
+      flex-wrap: wrap;
+    }
+
+    .q-chip {
+      font-size: .65rem;
+      background: rgba(196,125,42,.1);
+      color: var(--caramel);
+      border: 1px solid rgba(196,125,42,.18);
+      border-radius: 999px;
+      padding: .15rem .55rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+
+    .q-arrow {
+      font-size: 1.2rem;
+      color: var(--caramel);
+      opacity: .5;
+      transition: opacity .3s, transform .3s;
+      flex-shrink: 0;
+    }
+
+    .quarterly-card:hover .q-arrow {
+      opacity: 1;
+      transform: translateX(4px);
+    }
+
+    /* Month grid */
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+
+    /* Individual month card */
     .month-card {
       background: var(--steam);
       border: 1px solid var(--parchment);
-      border-radius: 14px;
-      padding: 1.4rem;
+      border-radius: 16px;
+      padding: 1.25rem 1.3rem 1.1rem;
       cursor: pointer;
-      transition: transform .25s, box-shadow .25s, border-color .25s;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .3s;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: .7rem;
+      gap: .55rem;
       text-decoration: none;
       color: inherit;
     }
@@ -62,94 +291,149 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at 80% 20%, rgba(196, 125, 42, .08) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 80% 20%, rgba(196,125,42,.1) 0%, transparent 55%);
       opacity: 0;
-      transition: opacity .3s;
+      transition: opacity .35s;
       pointer-events: none;
     }
 
     .month-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 28px var(--shadow);
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 12px 36px var(--shadow);
       border-color: var(--caramel);
     }
 
     .month-card:hover::before { opacity: 1; }
 
-    .card-month {
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+
+    .card-month-name {
       font-family: 'Playfair Display', serif;
-      font-size: 1.45rem;
+      font-size: 1.35rem;
       font-weight: 400;
       color: var(--espresso);
-      line-height: 1;
+      line-height: 1.1;
     }
 
-    .card-year {
-      font-size: .82rem;
-      color: var(--mid);
+    .card-badge {
+      font-size: .58rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: rgba(196,125,42,.1);
+      color: var(--caramel);
+      border: 1px solid rgba(196,125,42,.22);
+      border-radius: 8px;
+      padding: .2rem .5rem;
+      flex-shrink: 0;
+      font-weight: 600;
       margin-top: .1rem;
-    }
-
-    .card-stats {
-      display: flex;
-      gap: .65rem;
-      flex-wrap: wrap;
-    }
-
-    .stat-chip {
-      font-size: .72rem;
-      color: var(--mid);
-      background: var(--cream);
-      border: 1px solid var(--parchment);
-      border-radius: 999px;
-      padding: .18rem .6rem;
-    }
-
-    .card-top-bean {
-      font-size: .78rem;
-      color: var(--mid);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .card-bar {
-      height: 3px;
-      background: var(--parchment);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: .15rem;
-    }
-
-    .card-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--caramel), var(--honey));
-      border-radius: 2px;
     }
 
     .card-arrow {
       position: absolute;
-      top: 1.2rem;
-      right: 1.2rem;
-      font-size: 1rem;
+      bottom: 1rem;
+      right: 1.1rem;
+      font-size: .9rem;
       color: var(--light);
-      opacity: .4;
+      opacity: .3;
       transition: opacity .3s, transform .3s;
     }
 
     .month-card:hover .card-arrow {
-      opacity: .8;
+      opacity: .85;
       transform: translateX(4px);
     }
 
-    .empty {
-      text-align: center;
-      padding: 4rem 2rem;
+    /* Metric row */
+    .card-metrics {
+      display: flex;
+      gap: .55rem;
+      flex-wrap: wrap;
+    }
+
+    .metric-pill {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .7rem;
       color: var(--mid);
-      font-size: .9rem;
-      line-height: 1.8;
+      background: var(--cream);
+      border: 1px solid var(--parchment);
+      border-radius: 999px;
+      padding: .2rem .6rem;
+    }
+
+    .metric-pill .icon {
+      font-size: .72rem;
+      line-height: 1;
+    }
+
+    /* Top bean */
+    .card-top-bean {
+      font-size: .74rem;
+      color: var(--mid);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+
+    .card-top-bean .bean-name {
+      color: var(--espresso);
+      font-weight: 500;
+    }
+
+    /* Activity bar */
+    .card-activity {
+      height: 4px;
+      background: var(--parchment);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: .1rem;
+    }
+
+    .card-activity-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--caramel), var(--honey));
+      border-radius: 3px;
+      transition: width .8s cubic-bezier(.34,1.56,.64,1);
+      width: 0;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--mid);
       grid-column: 1 / -1;
     }
+
+    .empty-state .icon {
+      font-size: 2.5rem;
+      margin-bottom: .8rem;
+      opacity: .5;
+    }
+
+    .empty-state .msg {
+      font-size: .9rem;
+      line-height: 1.7;
+    }
+
+    .empty-state .hint {
+      font-size: .75rem;
+      opacity: .5;
+      margin-top: .3rem;
+    }
+
+    /* Bottom spacer */
+    .recap-spacer { height: 3.5rem; }
 
     /* Loader */
     #loader {
@@ -162,72 +446,99 @@
       flex-direction: column;
       gap: .75rem;
       z-index: 999;
-      transition: opacity .4s;
+      transition: opacity .45s;
     }
 
-    .loader-dot {
-      width: 8px;
-      height: 8px;
+    .loader-ring {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--parchment);
+      border-top-color: var(--caramel);
       border-radius: 50%;
-      background: var(--caramel);
-      display: inline-block;
-      margin: 0 3px;
-      animation: blink 1.2s ease-in-out infinite;
+      animation: spin .8s linear infinite;
     }
 
-    .loader-dot:nth-child(2) { animation-delay: .2s; }
-    .loader-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    @keyframes blink {
-      0%, 80%, 100% { opacity: .2; }
-      40% { opacity: 1; }
+    .loader-text {
+      font-size: .72rem;
+      color: var(--mid);
+      letter-spacing: .12em;
+      text-transform: uppercase;
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+    /* Entrance animations */
+    @keyframes cardSlideUp {
+      from { opacity: 0; transform: translateY(24px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card-enter {
+      animation: cardSlideUp .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .card-in { animation: fadeUp .5s both; }
+    .fade-in { animation: fadeIn .5s both; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .recap-hero { padding: 1.5rem 1.25rem 1.4rem; }
+      .month-grid { grid-template-columns: 1fr; }
+      .year-group { padding: 0 1.25rem; }
+      .summary-strip { gap: .45rem; }
+      .summary-item { padding: .4rem .65rem; }
+      .summary-num { font-size: 1rem; }
+    }
   </style>
 </head>
 
 <body data-page="recap">
 
+  <!-- Loader -->
   <div id="loader">
-    <div style="font-size:1.5rem">☕</div>
-    <div><span class="loader-dot"></span><span class="loader-dot"></span><span class="loader-dot"></span></div>
+    <div class="loader-ring"></div>
+    <div class="loader-text">Brewing recaps…</div>
   </div>
 
-  <!-- RECAP PAGE HEADER -->
+  <!-- Page header (matches app-wide style) -->
   <div class="page-header">
     <div>
       <h1>Brew <em>Recaps</em></h1>
-      <div class="sub">Month-by-month coffee archive</div>
+      <div class="sub">Your coffee journey, month by month</div>
     </div>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
   </div>
 
-  <div class="hero">
-    <div class="hero-label">Archive</div>
-    <div class="hero-sub">A month-by-month look at your coffee journey. Pick a month to dive in.</div>
+  <!-- Hero section -->
+  <div class="recap-hero" id="heroSection">
+    <div class="label">Archive</div>
+    <h2>Every cup tells a <em>story</em></h2>
+    <div class="desc">Your brewing history, organised by month. Pick any month to relive the beans, brews, and savings that made it special.</div>
+    <div class="summary-strip" id="summaryStrip"></div>
   </div>
 
-  <div class="recap-grid" id="grid"></div>
+  <!-- Content container (cards rendered here by JS) -->
+  <div id="recapContent"></div>
+
+  <div class="recap-spacer"></div>
 
   <script src="/app.js"></script>
   <script>
     const RECAP_API = '/api/logs';
 
-    // Always hide the loader — called in finally so it runs even on error
+    /* ── Loader ──────────────────────────────────────── */
     function hideLoader() {
-      const loader = document.getElementById('loader');
-      if (!loader) return;
-      loader.style.opacity = '0';
-      setTimeout(() => loader.style.display = 'none', 400);
+      const el = document.getElementById('loader');
+      if (!el) return;
+      el.style.opacity = '0';
+      setTimeout(() => el.style.display = 'none', 450);
     }
 
-    // Fetch all data; each call is individually guarded so one failure doesn't kill the rest
+    /* ── Fetch all data ──────────────────────────────── */
     async function fetchAll() {
       const safe = p => p.catch(e => ({ _err: e.message }));
       const [jRes, lRes, sRes] = await Promise.all([
@@ -235,7 +546,6 @@
         safe(fetch(RECAP_API).then(r => r.json())),
         safe(fetch(`${RECAP_API}?route=shelf`).then(r => r.json())),
       ]);
-      // Normalise journal entries: parse tastes JSON string from DB
       const rawJournal = Array.isArray(jRes.journal) ? jRes.journal : [];
       return {
         journal: rawJournal.map(j => ({
@@ -250,6 +560,7 @@
       };
     }
 
+    /* ── Opened-bean IDs ──────────────────────────────── */
     function openedIds(shelf) {
       const ids = new Set();
       (shelf || []).forEach(s => {
@@ -258,11 +569,11 @@
       return ids;
     }
 
+    /* ── Per-month stats ─────────────────────────────── */
     function computeMonthStats(month, journal, logs, openedBeanIds) {
       const brews = journal.filter(j => j.date && j.date.startsWith(month));
-      // Only count brews whose linked bean has been opened
       const validBrews = brews.filter(j => {
-        if (!j.bean_id && !j.beanId) return true; // unlinked entry — include
+        if (!j.bean_id && !j.beanId) return true;
         return openedBeanIds.has(String(j.bean_id || j.beanId));
       });
 
@@ -310,80 +621,189 @@
       };
     }
 
-    function renderCards(months, journal, logs, openedBeanIds) {
-      const grid = document.getElementById('grid');
+    /* ── Render summary strip ────────────────────────── */
+    function renderSummary(allStats) {
+      const strip = document.getElementById('summaryStrip');
+      const totalBrews = allStats.reduce((s, m) => s + m.stats.count, 0);
+      const totalSaved = allStats.reduce((s, m) => s + Math.max(0, m.stats.saved), 0);
+      const monthCount = allStats.length;
+
+      if (totalBrews === 0) { strip.innerHTML = ''; return; }
+
+      strip.innerHTML = `
+        <div class="summary-item fade-in" style="animation-delay:.1s">
+          <span class="summary-num">${totalBrews}</span>
+          <span class="summary-label">Total<br>Brews</span>
+        </div>
+        <div class="summary-item fade-in" style="animation-delay:.2s">
+          <span class="summary-num">₹${totalSaved > 999 ? (totalSaved/1000).toFixed(1) + 'k' : totalSaved}</span>
+          <span class="summary-label">Total<br>Saved</span>
+        </div>
+        <div class="summary-item fade-in" style="animation-delay:.3s">
+          <span class="summary-num">${monthCount}</span>
+          <span class="summary-label">Months<br>Tracked</span>
+        </div>
+      `;
+    }
+
+    /* ── Render everything ───────────────────────────── */
+    function renderRecaps(months, journal, logs, openedBeanIds) {
+      const container = document.getElementById('recapContent');
+
       if (!months.length) {
-        grid.innerHTML = `<div class="empty">No journal entries found.<br>Start logging your brews to see recaps here.</div>`;
+        container.innerHTML = `
+          <div class="year-group">
+            <div class="empty-state">
+              <div class="icon">📓</div>
+              <div class="msg">No journal entries found yet.</div>
+              <div class="hint">Start logging your brews to see recaps here.</div>
+            </div>
+          </div>`;
+        renderSummary([]);
         return;
       }
 
-      // Months with hand-crafted editorial slide decks
+      // Editorial slide decks
       const EDITORIAL = {
         '2026-06': 'june_2026.html',
         '2026-05': 'may_2026.html',
         '2026-04': 'april_2026.html',
       };
 
-      // Quarterly recaps shown as special cards
+      // Quarterly recaps
       const QUARTERLY = [
         { label: 'Q2 2026', sub: 'Apr · May · Jun', href: 'q2_2026.html', brews: 121, saved: 16550 },
       ];
 
-      const maxBrews = Math.max(...months.map(m => computeMonthStats(m, journal, logs, openedBeanIds).count), 1);
-      grid.innerHTML = '';
-      months.forEach((month, i) => {
-        const [y, mo] = month.split('-');
-        const label = new Date(+y, +mo - 1).toLocaleString('en-IN', { month: 'long' });
-        const stats = computeMonthStats(month, journal, logs, openedBeanIds);
-        const pct = Math.round(stats.count / maxBrews * 100);
-        const editorial = EDITORIAL[month];
+      // Build stats for all months
+      const allStats = months.map(m => ({
+        month: m,
+        stats: computeMonthStats(m, journal, logs, openedBeanIds),
+      }));
+      const maxBrews = Math.max(...allStats.map(m => m.stats.count), 1);
 
-        const card = document.createElement('a');
-        card.href = editorial || `slides.html?month=${month}`;
-        card.className = 'month-card card-in';
-        card.style.animationDelay = `${i * 0.08}s`;
-        card.innerHTML = `
-      <span class="card-arrow">→</span>
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
-        <div>
-          <div class="card-month">${label}</div>
-          <div class="card-year">${y}</div>
-        </div>
-        ${editorial ? `<span style="font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(196,125,42,.12);color:var(--caramel);border:1px solid rgba(196,125,42,.25);border-radius:6px;padding:.15rem .45rem;flex-shrink:0;margin-top:.15rem;font-weight:500">✦ Editorial</span>` : ''}
-      </div>
-      <div class="card-stats">
-        <span class="stat-chip">☕ ${stats.count} brews</span>
-        ${stats.saved > 0 ? `<span class="stat-chip">💰 ₹${stats.saved.toLocaleString('en-IN')}</span>` : ''}
-        ${stats.topTaste ? `<span class="stat-chip">🍓 ${stats.topTaste}</span>` : ''}
-      </div>
-      ${stats.topBean ? `<div class="card-top-bean">Top: ${stats.topBean}</div>` : ''}
-      <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>`;
-        grid.appendChild(card);
+      // Render summary strip
+      renderSummary(allStats);
+
+      // Group by year
+      const yearMap = {};
+      months.forEach(m => {
+        const y = m.split('-')[0];
+        if (!yearMap[y]) yearMap[y] = [];
+        yearMap[y].push(m);
+      });
+
+      const years = Object.keys(yearMap).sort().reverse();
+      let cardIdx = 0;
+      let html = '';
+
+      years.forEach(year => {
+        const yMonths = yearMap[year];
+        const yBrews = yMonths.reduce((s, m) => s + computeMonthStats(m, journal, logs, openedBeanIds).count, 0);
+
+        html += `<div class="year-group">`;
+        html += `
+          <div class="year-header fade-in" style="animation-delay:${cardIdx * 0.06}s">
+            <span class="yr">${year}</span>
+            <span class="line"></span>
+            <span class="count">${yBrews} brews</span>
+          </div>`;
+
+        // Quarterly cards for this year
+        const yearQuarterlies = QUARTERLY.filter(q => q.label.includes(year));
+        yearQuarterlies.forEach(q => {
+          html += `
+            <a class="quarterly-card card-enter" href="${q.href}" style="animation-delay:${cardIdx * 0.06}s">
+              <div class="q-icon">📊</div>
+              <div class="q-body">
+                <div class="q-title">${q.label} Recap</div>
+                <div class="q-sub">${q.sub}</div>
+                <div class="q-stats">
+                  <span class="q-chip">☕ ${q.brews} brews</span>
+                  <span class="q-chip">💰 ₹${q.saved.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+              <span class="q-arrow">→</span>
+            </a>`;
+          cardIdx++;
+        });
+
+        // Month cards
+        html += `<div class="month-grid">`;
+        yMonths.forEach(month => {
+          const [, mo] = month.split('-');
+          const label = new Date(+year, +mo - 1).toLocaleString('en-IN', { month: 'long' });
+          const stats = computeMonthStats(month, journal, logs, openedBeanIds);
+          const pct = Math.round(stats.count / maxBrews * 100);
+          const editorial = EDITORIAL[month];
+          const href = editorial || `slides.html?month=${month}`;
+
+          html += `
+            <a class="month-card card-enter" href="${href}" style="animation-delay:${cardIdx * 0.06}s" data-bar-pct="${pct}">
+              <div class="card-header">
+                <span class="card-month-name">${label}</span>
+                ${editorial ? `<span class="card-badge">✦ Editorial</span>` : ''}
+              </div>
+              <div class="card-metrics">
+                <span class="metric-pill"><span class="icon">☕</span> ${stats.count} brews</span>
+                ${stats.saved > 0 ? `<span class="metric-pill"><span class="icon">💰</span> ₹${stats.saved.toLocaleString('en-IN')}</span>` : ''}
+                ${stats.topTaste ? `<span class="metric-pill"><span class="icon">🍓</span> ${stats.topTaste}</span>` : ''}
+              </div>
+              ${stats.topBean ? `<div class="card-top-bean"><span>Top:</span> <span class="bean-name">${stats.topBean}</span></div>` : ''}
+              <div class="card-activity"><div class="card-activity-fill"></div></div>
+              <span class="card-arrow">→</span>
+            </a>`;
+          cardIdx++;
+        });
+
+        html += `</div>`; // .month-grid
+        html += `</div>`; // .year-group
+      });
+
+      container.innerHTML = html;
+
+      // Animate activity bars after paint
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.querySelectorAll('.month-card').forEach(card => {
+            const pct = card.dataset.barPct || 0;
+            const fill = card.querySelector('.card-activity-fill');
+            if (fill) fill.style.width = pct + '%';
+          });
+        }, 300);
       });
     }
 
+    /* ── Init ─────────────────────────────────────────── */
     (async () => {
       try {
         const { journal, logs, shelf } = await fetchAll();
         const openedBeanIds = openedIds(shelf);
 
-        // Collect ALL months with journal entries (no date cutoff)
         const months = [...new Set(
           journal
             .filter(j => j.date && j.date.length >= 7)
             .map(j => j.date.slice(0, 7))
         )].sort().reverse();
 
-        renderCards(months, journal, logs, openedBeanIds);
+        renderRecaps(months, journal, logs, openedBeanIds);
       } catch (e) {
         console.error('Recap index error:', e);
-        const grid = document.getElementById('grid');
-        if (grid) grid.innerHTML = `<div class="empty" style="grid-column:1/-1">Couldn't load recap data.<br><span style="font-size:.8rem;opacity:.5">${e.message}</span></div>`;
+        const c = document.getElementById('recapContent');
+        if (c) c.innerHTML = `
+          <div class="year-group">
+            <div class="empty-state">
+              <div class="icon">⚠️</div>
+              <div class="msg">Couldn't load recap data.</div>
+              <div class="hint">${e.message}</div>
+            </div>
+          </div>`;
       } finally {
         hideLoader();
       }
     })();
   </script>
+
   <nav class="bottom-nav">
     <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
         class="nav-label">Log</span></a>
