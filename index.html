@@ -768,6 +768,7 @@
   <div class="stats-tabs-wrap">
     <div class="stats-tabs">
       <button class="stats-tab active" onclick="switchStatsTab('general')">📊 General</button>
+      <button class="stats-tab" onclick="switchStatsTab('savings')">💰 Savings</button>
       <button class="stats-tab" onclick="switchStatsTab('brews')">☕ Brews</button>
       <button class="stats-tab" onclick="switchStatsTab('beans')">🌿 Beans</button>
       <button class="stats-tab" onclick="switchStatsTab('preparations')">⏳ Prep</button>
@@ -822,9 +823,11 @@
         <div class="bar-list" id="typeBarList"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Money Saved section -->
-    <div class="savings-section-wrap anim-in anim-d5">
+  <!-- ═══════════════ SAVINGS TAB ═══════════════ -->
+  <div id="tab-savings" class="stats-pane page-content">
+    <div class="savings-section-wrap anim-in">
       <div
         style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem">
         <div class="section-label" style="margin-bottom:0">💰 Money Saved vs Café</div>
