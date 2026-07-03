@@ -586,9 +586,9 @@
       </div>
     </div>
 
-    <!-- Freshest Bag -->
+    <!-- Use Next (oldest/stalest bag) -->
     <div class="hero-divider anim-in anim-d2">
-      <span class="label">🌿 Freshest Bag</span>
+      <span class="label">⏰ Use Next</span>
       <span class="line"></span>
     </div>
     <div id="sh-freshest" class="anim-in anim-d3"></div>
@@ -790,13 +790,14 @@
         document.getElementById('sh-total-g').textContent = totalAvailableG > 0 ? totalAvailableG.toFixed(0) + 'g' : '—';
         document.getElementById('sh-finished').textContent = finished.length;
 
-        // ── Freshest Bag ──
+        // ── Use Next (oldest/stalest bag — consume first) ──
         const freshestEl = document.getElementById('sh-freshest');
-        // Determine freshest among opened bags
-        let freshest = null;
-        let freshestPct = -1;
-        let freshestLabel = '';
-        let freshestBarCls = 'green';
+        // Find the OLDEST opened bag (lowest freshness = consume first)
+        let useNext = null;
+        let useNextPct = 101; // start high, find lowest
+        let useNextLabel = '';
+        let useNextBarCls = 'green';
+        let useNextRoastAge = '';
 
         opened.forEach(l => {
           const meta = bagMeta[l.id] || {};
@@ -805,48 +806,56 @@
           const daysSinceOpened = Math.floor((Date.now() - openedDate) / 86400000);
           const maxFresh = 30;
           const pct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / maxFresh * 100)));
-          if (pct > freshestPct) {
-            freshestPct = pct;
-            freshest = l;
-            freshestLabel = `${daysSinceOpened}d since opened`;
-            freshestBarCls = pct > 60 ? 'green' : pct > 30 ? 'amber' : 'red';
+          // Pick the bag with the LOWEST freshness (oldest)
+          if (pct < useNextPct) {
+            useNextPct = pct;
+            useNext = l;
+            useNextLabel = `${daysSinceOpened}d since opened`;
+            useNextBarCls = pct > 60 ? 'green' : pct > 30 ? 'amber' : 'red';
+            // Roast age
+            if (meta.roastDate) {
+              const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
+              const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
+              useNextRoastAge = `${daysFromRoast}d from roast`;
+            } else {
+              useNextRoastAge = '';
+            }
           }
         });
 
-        // If no opened bags, try sealed with roast dates
-        if (!freshest && sealed.length > 0) {
-          sealed.forEach(l => {
-            const meta = bagMeta[l.id] || {};
-            if (meta.roastDate) {
-              const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
-              const daysSinceRoast = Math.floor((Date.now() - roastDate) / 86400000);
-              const restDays = meta.restDays != null ? meta.restDays : 7;
-              if (daysSinceRoast < restDays) {
-                const pct = Math.round(daysSinceRoast / restDays * 100);
-                if (pct > freshestPct || !freshest) {
-                  freshestPct = pct;
-                  freshest = l;
-                  freshestLabel = `Resting · ${daysSinceRoast}d of ${restDays}d`;
-                  freshestBarCls = 'blue';
-                }
-              }
-            }
-          });
+        // If no opened bags, fall back to the oldest sealed bag
+        if (!useNext && sealed.length > 0) {
+          // Pick the oldest sealed bag (by purchase date)
+          const sortedSealed = [...sealed].sort((a, b) => new Date(a.date) - new Date(b.date));
+          const oldest = sortedSealed[0];
+          const meta = bagMeta[oldest.id] || {};
+          useNext = oldest;
+          useNextPct = 50;
+          useNextLabel = 'Sealed · oldest on shelf';
+          useNextBarCls = 'amber';
+          if (meta.roastDate) {
+            const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
+            const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
+            useNextRoastAge = `${daysFromRoast}d from roast`;
+          }
         }
 
-        if (freshest) {
-          const meta = bagMeta[freshest.id] || {};
-          const statusLabel = freshestBarCls === 'green' ? 'Peak Fresh' : freshestBarCls === 'amber' ? 'Use Soon' : freshestBarCls === 'red' ? 'Stale' : 'Resting';
-          const statusCls = freshestBarCls === 'green' ? 'fresh' : freshestBarCls === 'amber' ? 'use-soon' : freshestBarCls === 'red' ? 'stale' : 'resting';
+        if (useNext) {
+          const meta = bagMeta[useNext.id] || {};
+          const statusLabel = useNextBarCls === 'red' ? 'Use Now!' : useNextBarCls === 'amber' ? 'Use Soon' : 'Fresh';
+          const statusCls = useNextBarCls === 'red' ? 'stale' : useNextBarCls === 'amber' ? 'use-soon' : 'fresh';
           const pills = [];
-          if (freshest.origin) pills.push(`📍 ${esc(freshest.origin)}`);
-          if (freshest.size) pills.push(esc(freshest.size));
-          if (freshest.roaster) pills.push(esc(freshest.roaster));
+          if (useNext.origin) pills.push(`📍 ${esc(useNext.origin)}`);
+          if (useNext.size) pills.push(esc(useNext.size));
+          if (useNext.roaster) pills.push(esc(useNext.roaster));
+
+          // Roast age pill
+          if (useNextRoastAge) pills.push(`🌿 ${useNextRoastAge}`);
 
           // Usage bar
           const entries = meta.gramEntries || [];
           const usedG = entries.reduce((s, e) => s + Number(e.grams || 0), 0);
-          const bagSizeG = parseBagSizeLocal(freshest.size);
+          const bagSizeG = parseBagSizeLocal(useNext.size);
           let usageHtml = '';
           if (bagSizeG > 0 && usedG > 0) {
             const usagePct = Math.min(100, Math.round(usedG / bagSizeG * 100));
@@ -862,24 +871,23 @@
             <div class="freshest-bag-card">
               <div class="fb-left">
                 <span class="fb-status-badge ${statusCls}">${statusLabel}</span>
-                <span class="fb-freshness-pct">${freshestPct}%</span>
+                <span class="fb-freshness-pct">${useNextPct}%</span>
               </div>
               <div class="fb-body">
-                <div class="fb-name">${esc(freshest.name)}</div>
+                <div class="fb-name">${esc(useNext.name)}</div>
                 <div class="fb-meta">
-                  <span>${esc(freshest.vendor)}</span>
-                  <span>${freshestLabel}</span>
+                  <span>${esc(useNext.vendor)}</span>
+                  <span>${useNextLabel}</span>
                 </div>
                 ${pills.length ? `<div class="fb-pills">${pills.map(p => `<span class="fb-pill">${p}</span>`).join('')}</div>` : ''}
                 ${usageHtml}
               </div>
             </div>`;
         } else if (unfinished.length > 0) {
-          // fallback: show first unfinished bag
           const first = unfinished[0];
           freshestEl.innerHTML = `
             <div class="freshest-bag-card">
-              <div class="fb-left"><span class="fb-status-badge fresh">On Shelf</span></div>
+              <div class="fb-left"><span class="fb-status-badge use-soon">Use Next</span></div>
               <div class="fb-body">
                 <div class="fb-name">${esc(first.name)}</div>
                 <div class="fb-meta"><span>${esc(first.vendor)}</span></div>
