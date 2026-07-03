@@ -6,10 +6,510 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Broke Barista | Shelf</title>
   <meta name="description" content="Track your bean shelf — freshness, usage, and lifecycle.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ── Shelf Header ────────────────────────────── */
+    .shelf-header {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 1.8rem 1.25rem .5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .shelf-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: var(--espresso);
+      letter-spacing: -.02em;
+      line-height: 1.1;
+    }
+
+    .shelf-header h1 em {
+      color: var(--caramel);
+      font-style: italic;
+    }
+
+    .shelf-header .sub {
+      font-size: .72rem;
+      color: var(--mid);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .25rem;
+      font-weight: 300;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+
+    .owner-btn {
+      background: var(--steam);
+      border: 1.5px solid var(--parchment);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--caramel);
+      font-size: 1.1rem;
+      transition: all .3s ease;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .owner-btn:hover {
+      border-color: var(--caramel);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .bag-count-badge {
+      text-align: right;
+      margin-left: .25rem;
+    }
+
+    .bag-count-label {
+      font-size: .6rem;
+      color: var(--mid);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .bag-count-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      color: var(--roast);
+      line-height: 1.1;
+    }
+
+    /* ── Shelf Hero ──────────────────────────────── */
+    .shelf-hero {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* ── Supply Status Banner ────────────────────── */
+    .supply-banner {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      margin-bottom: .85rem;
+      display: flex;
+      gap: .8rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+    }
+
+    .supply-banner:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow);
+    }
+
+    .supply-banner::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      right: -20%;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(94, 138, 58, .06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .supply-banner.ok { border-color: rgba(94, 138, 58, .3); }
+    .supply-banner.warning { border-color: rgba(196, 125, 42, .4); }
+    .supply-banner.critical { border-color: rgba(180, 50, 40, .4); }
+
+    .sb-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sb-body {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sb-title {
+      font-family: 'Playfair Display', serif;
+      font-size: .95rem;
+      color: var(--espresso);
+      margin-bottom: .15rem;
+    }
+
+    .sb-sub {
+      font-size: .7rem;
+      color: var(--mid);
+      line-height: 1.4;
+    }
+
+    .sb-sub strong {
+      color: var(--espresso);
+    }
+
+    .sb-right {
+      text-align: right;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sb-cups {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .sb-cups-label {
+      font-size: .52rem;
+      color: var(--mid);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-top: .1rem;
+    }
+
+    .supply-banner.warning .sb-cups { color: var(--caramel); }
+    .supply-banner.critical .sb-cups { color: var(--roast); }
+
+    /* ── Activity Strip ──────────────────────────── */
+    .shelf-activity-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .65rem;
+      margin-bottom: .85rem;
+    }
+
+    .sa-card {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 14px;
+      padding: .75rem .6rem;
+      text-align: center;
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+    }
+
+    .sa-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+
+    .sa-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--roast);
+      line-height: 1.1;
+    }
+
+    .sa-label {
+      font-size: .55rem;
+      color: var(--mid);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .2rem;
+      font-weight: 500;
+    }
+
+    .sa-card.accent-green { border-color: rgba(94, 138, 58, .3); background: rgba(94, 138, 58, .06); }
+    .sa-card.accent-green .sa-num { color: var(--green); }
+    .sa-card.accent-blue { border-color: rgba(74, 111, 165, .3); background: rgba(74, 111, 165, .06); }
+    .sa-card.accent-blue .sa-num { color: var(--blue); }
+    .sa-card.accent-caramel { border-color: rgba(196, 125, 42, .3); background: rgba(196, 125, 42, .06); }
+    .sa-card.accent-caramel .sa-num { color: var(--caramel); }
+    .sa-card.accent-purple { border-color: rgba(122, 58, 138, .3); background: rgba(122, 58, 138, .06); }
+    .sa-card.accent-purple .sa-num { color: var(--purple); }
+
+    /* ── Freshest Bag Highlight ──────────────────── */
+    .freshest-bag-card {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      margin-bottom: .85rem;
+      display: flex;
+      gap: .85rem;
+      align-items: flex-start;
+      transition: transform .25s, box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .freshest-bag-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow);
+    }
+
+    .freshest-bag-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -25%;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(94, 138, 58, .05) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .fb-left {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+    }
+
+    .fb-status-badge {
+      font-size: .52rem;
+      padding: .16rem .5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .fb-status-badge.fresh { background: var(--green-bg); color: var(--green); }
+    .fb-status-badge.resting { background: rgba(74, 111, 165, .12); color: var(--blue); }
+    .fb-status-badge.use-soon { background: rgba(196, 125, 42, .12); color: var(--caramel); }
+    .fb-status-badge.stale { background: rgba(180, 50, 40, .1); color: var(--roast); }
+
+    .fb-freshness-pct {
+      font-family: 'DM Mono', monospace;
+      font-size: .65rem;
+      color: var(--light);
+    }
+
+    .fb-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .fb-name {
+      font-family: 'Playfair Display', serif;
+      font-size: .92rem;
+      color: var(--espresso);
+      line-height: 1.2;
+      margin-bottom: .1rem;
+    }
+
+    .fb-meta {
+      font-size: .64rem;
+      color: var(--mid);
+      display: flex;
+      flex-wrap: wrap;
+      gap: .25rem .6rem;
+    }
+
+    .fb-pills {
+      display: flex;
+      gap: .25rem;
+      flex-wrap: wrap;
+      margin-top: .3rem;
+    }
+
+    .fb-pill {
+      font-size: .56rem;
+      background: var(--parchment);
+      padding: .14rem .4rem;
+      border-radius: 6px;
+      color: var(--roast);
+    }
+
+    .fb-bar-wrap {
+      margin-top: .35rem;
+    }
+
+    .fb-bar-label {
+      font-size: .58rem;
+      color: var(--light);
+      margin-bottom: .15rem;
+    }
+
+    .fb-bar-track {
+      height: 6px;
+      background: var(--parchment);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .fb-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .5s ease;
+    }
+
+    .fb-bar-fill.green { background: linear-gradient(90deg, var(--green), #8CC85A); }
+    .fb-bar-fill.amber { background: linear-gradient(90deg, var(--caramel), var(--honey)); }
+    .fb-bar-fill.red { background: linear-gradient(90deg, #B43228, #E85C4A); }
+    .fb-bar-fill.blue { background: linear-gradient(90deg, var(--blue), #7AABDF); }
+
+    /* ── Top Origins Mini ────────────────────────── */
+    .origins-card {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 16px;
+      padding: .85rem 1rem;
+      margin-bottom: .85rem;
+      transition: transform .25s, box-shadow .25s;
+    }
+
+    .origins-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow);
+    }
+
+    .oc-title {
+      font-size: .58rem;
+      color: var(--mid);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: .5rem;
+    }
+
+    .oc-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .35rem;
+    }
+
+    .oc-label {
+      font-size: .68rem;
+      color: var(--espresso);
+      min-width: 70px;
+      text-align: right;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .oc-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--parchment);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .oc-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--green), #8CC85A);
+      transition: width .5s ease;
+    }
+
+    .oc-count {
+      font-size: .58rem;
+      color: var(--light);
+      min-width: 24px;
+      font-family: 'DM Mono', monospace;
+      text-align: right;
+    }
+
+    /* ── Section Dividers ─────────────────────────── */
+    .hero-divider {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      margin: .4rem 0 .6rem;
+    }
+
+    .hero-divider .label {
+      font-size: .58rem;
+      color: var(--mid);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .hero-divider .line {
+      flex: 1;
+      height: 1px;
+      background: var(--parchment);
+    }
+
+    /* ── Card Hover Polish ────────────────────────── */
+    .stat-card {
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .shelf-card {
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+    }
+
+    .shelf-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px var(--shadow);
+    }
+
+    .shelf-right .action-btn,
+    .shelf-right .btn-finish {
+      opacity: .6;
+      transition: all .25s;
+    }
+
+    .shelf-card:hover .action-btn,
+    .shelf-card:hover .btn-finish {
+      opacity: 1;
+    }
+
+    /* ── Filter Bar Polish ────────────────────────── */
+    .filter-btn {
+      transition: all .25s;
+    }
+
+    .filter-btn:hover:not(.active) {
+      background: var(--parchment);
+      transform: translateY(-1px);
+    }
+
+    /* ── Entrance Animations ──────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .anim-in { animation: fadeUp .4s both; }
+    .anim-d1 { animation-delay: .05s; }
+    .anim-d2 { animation-delay: .1s; }
+    .anim-d3 { animation-delay: .15s; }
+    .anim-d4 { animation-delay: .2s; }
+    .anim-d5 { animation-delay: .25s; }
+    .anim-d6 { animation-delay: .3s; }
+
+    @media (max-width: 480px) {
+      .shelf-header { padding: 1.5rem 1rem .5rem; }
+      .shelf-hero { padding: 0 1rem; }
+      .shelf-activity-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 
 <body data-page="shelf">
@@ -45,23 +545,61 @@
     </div>
   </div>
 
-  <!-- SHELF PAGE -->
-  <div class="page-header">
+  <!-- HEADER -->
+  <div class="page-header shelf-header">
     <div>
       <h1>The <em>Shelf</em></h1>
-      <div class="sub">Beans in rotation</div>
+      <div class="sub">Beans in rotation · freshness · usage</div>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center">
+    <div class="header-actions">
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
-      <div style="text-align:right;margin-left:.25rem">
-        <div style="font-size:.7rem;color:var(--mid);letter-spacing:.09em;text-transform:uppercase">Coffee Bags</div>
-        <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--roast);line-height:1.1" id="shelfCount">0</div>
+      <div class="bag-count-badge">
+        <div class="bag-count-label">Coffee Bags</div>
+        <div class="bag-count-num" id="shelfCount">0</div>
       </div>
     </div>
   </div>
+
+  <!-- ═══════════════ SHELF HERO ═══════════════ -->
+  <div class="shelf-hero" id="shelf-hero">
+    <!-- Supply Banner -->
+    <div id="sh-supply" class="anim-in"></div>
+
+    <!-- Activity Strip -->
+    <div class="shelf-activity-strip anim-in anim-d1" id="sh-activity-strip">
+      <div class="sa-card accent-green">
+        <div class="sa-num" id="sh-opened">—</div>
+        <div class="sa-label">Opened</div>
+      </div>
+      <div class="sa-card accent-blue">
+        <div class="sa-num" id="sh-sealed">—</div>
+        <div class="sa-label">Sealed</div>
+      </div>
+      <div class="sa-card accent-caramel">
+        <div class="sa-num" id="sh-total-g">—</div>
+        <div class="sa-label">Grams Left</div>
+      </div>
+      <div class="sa-card accent-purple">
+        <div class="sa-num" id="sh-finished">—</div>
+        <div class="sa-label">Finished</div>
+      </div>
+    </div>
+
+    <!-- Freshest Bag -->
+    <div class="hero-divider anim-in anim-d2">
+      <span class="label">🌿 Freshest Bag</span>
+      <span class="line"></span>
+    </div>
+    <div id="sh-freshest" class="anim-in anim-d3"></div>
+
+    <!-- Origins -->
+    <div id="sh-origins" class="anim-in anim-d4"></div>
+  </div>
+
+  <!-- ═══════════════ SHELF CONTENT ═══════════════ -->
   <div class="page-content">
-    <div class="stat-strip" style="grid-template-columns:1fr 1fr">
+    <div class="stat-strip anim-in anim-d1" style="grid-template-columns:1fr 1fr">
       <div class="stat-card">
         <div class="stat-num" id="shelfActive">0</div>
         <div class="stat-label">Active Bags (Opened)</div>
@@ -71,13 +609,13 @@
         <div class="stat-label">Sealed Bags</div>
       </div>
     </div>
-    <!-- Bean Predictor Widget — always visible, filled by JS after data loads -->
-    <div id="shelf-bean-alert" class="low-bean-alert" style="display:none"></div>
-    <div class="filter-bar">
+    <!-- Bean Predictor Widget -->
+    <div id="shelf-bean-alert" class="low-bean-alert anim-in anim-d2" style="display:none"></div>
+    <div class="filter-bar anim-in anim-d3">
       <button class="filter-btn active" onclick="setShelfFilter('available',this)">Available</button>
       <button class="filter-btn" onclick="setShelfFilter('finished',this)">Finished</button>
     </div>
-    <div id="shelf-list"></div>
+    <div id="shelf-list" class="anim-in anim-d4"></div>
   </div>
 
   <!-- BAG LIFECYCLE MODAL -->
@@ -150,7 +688,236 @@
     <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
         class="nav-label">Add</span></a>
   </nav>
+
   <script src="/app.js?v=3"></script>
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       SHELF HERO — hooks into renderShelf lifecycle
+    ═══════════════════════════════════════════════════════ */
+    (function () {
+      const _origRender = window.renderShelf;
+      window.renderShelf = function () {
+        _origRender.apply(this, arguments);
+        renderShelfHero();
+      };
+
+      function esc(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function parseBagSizeLocal(sizeStr) {
+        if (!sizeStr) return 0;
+        const m = sizeStr.match(/([\d.]+)\s*(kg|g)/i);
+        if (!m) return 0;
+        return m[2].toLowerCase() === 'kg' ? parseFloat(m[1]) * 1000 : parseFloat(m[1]);
+      }
+
+      function renderShelfHero() {
+        const heroEl = document.getElementById('shelf-hero');
+        if (!logs || !logs.length) { heroEl.style.display = 'none'; return; }
+        heroEl.style.display = '';
+
+        const allBeans = logs.filter(l => l.category === 'beans');
+        const finished = allBeans.filter(b => finishedBags.includes(b.id));
+        const unfinished = allBeans.filter(b => !finishedBags.includes(b.id));
+        const opened = unfinished.filter(b => bagMeta[b.id] && bagMeta[b.id].openedDate);
+        const sealed = unfinished.filter(b => !bagMeta[b.id] || !bagMeta[b.id].openedDate);
+
+        // ── Calculate total available grams & cups ──
+        const STD = typeof STD_DOSE_G !== 'undefined' ? STD_DOSE_G : 15;
+        let totalAvailableG = 0;
+        let totalCupsLeft = 0;
+
+        unfinished.forEach(l => {
+          const meta = bagMeta[l.id] || {};
+          const bagSizeG = parseBagSizeLocal(l.size);
+          const entries = meta.gramEntries || [];
+          const usedG = entries.reduce((s, e) => s + Number(e.grams || 0), 0);
+          if (!bagSizeG) return;
+
+          const availG = Math.max(0, bagSizeG - usedG);
+          let avgDose = STD;
+          const beanJournals = journal.filter(j => {
+            const jBeanId = j.beanId !== undefined ? j.beanId : j.bean_id;
+            return Number(jBeanId) === l.id && Number(j.dose) > 0;
+          });
+          if (beanJournals.length > 0) {
+            avgDose = beanJournals.reduce((s, j) => s + Number(j.dose), 0) / beanJournals.length;
+          }
+          totalAvailableG += availG;
+          totalCupsLeft += Math.floor(availG / avgDose);
+        });
+
+        // ── Supply Banner ──
+        const supplyEl = document.getElementById('sh-supply');
+        const isLow = totalAvailableG < 300;
+        const isCritical = totalAvailableG < 100;
+        const hasNoBeans = unfinished.length === 0;
+
+        let level, icon, title, sub;
+        if (hasNoBeans) {
+          level = 'ok'; icon = '🫙'; title = 'No active bags';
+          sub = 'Add beans to your shelf to start tracking';
+        } else if (isCritical) {
+          level = 'critical'; icon = '🚨'; title = 'Critically Low!';
+          sub = `Only <strong>${totalAvailableG.toFixed(0)}g</strong> remaining`;
+        } else if (isLow) {
+          level = 'warning'; icon = '⚠️'; title = 'Running Low';
+          sub = `<strong>${totalAvailableG.toFixed(0)}g</strong> available`;
+        } else {
+          level = 'ok'; icon = '✅'; title = 'Bean Supply OK';
+          sub = `<strong>${totalAvailableG.toFixed(0)}g</strong> available`;
+        }
+
+        supplyEl.innerHTML = `
+          <div class="supply-banner ${level}">
+            <div class="sb-icon">${icon}</div>
+            <div class="sb-body">
+              <div class="sb-title">${title}</div>
+              <div class="sb-sub">${sub}</div>
+            </div>
+            <div class="sb-right">
+              <div class="sb-cups">~${totalCupsLeft}</div>
+              <div class="sb-cups-label">Cups Left</div>
+            </div>
+          </div>`;
+
+        // ── Activity Strip ──
+        document.getElementById('sh-opened').textContent = opened.length;
+        document.getElementById('sh-sealed').textContent = sealed.length;
+        document.getElementById('sh-total-g').textContent = totalAvailableG > 0 ? totalAvailableG.toFixed(0) + 'g' : '—';
+        document.getElementById('sh-finished').textContent = finished.length;
+
+        // ── Freshest Bag ──
+        const freshestEl = document.getElementById('sh-freshest');
+        // Determine freshest among opened bags
+        let freshest = null;
+        let freshestPct = -1;
+        let freshestLabel = '';
+        let freshestBarCls = 'green';
+
+        opened.forEach(l => {
+          const meta = bagMeta[l.id] || {};
+          const openedDate = meta.openedDate ? new Date(meta.openedDate + 'T00:00:00').getTime() : null;
+          if (!openedDate) return;
+          const daysSinceOpened = Math.floor((Date.now() - openedDate) / 86400000);
+          const maxFresh = 30;
+          const pct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / maxFresh * 100)));
+          if (pct > freshestPct) {
+            freshestPct = pct;
+            freshest = l;
+            freshestLabel = `${daysSinceOpened}d since opened`;
+            freshestBarCls = pct > 60 ? 'green' : pct > 30 ? 'amber' : 'red';
+          }
+        });
+
+        // If no opened bags, try sealed with roast dates
+        if (!freshest && sealed.length > 0) {
+          sealed.forEach(l => {
+            const meta = bagMeta[l.id] || {};
+            if (meta.roastDate) {
+              const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
+              const daysSinceRoast = Math.floor((Date.now() - roastDate) / 86400000);
+              const restDays = meta.restDays != null ? meta.restDays : 7;
+              if (daysSinceRoast < restDays) {
+                const pct = Math.round(daysSinceRoast / restDays * 100);
+                if (pct > freshestPct || !freshest) {
+                  freshestPct = pct;
+                  freshest = l;
+                  freshestLabel = `Resting · ${daysSinceRoast}d of ${restDays}d`;
+                  freshestBarCls = 'blue';
+                }
+              }
+            }
+          });
+        }
+
+        if (freshest) {
+          const meta = bagMeta[freshest.id] || {};
+          const statusLabel = freshestBarCls === 'green' ? 'Peak Fresh' : freshestBarCls === 'amber' ? 'Use Soon' : freshestBarCls === 'red' ? 'Stale' : 'Resting';
+          const statusCls = freshestBarCls === 'green' ? 'fresh' : freshestBarCls === 'amber' ? 'use-soon' : freshestBarCls === 'red' ? 'stale' : 'resting';
+          const pills = [];
+          if (freshest.origin) pills.push(`📍 ${esc(freshest.origin)}`);
+          if (freshest.size) pills.push(esc(freshest.size));
+          if (freshest.roaster) pills.push(esc(freshest.roaster));
+
+          // Usage bar
+          const entries = meta.gramEntries || [];
+          const usedG = entries.reduce((s, e) => s + Number(e.grams || 0), 0);
+          const bagSizeG = parseBagSizeLocal(freshest.size);
+          let usageHtml = '';
+          if (bagSizeG > 0 && usedG > 0) {
+            const usagePct = Math.min(100, Math.round(usedG / bagSizeG * 100));
+            const leftG = Math.max(0, bagSizeG - usedG);
+            usageHtml = `
+              <div class="fb-bar-wrap">
+                <div class="fb-bar-label">${usedG.toFixed(1)}g used · ${leftG.toFixed(0)}g left</div>
+                <div class="fb-bar-track"><div class="fb-bar-fill ${usagePct >= 80 ? 'red' : usagePct >= 50 ? 'amber' : 'green'}" style="width:${usagePct}%"></div></div>
+              </div>`;
+          }
+
+          freshestEl.innerHTML = `
+            <div class="freshest-bag-card">
+              <div class="fb-left">
+                <span class="fb-status-badge ${statusCls}">${statusLabel}</span>
+                <span class="fb-freshness-pct">${freshestPct}%</span>
+              </div>
+              <div class="fb-body">
+                <div class="fb-name">${esc(freshest.name)}</div>
+                <div class="fb-meta">
+                  <span>${esc(freshest.vendor)}</span>
+                  <span>${freshestLabel}</span>
+                </div>
+                ${pills.length ? `<div class="fb-pills">${pills.map(p => `<span class="fb-pill">${p}</span>`).join('')}</div>` : ''}
+                ${usageHtml}
+              </div>
+            </div>`;
+        } else if (unfinished.length > 0) {
+          // fallback: show first unfinished bag
+          const first = unfinished[0];
+          freshestEl.innerHTML = `
+            <div class="freshest-bag-card">
+              <div class="fb-left"><span class="fb-status-badge fresh">On Shelf</span></div>
+              <div class="fb-body">
+                <div class="fb-name">${esc(first.name)}</div>
+                <div class="fb-meta"><span>${esc(first.vendor)}</span></div>
+              </div>
+            </div>`;
+        } else {
+          freshestEl.innerHTML = '';
+        }
+
+        // ── Origins Chart ──
+        const originsEl = document.getElementById('sh-origins');
+        const originCount = {};
+        allBeans.forEach(l => {
+          const o = l.origin || 'Unknown';
+          originCount[o] = (originCount[o] || 0) + 1;
+        });
+        const sortedOrigins = Object.entries(originCount).sort((a, b) => b[1] - a[1]);
+        if (sortedOrigins.length > 1) {
+          const maxO = sortedOrigins[0][1];
+          const rows = sortedOrigins.slice(0, 5).map(([origin, count]) => {
+            const pct = Math.round(count / maxO * 100);
+            return `<div class="oc-row">
+              <span class="oc-label">${esc(origin)}</span>
+              <div class="oc-bar-wrap"><div class="oc-bar" style="width:${pct}%"></div></div>
+              <span class="oc-count">${count}</span>
+            </div>`;
+          }).join('');
+          originsEl.innerHTML = `
+            <div class="origins-card">
+              <div class="oc-title">📍 Bean Origins</div>
+              ${rows}
+            </div>`;
+        } else {
+          originsEl.innerHTML = '';
+        }
+      }
+    })();
+  </script>
 </body>
 
 </html>
