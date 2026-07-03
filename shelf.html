@@ -923,6 +923,44 @@
         } else {
           originsEl.innerHTML = '';
         }
+
+        // ── Inject Roast Age into active shelf cards ──
+        const activeCards = document.querySelectorAll('.shelf-card:not(.finished)');
+        activeCards.forEach(card => {
+          const trackBtn = card.querySelector('button[onclick^="openBagModal"]');
+          if (trackBtn) {
+            const match = trackBtn.getAttribute('onclick').match(/openBagModal\((\d+)\)/);
+            if (match && match[1]) {
+              const bagId = match[1];
+              const meta = bagMeta[bagId] || {};
+              if (meta.roastDate) {
+                const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
+                const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
+                
+                // Find existing roast pill and append the age
+                const pills = card.querySelectorAll('.shelf-pills .epill');
+                let roastPill = Array.from(pills).find(p => p.textContent.includes('🌿 Roasted'));
+                
+                if (roastPill) {
+                  roastPill.textContent += ` (${daysFromRoast}d ago)`;
+                } else {
+                  // Fallback if pill missing
+                  const newPill = document.createElement('span');
+                  newPill.className = 'epill';
+                  newPill.style.background = 'var(--green-bg)';
+                  newPill.style.color = 'var(--green)';
+                  newPill.textContent = `🌿 ${daysFromRoast}d from roast`;
+                  
+                  const pillContainers = card.querySelectorAll('.shelf-pills');
+                  if (pillContainers.length > 0) {
+                    const target = pillContainers.length > 1 ? pillContainers[1] : pillContainers[0];
+                    target.appendChild(newPill);
+                  }
+                }
+              }
+            }
+          }
+        });
       }
     })();
   </script>
