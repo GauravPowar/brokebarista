@@ -150,7 +150,7 @@ const SLIDES = [
     <div class="label fu">Dialling In</div>
     <div class="headline fu d1">Grind arc across <em>April</em></div>
     <div class="chart-container fu d2"><canvas id="grindChart"></canvas></div>
-    <div class="sub fu d3">Started coarser at 0.9 · dialled finer to 0.71 by Apr 30<br><span style="opacity:.4;font-size:.85rem">Y-axis inverted — lower = finer</span></div>`},
+    <div class="sub fu d3">Started coarser at 0.9.0 · dialled finer to 0.7.1 by Apr 30<br><span style="opacity:.4;font-size:.85rem">Y-axis inverted — lower = finer</span></div>`},
 
   /* 5 — FLAVORS */
   {cls:'s5', html:`
@@ -262,6 +262,16 @@ function initCharts(){
   const TEXT='rgba(245,239,224,0.35)';const GRID='rgba(232,168,62,0.06)';
   const AMBER='#e8a83e';const GREEN='#16a085';
 
+  const formatGrind = v => {
+    if (typeof v !== 'number') return v;
+    const s = v.toFixed(2);
+    const parts = s.split('.');
+    if (parts.length !== 2) return s;
+    const z = parseInt(parts[1][1], 10);
+    if (z > 2) return ''; // hide interpolated ticks with invalid z values
+    return `${parts[0]}.${parts[1][0]}.${parts[1][1]}`;
+  };
+
   Chart.defaults.font.family="'DM Sans',sans-serif";
   Chart.defaults.font.size=11;Chart.defaults.color=TEXT;
 
@@ -270,7 +280,7 @@ function initCharts(){
   if(gc) new Chart(gc,{type:'line',data:{
     labels:['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6','Apr 7','Apr 8','Apr 9','Apr 10','Apr 11','Apr 12','Apr 13','Apr 17','Apr 18','Apr 20','Apr 21','Apr 23','Apr 24','Apr 25','Apr 28','Apr 30'],
     datasets:[{data:[0.9,0.9,0.9,0.9,0.9,0.81,0.81,0.81,0.82,0.82,0.9,0.9,0.80,0.9,0.82,0.9,0.9,0.9,0.80,0.80,0.80,0.71],borderColor:AMBER,backgroundColor:'rgba(232,168,62,0.08)',pointBackgroundColor:AMBER,pointRadius:4,tension:0.4,fill:true}]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' Grind '+c.raw.toFixed(2)}}},scales:{x:{ticks:{color:TEXT,font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{display:false},border:{color:'rgba(232,168,62,0.1)'}},y:{ticks:{color:TEXT,callback:v=>v.toFixed(2)},grid:{color:GRID},border:{display:false},min:0.65,max:0.95,reverse:true}}}});
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' Grind '+formatGrind(c.raw)}}},scales:{x:{ticks:{color:TEXT,font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{display:false},border:{color:'rgba(232,168,62,0.1)'}},y:{ticks:{color:TEXT,callback:v=>formatGrind(v)},grid:{color:GRID},border:{display:false},min:0.65,max:0.95,reverse:true}}}});
 
   // Day chart
   const dc=document.getElementById('dayChart');

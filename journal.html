@@ -7,9 +7,554 @@
   <title>Broke Barista | Journal</title>
   <meta name="description" content="Your brew journal — sessions, tasting notes, and ratings. 10 per page.">
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ── Journal Page Overrides ─────────────────────── */
+
+    /* ── Header ──────────────────────────────────── */
+    .journal-header {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 1.8rem 1.25rem .5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .journal-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: var(--espresso);
+      letter-spacing: -.02em;
+      line-height: 1.1;
+    }
+
+    .journal-header h1 em {
+      color: var(--caramel);
+      font-style: italic;
+    }
+
+    .journal-header .sub {
+      font-size: .72rem;
+      color: var(--mid);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: .25rem;
+      font-weight: 300;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+
+    .owner-btn {
+      background: var(--steam);
+      border: 1.5px solid var(--parchment);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--caramel);
+      font-size: 1.1rem;
+      transition: all .3s ease;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .owner-btn:hover {
+      border-color: var(--caramel);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    /* ── Journal Stat Cards ───────────────────────── */
+    .stat-card {
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    /* ── Journal Entry Cards ──────────────────────── */
+    .journal-entry {
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .journal-entry:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px var(--shadow);
+    }
+
+    .journal-entry::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -25%;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(196, 125, 42, .04) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .je-title {
+      position: relative;
+      z-index: 1;
+    }
+
+    .je-header {
+      position: relative;
+      z-index: 1;
+    }
+
+    .je-date {
+      background: rgba(196, 125, 42, .08);
+      padding: .15rem .55rem;
+      border-radius: 6px;
+      color: var(--caramel);
+      font-weight: 500;
+    }
+
+    /* ── Filter Bar Polish ────────────────────────── */
+    .j-filter-bar {
+      transition: box-shadow .3s;
+    }
+
+    .j-filter-bar:focus-within {
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .j-filter-chip-select {
+      transition: all .2s;
+    }
+
+    .j-filter-chip-select:hover {
+      border-color: var(--caramel);
+    }
+
+    /* ── Taste Chips Glow ─────────────────────────── */
+    .taste-chip {
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .taste-chip:hover {
+      transform: scale(1.08);
+      box-shadow: 0 2px 8px rgba(122, 58, 138, .2);
+    }
+
+    /* ── Action Buttons ───────────────────────────── */
+    .je-actions {
+      opacity: .6;
+      transition: opacity .25s;
+    }
+
+    .journal-entry:hover .je-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      transition: all .2s;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* ── Entrance Animations ──────────────────────── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .anim-in {
+      animation: fadeUp .4s both;
+    }
+
+    .anim-d1 { animation-delay: .05s; }
+    .anim-d2 { animation-delay: .1s; }
+    .anim-d3 { animation-delay: .15s; }
+    .anim-d4 { animation-delay: .2s; }
+    .anim-d5 { animation-delay: .25s; }
+
+    /* ── Journal At-a-Glance Hero ─────────────────── */
+    .journal-hero {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* ── Streak / Recent Activity Strip ───────────── */
+    .journal-activity-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .65rem;
+      margin-bottom: .85rem;
+    }
+
+    .ja-card {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 14px;
+      padding: .75rem .6rem;
+      text-align: center;
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+    }
+
+    .ja-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px var(--shadow);
+    }
+
+    .ja-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--roast);
+      line-height: 1.1;
+    }
+
+    .ja-label {
+      font-size: .58rem;
+      color: var(--mid);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-top: .2rem;
+      font-weight: 500;
+    }
+
+    .ja-card.accent-green {
+      border-color: rgba(94, 138, 58, .3);
+      background: rgba(94, 138, 58, .06);
+    }
+
+    .ja-card.accent-green .ja-num {
+      color: var(--green);
+    }
+
+    .ja-card.accent-caramel {
+      border-color: rgba(196, 125, 42, .3);
+      background: rgba(196, 125, 42, .06);
+    }
+
+    .ja-card.accent-caramel .ja-num {
+      color: var(--caramel);
+    }
+
+    .ja-card.accent-purple {
+      border-color: rgba(122, 58, 138, .3);
+      background: rgba(122, 58, 138, .06);
+    }
+
+    .ja-card.accent-purple .ja-num {
+      color: var(--purple);
+    }
+
+    /* ── Last Brew Highlight ──────────────────────── */
+    .last-brew-highlight {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      margin-bottom: .85rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      transition: transform .25s, box-shadow .25s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .last-brew-highlight:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow);
+    }
+
+    .last-brew-highlight::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(196, 125, 42, .06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .lbh-left {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .25rem;
+    }
+
+    .lbh-date {
+      font-size: .56rem;
+      color: var(--cream);
+      background: var(--caramel);
+      padding: .18rem .5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .lbh-date.today {
+      background: var(--green);
+    }
+
+    .lbh-rating {
+      font-size: .8rem;
+      color: var(--caramel);
+      letter-spacing: .04em;
+    }
+
+    .lbh-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lbh-bean {
+      font-family: 'Playfair Display', serif;
+      font-size: .92rem;
+      color: var(--espresso);
+      line-height: 1.2;
+      margin-bottom: .15rem;
+    }
+
+    .lbh-meta {
+      font-size: .66rem;
+      color: var(--mid);
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem .65rem;
+    }
+
+    .lbh-params {
+      display: flex;
+      gap: .4rem;
+      margin-top: .35rem;
+      flex-wrap: wrap;
+    }
+
+    .lbh-param {
+      font-size: .6rem;
+      background: var(--parchment);
+      padding: .18rem .45rem;
+      border-radius: 6px;
+      color: var(--roast);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+    }
+
+    .lbh-notes {
+      font-size: .68rem;
+      color: var(--mid);
+      margin-top: .3rem;
+      font-style: italic;
+      line-height: 1.3;
+    }
+
+    .lbh-tastes {
+      display: flex;
+      gap: .25rem;
+      flex-wrap: wrap;
+      margin-top: .3rem;
+    }
+
+    .lbh-taste {
+      font-size: .55rem;
+      background: var(--purple-bg);
+      color: var(--purple);
+      padding: .14rem .45rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    /* ── Section Dividers ─────────────────────────── */
+    .hero-divider {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      margin: .4rem 0 .6rem;
+    }
+
+    .hero-divider .label {
+      font-size: .58rem;
+      color: var(--mid);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .hero-divider .line {
+      flex: 1;
+      height: 1px;
+      background: var(--parchment);
+    }
+
+    /* ── Flavor Profile ──────────────────────────── */
+    .journal-flavor-section {
+      background: var(--steam);
+      border: 1px solid var(--parchment);
+      border-radius: 16px;
+      padding: .85rem 1rem;
+      margin-bottom: .85rem;
+      transition: transform .25s, box-shadow .25s;
+    }
+
+    .journal-flavor-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--shadow);
+    }
+
+    .jf-title {
+      font-size: .58rem;
+      color: var(--mid);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: .5rem;
+    }
+
+    .jf-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+    }
+
+    .jf-pill {
+      padding: .25rem .55rem;
+      border-radius: 20px;
+      font-size: .65rem;
+      font-weight: 500;
+      transition: transform .2s;
+      cursor: default;
+    }
+
+    .jf-pill:hover {
+      transform: scale(1.08);
+    }
+
+    .jf-pill.tier-1 {
+      background: var(--purple);
+      color: var(--cream);
+      font-size: .75rem;
+      padding: .3rem .7rem;
+    }
+
+    .jf-pill.tier-2 {
+      background: var(--purple-bg);
+      color: var(--purple);
+      font-size: .68rem;
+    }
+
+    .jf-pill.tier-3 {
+      background: var(--parchment);
+      color: var(--mid);
+      font-size: .62rem;
+    }
+
+    /* ── Brew Method Breakdown ────────────────────── */
+    .brew-method-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .4rem;
+    }
+
+    .bm-label {
+      font-size: .68rem;
+      color: var(--espresso);
+      min-width: 80px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .bm-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--parchment);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bm-bar {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--caramel), var(--honey));
+      transition: width .5s ease;
+    }
+
+    .bm-count {
+      font-size: .6rem;
+      color: var(--light);
+      min-width: 24px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Pagination Polish ────────────────────────── */
+    .pag-bar {
+      transition: box-shadow .3s;
+    }
+
+    .pag-btn {
+      transition: all .2s;
+    }
+
+    .pag-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    /* ── New Session Button ───────────────────────── */
+    .new-session-btn {
+      background: linear-gradient(135deg, var(--caramel), var(--honey));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: .55rem 1rem;
+      font-size: .78rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all .25s;
+      box-shadow: 0 2px 12px rgba(196, 125, 42, .3);
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+
+    .new-session-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(196, 125, 42, .4);
+    }
+
+    @media (max-width: 480px) {
+      .journal-header { padding: 1.5rem 1rem .5rem; }
+      .journal-hero { padding: 0 1rem; }
+      .journal-activity-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 
 <body data-page="journal">
@@ -45,20 +590,58 @@
     </div>
   </div>
 
-  <!-- JOURNAL PAGE -->
-  <div class="page-header">
+  <!-- HEADER -->
+  <div class="page-header journal-header">
     <div>
       <h1>Brew <em>Journal</em></h1>
-      <div class="sub">Sessions, tasting notes, ratings</div>
+      <div class="sub">Sessions · tasting notes · ratings</div>
     </div>
-    <div style="display:flex;gap:.5rem;align-items:center">
+    <div class="header-actions">
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌓</button>
       <button class="owner-btn" onclick="toggleOwnerAccess()" title="Owner Login">🔐</button>
-      <button class="btn-primary" onclick="openJournalModal()">+ New Session</button>
+      <button class="new-session-btn" onclick="openJournalModal()">+ New Session</button>
     </div>
   </div>
+
+  <!-- ═══════════════ JOURNAL HERO ═══════════════ -->
+  <div class="journal-hero" id="journal-hero">
+    <!-- Activity strip -->
+    <div class="journal-activity-strip anim-in" id="jh-activity-strip">
+      <div class="ja-card">
+        <div class="ja-num" id="jh-total">—</div>
+        <div class="ja-label">Sessions</div>
+      </div>
+      <div class="ja-card accent-caramel">
+        <div class="ja-num" id="jh-streak">—</div>
+        <div class="ja-label">Streak</div>
+      </div>
+      <div class="ja-card accent-green">
+        <div class="ja-num" id="jh-saved">—</div>
+        <div class="ja-label">Saved</div>
+      </div>
+      <div class="ja-card accent-purple">
+        <div class="ja-num" id="jh-top-taste">—</div>
+        <div class="ja-label">Top Note</div>
+      </div>
+    </div>
+
+    <!-- Last brew highlight -->
+    <div class="hero-divider anim-in anim-d1">
+      <span class="label">☕ Last Brew</span>
+      <span class="line"></span>
+    </div>
+    <div id="jh-last-brew" class="anim-in anim-d2"></div>
+
+    <!-- Flavor profile -->
+    <div id="jh-flavor" class="anim-in anim-d3"></div>
+
+    <!-- Brew method breakdown -->
+    <div id="jh-methods" class="anim-in anim-d4"></div>
+  </div>
+
+  <!-- ═══════════════ JOURNAL CONTENT ═══════════════ -->
   <div class="page-content">
-    <div class="stat-strip" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-strip anim-in anim-d1" style="grid-template-columns:repeat(4,1fr)">
       <div class="stat-card">
         <div class="stat-num" id="jsTotal">0</div>
         <div class="stat-label">Sessions</div>
@@ -78,11 +661,13 @@
     </div>
 
     <!-- JOURNAL FILTER BAR -->
-    <div class="j-filter-bar" id="journalFilterBar">
+    <div class="j-filter-bar anim-in anim-d2" id="journalFilterBar">
       <div class="j-filter-search-wrap">
         <span class="j-filter-icon">🔍</span>
-        <input type="text" id="jFilterSearch" class="j-filter-search" placeholder="Search beans, notes, tastes…" oninput="applyJournalFilter()" autocomplete="off">
-        <button class="j-filter-clear-btn" id="jFilterClearBtn" onclick="clearJournalFilter()" title="Clear all filters" style="display:none">✕</button>
+        <input type="text" id="jFilterSearch" class="j-filter-search"
+          placeholder="Search beans, notes, tastes…" oninput="applyJournalFilter()" autocomplete="off">
+        <button class="j-filter-clear-btn" id="jFilterClearBtn" onclick="clearJournalFilter()"
+          title="Clear all filters" style="display:none">✕</button>
       </div>
       <div class="j-filter-chips">
         <select id="jFilterBrewer" class="j-filter-chip-select" onchange="applyJournalFilter()">
@@ -111,8 +696,8 @@
       <div id="jFilterSummary" class="j-filter-summary" style="display:none"></div>
     </div>
 
-    <div id="journalList"></div>
-    <div id="journalPagination"></div>
+    <div id="journalList" class="anim-in anim-d3"></div>
+    <div id="journalPagination" class="anim-in anim-d4"></div>
   </div>
 
   <!-- JOURNAL MODAL -->
@@ -414,7 +999,8 @@
       <div class="share-theme-row">
         <span class="share-theme-label">Theme</span>
         <div class="share-theme-swatches">
-          <div class="theme-swatch-wrapper active" data-theme="espresso" onclick="selectShareTheme(this,'espresso')">
+          <div class="theme-swatch-wrapper active" data-theme="espresso"
+            onclick="selectShareTheme(this,'espresso')">
             <div class="share-theme-swatch" style="background:linear-gradient(135deg,#C47D2A,#E8A83E)"></div>
             <span class="theme-name">Espresso</span>
           </div>
@@ -460,7 +1046,6 @@
   </div>
 
   <!-- BOTTOM NAV -->
-
   <nav class="bottom-nav">
     <a href="/log" class="nav-link" data-page="log"><span class="nav-icon">📋</span><span
         class="nav-label">Log</span></a>
@@ -475,7 +1060,152 @@
     <a href="/add" class="nav-link" data-page="add"><span class="nav-icon">＋</span><span
         class="nav-label">Add</span></a>
   </nav>
+
   <script src="/app.js"></script>
+  <script>
+    /* ═══════════════════════════════════════════════════════
+       JOURNAL HERO — hooks into renderJournal lifecycle
+    ═══════════════════════════════════════════════════════ */
+    (function () {
+      const _origRender = window.renderJournal;
+      window.renderJournal = function () {
+        _origRender.apply(this, arguments);
+        renderJournalHero();
+      };
+
+      function esc(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function renderJournalHero() {
+        if (!journal || !journal.length) {
+          document.getElementById('journal-hero').style.display = 'none';
+          return;
+        }
+        document.getElementById('journal-hero').style.display = '';
+
+        // ── Activity Strip ──
+        const rated = journal.filter(j => j.rating > 0);
+        const avgRating = rated.length ? (rated.reduce((s, j) => s + j.rating, 0) / rated.length) : 0;
+
+        // Streak
+        let streak = 0;
+        const byDate = {};
+        journal.forEach(j => { byDate[j.date.slice(0, 10)] = true; });
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+        let check = byDate[today.toISOString().slice(0, 10)] ? new Date(today) : new Date(yesterday);
+        while (byDate[check.toISOString().slice(0, 10)]) {
+          streak++;
+          check.setDate(check.getDate() - 1);
+        }
+
+        // Savings
+        let totalSaved = 0;
+        try { totalSaved = calcMoneySaved().totalSaved; } catch (e) { }
+
+        // Top taste
+        const tasteCount = {};
+        journal.forEach(j => {
+          const t = Array.isArray(j.tastes) ? j.tastes : [];
+          t.forEach(taste => { if (taste) tasteCount[taste] = (tasteCount[taste] || 0) + 1; });
+        });
+        const topTaste = Object.entries(tasteCount).sort((a, b) => b[1] - a[1])[0];
+
+        document.getElementById('jh-total').textContent = journal.length;
+        document.getElementById('jh-streak').textContent = streak + (streak === 1 ? ' day' : ' days');
+        document.getElementById('jh-saved').textContent = (totalSaved >= 0 ? '₹' : '-₹') + Math.abs(totalSaved).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        document.getElementById('jh-top-taste').textContent = topTaste ? topTaste[0] : '—';
+
+        // ── Last Brew Highlight ──
+        const lastBrewEl = document.getElementById('jh-last-brew');
+        const sorted = [...journal].sort((a, b) => {
+          const da = new Date(a.date + 'T00:00:00'), db = new Date(b.date + 'T00:00:00');
+          if (db - da !== 0) return db - da;
+          return Number(b.id) - Number(a.id);
+        });
+        const last = sorted[0];
+
+        const todayDate = new Date(); todayDate.setHours(0, 0, 0, 0);
+        const brewDate = new Date(last.date + 'T00:00:00');
+        const isToday = brewDate.getTime() === todayDate.getTime();
+        const dateLabel = isToday ? 'Today' : brewDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        const stars = last.rating > 0 ? '★'.repeat(last.rating) + '☆'.repeat(5 - last.rating) : '';
+        const beanName = last.beanLabel || last.bean_label || (last.beanId ? (logs.find(l => l.id === parseInt(last.beanId))?.name || '') : '') || 'Brew Session';
+        const tastes = (Array.isArray(last.tastes) ? last.tastes : []).filter(t => t);
+
+        let paramsHtml = '';
+        if (last.dose) paramsHtml += `<span class="lbh-param">${last.dose}g in</span>`;
+        if (last.yield) paramsHtml += `<span class="lbh-param">${last.yield}${last.yield > 100 ? 'ml' : 'g'} out</span>`;
+        if (last.time) paramsHtml += `<span class="lbh-param">${last.time}s</span>`;
+        if (last.temp) paramsHtml += `<span class="lbh-param">${last.temp}°C</span>`;
+        if (last.grind) paramsHtml += `<span class="lbh-param">⚙ ${esc(last.grind)}</span>`;
+
+        lastBrewEl.innerHTML = `
+          <div class="last-brew-highlight">
+            <div class="lbh-left">
+              <span class="lbh-date ${isToday ? 'today' : ''}">${dateLabel}</span>
+              ${stars ? `<span class="lbh-rating">${stars}</span>` : ''}
+            </div>
+            <div class="lbh-body">
+              <div class="lbh-bean">${esc(beanName)}</div>
+              <div class="lbh-meta">
+                ${last.brewer ? `<span>☕ ${esc(last.brewer)}</span>` : ''}
+                ${last.grinder ? `<span>⚙️ ${esc(last.grinder)}</span>` : ''}
+              </div>
+              ${paramsHtml ? `<div class="lbh-params">${paramsHtml}</div>` : ''}
+              ${last.notes ? `<div class="lbh-notes">"${esc(last.notes)}"</div>` : ''}
+              ${tastes.length ? `<div class="lbh-tastes">${tastes.map(t => `<span class="lbh-taste">${esc(t)}</span>`).join('')}</div>` : ''}
+            </div>
+          </div>`;
+
+        // ── Flavor Profile Cloud ──
+        const flavorEl = document.getElementById('jh-flavor');
+        const sortedTastes = Object.entries(tasteCount).sort((a, b) => b[1] - a[1]);
+        if (sortedTastes.length > 0) {
+          const maxCount = sortedTastes[0][1];
+          const pills = sortedTastes.slice(0, 10).map(([taste, count]) => {
+            const ratio = count / maxCount;
+            const tier = ratio >= 0.6 ? 'tier-1' : ratio >= 0.3 ? 'tier-2' : 'tier-3';
+            return `<span class="jf-pill ${tier}" title="${count}×">${esc(taste)}</span>`;
+          }).join('');
+          flavorEl.innerHTML = `
+            <div class="journal-flavor-section">
+              <div class="jf-title">🎨 Your Flavor Profile</div>
+              <div class="jf-cloud">${pills}</div>
+            </div>`;
+        } else {
+          flavorEl.innerHTML = '';
+        }
+
+        // ── Brew Method Breakdown ──
+        const methodEl = document.getElementById('jh-methods');
+        const brewCount = {};
+        journal.forEach(j => { if (j.brewer) brewCount[j.brewer] = (brewCount[j.brewer] || 0) + 1; });
+        const sortedMethods = Object.entries(brewCount).sort((a, b) => b[1] - a[1]);
+        if (sortedMethods.length > 1) {
+          const maxM = sortedMethods[0][1];
+          const rows = sortedMethods.slice(0, 5).map(([method, count]) => {
+            const pct = Math.round(count / maxM * 100);
+            return `<div class="brew-method-row">
+              <span class="bm-label">${esc(method)}</span>
+              <div class="bm-bar-wrap"><div class="bm-bar" style="width:${pct}%"></div></div>
+              <span class="bm-count">${count}</span>
+            </div>`;
+          }).join('');
+          methodEl.innerHTML = `
+            <div class="journal-flavor-section" style="margin-bottom:.85rem">
+              <div class="jf-title">☕ Brew Methods</div>
+              ${rows}
+            </div>`;
+        } else {
+          methodEl.innerHTML = '';
+        }
+      }
+    })();
+  </script>
 </body>
 
 </html>

@@ -43,6 +43,8 @@ const PROCESS_MAP = [
   { key: 'washed', label: 'Washed', icon: '💧', hint: 'wet process, fully washed' },
   { key: 'honey', label: 'Honey', icon: '🍯', hint: 'pulped natural, honey process' },
   { key: 'anaerobic', label: 'Anaerobic', icon: '⚗️', hint: 'fermentation, carbonic maceration' },
+  { key: 'co-ferment', label: 'Co-Ferment', icon: '🍇', hint: 'co-fermented with fruit/yeast' },
+  { key: 'washed-natural', label: 'Washed and Natural', icon: '🌓', hint: 'blend of washed and natural lots' },
   { key: 'wet-hulled', label: 'Wet Hulled', icon: '🌾', hint: 'giling basah' },
   { key: 'experimental', label: 'Experimental', icon: '🧪', hint: 'infused, experimental, barrel aged' },
 ];
@@ -291,11 +293,11 @@ function addItemRow(prefill = {}) {
       <div class="field" style="margin-bottom:.65rem">
         <label class="form-label">Process</label>
         <div class="pill-group" id="process-pills-${n}">
-          ${['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown'].map(v => `<span class="pill-opt ${(prefill.process || '') === (v) ? 'selected' : ''}" data-val="${v}" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">${v}</span>`).join('')}
-          <span class="pill-opt ${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? 'selected' : ''}" data-val="__custom__" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">Custom…</span>
+          ${['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Co-Ferment', 'Washed and Natural', 'Unknown'].map(v => `<span class="pill-opt ${(prefill.process || '') === (v) ? 'selected' : ''}" data-val="${v}" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">${v}</span>`).join('')}
+          <span class="pill-opt ${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Co-Ferment', 'Washed and Natural', 'Unknown', ''].includes(prefill.process || '') ? 'selected' : ''}" data-val="__custom__" onclick="selectPill(this,'process-pills-${n}');toggleCustomProcess(${n})">Custom…</span>
         </div>
-        <div id="custom-process-wrap-${n}" style="margin-top:.45rem;display:${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? 'block' : 'none'}">
-          <input type="text" id="custom-process-${n}" placeholder="e.g. Carbonic Maceration, Extended Ferment…" value="${esc(!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Unknown', ''].includes(prefill.process || '') ? prefill.process || '' : '')}">
+        <div id="custom-process-wrap-${n}" style="margin-top:.45rem;display:${!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Co-Ferment', 'Washed and Natural', 'Unknown', ''].includes(prefill.process || '') ? 'block' : 'none'}">
+          <input type="text" id="custom-process-${n}" placeholder="e.g. Carbonic Maceration, Extended Ferment…" value="${esc(!['Natural', 'Washed', 'Honey', 'Anaerobic', 'Wet Hulled', 'Co-Ferment', 'Washed and Natural', 'Unknown', ''].includes(prefill.process || '') ? prefill.process || '' : '')}">
         </div>
       </div>
 
@@ -844,8 +846,10 @@ function _defaultRestDays(log) {
   const proc = (log?.process || '').toLowerCase();
   // Espresso-style darker roasts degas faster; lighter & anaerobic/natural need longer
   if (proc.includes('anaerobic') || proc.includes('carbonic')) return 14;
+  if (proc.includes('co-ferment') || proc.includes('coferment')) return 12;
   if (proc.includes('natural')) return 10;
   if (proc.includes('honey')) return 9;
+  if (proc.includes('washed') && proc.includes('natural')) return 8;
   if (proc.includes('washed')) return 7;
   return 7; // sensible default
 }
@@ -3164,5 +3168,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       break;
     }
+  }
+});
+
+// Prevent number inputs from changing values when scrolling
+document.addEventListener('wheel', function (e) {
+  if (document.activeElement && document.activeElement.type === 'number') {
+    document.activeElement.blur();
   }
 });
