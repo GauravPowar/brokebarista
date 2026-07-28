@@ -1090,7 +1090,7 @@ function renderJournal() {
     return;
   }
 
-  const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
   $('journalList').innerHTML = sorted.map(j => {
     const stars = '★'.repeat(j.rating || 0) + '☆'.repeat(5 - (j.rating || 0));
     const tastes = (j.tastes || []).map(t => `<span class="taste-chip">${esc(t)}</span>`).join('');
@@ -2814,11 +2814,11 @@ function _populateJournalFilterDropdowns() {
 function _applyJournalSort(arr, sortKey) {
   const sorted = [...arr];
   switch (sortKey) {
-    case 'date-asc':    sorted.sort((a, b) => new Date(a.date) - new Date(b.date)); break;
-    case 'date-desc':   sorted.sort((a, b) => new Date(b.date) - new Date(a.date)); break;
-    case 'rating-desc': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.date) - new Date(a.date)); break;
-    case 'rating-asc':  sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0) || new Date(b.date) - new Date(a.date)); break;
-    default:            sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+    case 'date-asc':    sorted.sort((a, b) => new Date(a.date) - new Date(b.date) || Number(a.id) - Number(b.id)); break;
+    case 'date-desc':   sorted.sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    case 'rating-desc': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    case 'rating-asc':  sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0) || new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    default:            sorted.sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
   }
   return sorted;
 }
