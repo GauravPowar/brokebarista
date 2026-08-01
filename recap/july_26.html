@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>July 2026 — Brew Recap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600;800;900&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box }
+    :root { --amber: #e8a83e; --caramel: #c47d2a; --cream: #f5efe0; --c1: #1a0a00 }
+    body { font-family: 'DM Sans', sans-serif; background: var(--c1); color: var(--cream); overflow: hidden; height: 100vh; width: 100vw; user-select: none }
+    #deck { width: 100%; height: 100%; position: relative }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s, transform .5s; transform: translateY(40px); padding: 2rem; text-align: center; overflow: hidden }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0) }
+    .slide.out { opacity: 0; transform: translateY(-40px) }
+    .s0 { background: radial-gradient(ellipse at 30% 40%, #1a2d3d, #040a0d 70%) }
+    .s1 { background: radial-gradient(ellipse at 70% 30%, #1a1a3d, #040408 70%) }
+    .s2 { background: radial-gradient(ellipse at 50% 60%, #001a2d, #000508 70%) }
+    .s3 { background: radial-gradient(ellipse at 20% 50%, #1a000d, #050002 70%) }
+    .s4 { background: radial-gradient(ellipse at 80% 40%, #0d1a00, #030500 70%) }
+    .s5 { background: radial-gradient(ellipse at 50% 50%, #001a1a, #000503 70%) }
+    .s6 { background: radial-gradient(ellipse at 30% 60%, #1a0d00, #050300 70%) }
+    .s7 { background: radial-gradient(ellipse at 60% 40%, #0a001a, #020005 70%) }
+    .s8 { background: radial-gradient(ellipse at 50% 50%, #001a0a, #000503 70%) }
+    .s9 { background: radial-gradient(ellipse at 40% 30%, #1a1a00, #050500 70%) }
+    .s10 { background: radial-gradient(ellipse at 60% 50%, #0a1a00, #020500 70%) }
+    .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: float linear infinite; opacity: .15 }
+    @keyframes float { 0% { transform: translateY(100vh) rotate(0deg) } 100% { transform: translateY(-20px) rotate(720deg) } }
+    .label { font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; opacity: .55; margin-bottom: 1rem; font-weight: 600 }
+    .bignum { font-size: clamp(4rem, 20vw, 9rem); font-weight: 900; line-height: 1; background: linear-gradient(135deg, var(--amber), var(--caramel), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pop .6s cubic-bezier(.175, .885, .32, 1.275) both }
+    @keyframes pop { from { transform: scale(.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    .headline { font-family: 'DM Serif Display', serif; font-size: clamp(1.4rem, 5vw, 2.4rem); line-height: 1.2; margin: .5rem 0 1rem }
+    .sub { font-size: 1rem; opacity: .65; max-width: 520px; line-height: 1.6 }
+    .hi { color: var(--amber); font-weight: 700; -webkit-text-fill-color: var(--amber) }
+    .pill { display: inline-block; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: .4rem 1.2rem; font-size: .9rem; margin: .3rem; backdrop-filter: blur(8px) }
+    .bar-item { display: flex; align-items: center; gap: 1rem; margin: .4rem 0; width: min(420px, 90vw) }
+    .bname { font-size: .85rem; width: 130px; text-align: right; flex-shrink: 0; line-height: 1.2 }
+    .btrack { flex: 1; background: rgba(255,255,255,.08); border-radius: 4px; height: 10px; overflow: hidden }
+    .bfill { height: 100%; border-radius: 4px }
+    .bval { font-size: .8rem; opacity: .6; width: 30px; flex-shrink: 0 }
+    .tag { display: inline-block; font-size: .75rem; padding: .3rem .8rem; border-radius: 999px; margin: .2rem; font-weight: 600 }
+    .moment-item { display: flex; align-items: flex-start; gap: .9rem; text-align: left; margin: .6rem 0; max-width: 480px; width: 90vw }
+    .mdot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .65rem; border: 0.5px solid }
+    .mdot-good { background: rgba(90,158,114,.15); border-color: rgba(90,158,114,.4); color: #7ac494 }
+    .mdot-bad { background: rgba(192,80,58,.15); border-color: rgba(192,80,58,.4); color: #e06050 }
+    .mbody .date { font-size: .68rem; opacity: .4; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .15rem }
+    .mbody .note { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-style: italic; line-height: 1.25 }
+    .mbody .note.good { color: #7ac494 }
+    .mbody .note.bad { color: #e06050 }
+    .mbody .detail { font-size: .75rem; opacity: .5; margin-top: .2rem; line-height: 1.5 }
+    .chart-container { width: min(480px, 90vw); height: 220px; position: relative }
+    #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--amber); transition: width .4s; z-index: 9999 }
+    #backBtn { position: fixed; top: 1.1rem; left: 1rem; z-index: 999; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .35rem .9rem; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: .75rem; letter-spacing: .05em; text-decoration: none; backdrop-filter: blur(8px); transition: background .2s }
+    #backBtn:hover { background: rgba(255,255,255,.1) }
+    #dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: .5rem; z-index: 999 }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); cursor: pointer; transition: all .3s }
+    .dot.active { background: var(--amber); transform: scale(1.4) }
+    #navL, #navR { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.06); border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; z-index: 999; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .2s }
+    #navL:hover, #navR:hover { background: rgba(255,255,255,.15) }
+    #navL { left: 1rem }
+    #navR { right: 1rem }
+    .coffee-cup { font-size: 5rem; animation: bounce 2s ease-in-out infinite }
+    @keyframes bounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-12px) } }
+    .steam { position: absolute; bottom: 44%; left: 50%; width: 3px; background: rgba(255,255,255,.12); border-radius: 2px; animation: steam 2s ease-in-out infinite; transform-origin: bottom center }
+    @keyframes steam { 0% { height: 0; opacity: .2; transform: translateX(-50%) } 50% { height: 60px; opacity: .5; transform: translateX(-50%) scaleX(1.5) rotate(4deg) } 100% { height: 0; opacity: 0; transform: translateX(-50%) } }
+    .glow { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.4); animation: pulse 2s ease-in-out infinite }
+    @keyframes pulse { 0%, 100% { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.3) } 50% { text-shadow: 0 0 60px var(--amber), 0 0 120px rgba(232,168,62,.6) } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+    .fu { animation: fadeUp .6s both }
+    .d1 { animation-delay: .15s }
+    .d2 { animation-delay: .3s }
+    .d3 { animation-delay: .45s }
+    .d4 { animation-delay: .6s }
+    .d5 { animation-delay: .75s }
+  </style>
+</head>
+
+<body>
+  <div id="progress"></div>
+  <a id="backBtn" href="index.html">&#8592; All Recaps</a>
+  <div id="dots"></div>
+  <button id="navL">&#8249;</button>
+  <button id="navR">&#8250;</button>
+  <div id="deck"></div>
+
+  <script>
+    const COLORS = ['#e8a83e','#c47d2a','#16a085','#8e44ad','#c0392b','#2980b9','#27ae60','#d35400'];
+    let cur = 0, tot = 0;
+
+    function particles(el) {
+      for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div'); p.className = 'particle';
+        const s = Math.random() * 6 + 2;
+        p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${COLORS[Math.floor(Math.random()*COLORS.length)]};animation-duration:${Math.random()*10+8}s;animation-delay:-${Math.random()*10}s`;
+        el.appendChild(p);
+      }
+    }
+
+    const SLIDES = [
+      /* 0 — INTRO */
+      { cls: 's0', html: `
+    <div class="steam" style="margin-left:-8px"></div>
+    <div class="steam" style="margin-left:8px;animation-delay:.7s"></div>
+    <div class="coffee-cup">&#9749;</div>
+    <div class="label fu d1">Monthly Recap</div>
+    <div class="headline fu d2" style="font-size:clamp(2rem,8vw,3.8rem)">July <span style="color:var(--amber)">2026</span></div>
+    <div class="sub fu d3">31 brews across 24 active days.<br>The Kompresso carried the fort. The Dedica returned. 32 clicks cracked the new bag.</div>` },
+
+      /* 1 — SESSIONS */
+      { cls: 's1', html: `
+    <div class="label fu">Sessions This Month</div>
+    <div class="bignum fu d1">31</div>
+    <div class="headline fu d2">cups of <em>relentless dialling</em></div>
+    <div class="sub fu d3">Brewed on <span class="hi">24 out of 31 days</span> &mdash; averaging ~1.3 brews a day.<br>Five perfect shots. A new bag tested patience for three days straight.</div>
+    <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center" class="fu d4">
+      <div class="pill">&#11088; 5 five-stars</div>
+      <div class="pill">&#128202; 3.7&#9733; avg</div>
+      <div class="pill">&#129752; 2 beans active</div>
+      <div class="pill">&#128295; Kompresso era</div>
+    </div>` },
+
+      /* 2 — BREWER SPLIT */
+      { cls: 's2', html: `
+    <div class="label fu">Brewer Lineup</div>
+    <div class="headline fu d1">The <span class="hi">Kompresso</span> held the fort for three weeks</div>
+    <div style="margin-top:1.5rem" class="fu d2">
+      <div class="bar-item"><div class="bname">Kompresso</div><div class="btrack"><div class="bfill" style="width:100%;background:#8e44ad"></div></div><div class="bval">12&times;</div></div>
+      <div class="bar-item"><div class="bname">Espresso</div><div class="btrack"><div class="bfill" style="width:75%;background:#e8a83e"></div></div><div class="bval">9&times;</div></div>
+      <div class="bar-item"><div class="bname">V60</div><div class="btrack"><div class="bfill" style="width:67%;background:#16a085"></div></div><div class="bval">8&times;</div></div>
+      <div class="bar-item"><div class="bname">KaldiPress</div><div class="btrack"><div class="bfill" style="width:17%;background:#27ae60"></div></div><div class="bval">2&times;</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:1rem"><span class="hi">39%</span> kompresso &middot; <span class="hi">29%</span> espresso &middot; <span class="hi">26%</span> pour over &middot; <span class="hi">6%</span> other</div>` },
+
+      /* 3 — BEANS */
+      { cls: 's3', html: `
+    <div class="label fu">Bean Rotation</div>
+    <div class="headline fu d1"><em>Daily Driver</em> dominated from start to finish</div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Daily Driver</div><div class="btrack"><div class="bfill" style="width:100%;background:#e8a83e"></div></div><div class="bval">24&times;</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Raxidi Lobo</div><div class="btrack"><div class="bfill" style="width:29%;background:#16a085"></div></div><div class="bval">7&times;</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Java Trench</div><div class="btrack"><div class="bfill" style="width:4%;background:#8e44ad"></div></div><div class="bval">1&times;</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:.8rem">Stockholm Roasters Daily Driver Bag 1 &rarr; Bag 2 mid-month &middot; Ground Zero Raxidi Lobo closed out &middot; Ruckus Java Trench debut Jul 29</div>` },
+
+      /* 4 — THE MACHINE SAGA PART II */
+      { cls: 's4', html: `
+    <div class="label fu">The Machine Saga &mdash; Part II</div>
+    <div class="headline fu d1">Kompresso ran the show, <span class="hi">Dedica returned Jul 22</span></div>
+    <div style="margin-top:1.2rem;display:flex;flex-direction:column;gap:.8rem;align-items:center" class="fu d2">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Jul 1&ndash;21 &middot; The long haul</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#8e44ad">Cafflano Kompresso as the daily weapon</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">12 Kompresso shots + 7 V60s + 2 KaldiPress. Machine still out. Kompresso dialled in perfectly at 30 clicks.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Jul 22 &middot; The return</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#7ac494">Dedica back in action &#9749;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">Espresso shots Jul 22 &amp; 23 both clean 4&#9733;. Then new bag arrived Jul 28 &mdash; chaos began.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Jul 28&ndash;30 &middot; New bag dialling saga</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--amber)">32 clicks for 15g. Locked in. &#127919;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">30&rarr;33&rarr;31 (Jul 28) &middot; 32 (Jul 29) &middot; 35&rarr;40&rarr;32&rarr;32 (Jul 30) &middot; Final: "Dialled in. For now :)"</div>
+      </div>
+    </div>` },
+
+      /* 5 — FLAVORS */
+      { cls: 's5', html: `
+    <div class="label fu">Your Palate</div>
+    <div class="headline fu d1">July tasted like <span class="hi">Orange &amp; Lime</span> and <span class="hi">Sweet Aromatics</span></div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <span class="tag" style="background:#16a08522;border:1px solid #16a08555;color:#7ac494">Orange &times;1 &#11088;</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Lime &times;2 &#11088;</span>
+      <span class="tag" style="background:#e8a83e22;border:1px solid #e8a83e55;color:#e8a83e">Sweet Aromatics &times;2 &#11088;</span>
+      <span class="tag" style="background:#27ae6022;border:1px solid #27ae6055;color:#7ac494">Overall Sweet &times;1 &#11088;</span>
+      <span class="tag" style="background:#c47d2a22;border:1px solid #c47d2a55;color:#c47d2a">Cocoa &times;1</span>
+      <span class="tag" style="background:#c0392b22;border:1px solid #c0392b55;color:#e07868">Pepper &times;1</span>
+      <span class="tag" style="background:#8e44ad22;border:1px solid #8e44ad55;color:#b07fd6">Cinnamon &times;1</span>
+      <span class="tag" style="background:#d3540022;border:1px solid #d3540055;color:#e07840">Cherry &times;1</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Pear &times;1</span>
+    </div>
+    <div class="sub fu d3" style="margin-top:1rem;font-size:.85rem">The Jul 19 Raxidi Lobo V60 at 95 clicks was the flavour eruption of the month &mdash; Orange, Lime, Sweet Aromatics, Overall Sweet all at once. &#11088;&#11088;&#11088;&#11088;&#11088;</div>` },
+
+      /* 6 — STANDOUT MOMENTS */
+      { cls: 's6', html: `
+    <div class="label fu">Standout Moments</div>
+    <div style="margin-top:1rem">
+      <div class="moment-item fu d1">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Jul 9 &middot; Kompresso</div>
+        <div class="note good">"Perfect Kompresso." &#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <div class="detail">Daily Driver &middot; 15g&rarr;29.4g &middot; 40s &middot; 94&deg;C &middot; 30 clicks K6 &middot; Kompresso at its absolute peak</div></div>
+      </div>
+      <div class="moment-item fu d2">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Jul 19 &middot; V60</div>
+        <div class="note good">"Orange, Lime, Sweet Aromatics, Overall Sweet." &#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <div class="detail">Raxidi Lobo &middot; 22g&rarr;331.8g &middot; 180s &middot; 92&deg;C &middot; 95 clicks &middot; last-gasp masterpiece from the bag</div></div>
+      </div>
+      <div class="moment-item fu d3">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Jul 30 &middot; Espresso &times;2</div>
+        <div class="note good">"32 clicks it is for 15gm. Dialled in. For now :)" &#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <div class="detail">Daily Driver Bag 2 &middot; 15g&rarr;35g &middot; 40s &middot; 94&deg;C &middot; sweet spot locked after 5 dialling attempts</div></div>
+      </div>
+      <div class="moment-item fu d4">
+        <div class="mdot mdot-bad">&#10005;</div>
+        <div class="mbody"><div class="date">Jul 28&ndash;29 &middot; New Bag Chaos</div>
+        <div class="note bad">"Too coarse? / POOR PUCK PREP / 32 clicks won&apos;t work for 18gm." &#11088;&#11088;</div>
+        <div class="detail">Daily Driver Bag 2 &middot; 5 sessions to dial in &middot; from &#9733;&#9733; to &#9733;&#9733;&#9733;&#9733;&#9733; in 2 days</div></div>
+      </div>
+    </div>` },
+
+      /* 7 — GRIND CHART */
+      { cls: 's7', html: `
+    <div class="label fu">Dialling In</div>
+    <div class="headline fu d1">The K6 clicks across <em>July espresso</em></div>
+    <div class="chart-container fu d2"><canvas id="grindChart"></canvas></div>
+    <div class="sub fu d3">Espresso range: 25&ndash;40 clicks on K6<br><span style="opacity:.4;font-size:.85rem">Espresso sessions shown &middot; lower = finer</span></div>` },
+
+      /* 8 — DAILY ACTIVITY */
+      { cls: 's8', html: `
+    <div class="label fu">Activity</div>
+    <div class="headline fu d1">Sessions by day &mdash; <span class="hi">24 days of coffee</span></div>
+    <div class="chart-container fu d2" style="height:200px"><canvas id="dayChart"></canvas></div>
+    <div class="sub fu d3">24 active days &middot; Espresso <span style="color:#e8a83e">&#9632;</span> Kompresso <span style="color:#8e44ad">&#9632;</span> V60 <span style="color:#16a085">&#9632;</span> Other <span style="color:#27ae60">&#9632;</span></div>` },
+
+      /* 9 — SAVINGS */
+      { cls: 's9', html: `
+    <div class="label fu">Money Saved vs Caf&eacute;</div>
+    <div class="bignum fu d1" style="font-size:clamp(3rem,14vw,7rem)">&#8377;5,525</div>
+    <div class="headline fu d2">saved this month</div>
+    <div class="sub fu d3">Caf&eacute; equiv: <span class="hi">&#8377;7,425</span> &middot; Beans consumed: <span class="hi">~&#8377;1,900</span><br><span style="font-size:.8rem;opacity:.5">(9 espresso &times; &#8377;200 + 12 kompresso &times; &#8377;175 + 8 V60 &times; &#8377;200 + 2 other &times; &#8377;150) &minus; beans</span><br>31 cups at home. Even the dialling chaos paid off.</div>` },
+
+      /* 10 — OUTRO */
+      { cls: 's10', html: `
+    <div class="headline glow fu" style="font-size:clamp(2rem,8vw,3.2rem)">That was July &#9749;</div>
+    <div class="sub fu d2" style="margin-top:1rem">31 brews &middot; 5 perfect shots &middot; Kompresso held the fort &middot; 32 clicks locked in.<br>24 days of stubborn consistency. The K6 knows its number now.</div>
+    <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center" class="fu d3">
+      <div class="pill">&#9749; 31 brews</div>
+      <div class="pill">&#128293; 24/31 days</div>
+      <div class="pill">&#11088; 5 five-stars</div>
+      <div class="pill">&#128176; &#8377;5,525 saved</div>
+      <div class="pill">&#127919; 32 clicks locked</div>
+    </div>
+    <a href="index.html" class="pill fu d4" style="margin-top:1.5rem;display:inline-block">&#8592; All Recaps</a>` },
+    ];
+
+    function buildDeck() {
+      const deck = document.getElementById('deck');
+      SLIDES.forEach(({ cls, html }) => {
+        const div = document.createElement('div');
+        div.className = `slide ${cls}`; div.innerHTML = html;
+        particles(div); deck.appendChild(div);
+      });
+      tot = SLIDES.length;
+      const dots = document.getElementById('dots');
+      for (let i = 0; i < tot; i++) { const d = document.createElement('div'); d.className = 'dot'; d.onclick = () => goTo(i); dots.appendChild(d); }
+      goTo(0);
+      requestAnimationFrame(initCharts);
+    }
+
+    function goTo(n) {
+      const slides = document.querySelectorAll('.slide');
+      slides[cur]?.classList.remove('active'); slides[cur]?.classList.add('out');
+      setTimeout(() => slides[cur]?.classList.remove('out'), 500);
+      cur = n; slides[cur]?.classList.add('active');
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+      document.getElementById('progress').style.width = `${((cur + 1) / tot * 100).toFixed(1)}%`;
+    }
+
+    function navNext() { if (cur >= tot - 1) { window.location.href = 'index.html'; } else { goTo(cur + 1); } }
+    function navPrev() { goTo(Math.max(cur - 1, 0)); }
+    document.getElementById('navR').onclick = navNext;
+    document.getElementById('navL').onclick = navPrev;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navNext();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navPrev();
+    });
+    let tx = 0;
+    document.addEventListener('touchstart', e => { tx = e.touches[0].clientX }, { passive: true });
+    document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) { dx < 0 ? navNext() : navPrev() } });
+
+    function initCharts() {
+      const TEXT = 'rgba(245,239,224,0.35)'; const GRID = 'rgba(232,168,62,0.06)';
+      const AMBER = '#e8a83e'; const GREEN = '#16a085'; const PURPLE = '#8e44ad';
+
+      Chart.defaults.font.family = "'DM Sans',sans-serif";
+      Chart.defaults.font.size = 11; Chart.defaults.color = TEXT;
+
+      // Grind chart — July espresso sessions K6 clicks
+      const gc = document.getElementById('grindChart');
+      if (gc) new Chart(gc, {
+        type: 'line', data: {
+          labels: ['Jul 2','Jul 22','Jul 23','Jul 28a','Jul 28b','Jul 28c','Jul 29','Jul 30a','Jul 30b','Jul 30c','Jul 30d','Jul 31'],
+          datasets: [{ data: [29,30,28,30,33,31,32,35,40,32,32,32], borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.08)', pointBackgroundColor: AMBER, pointRadius: 3, tension: 0.3, fill: true, spanGaps: true }]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw ? ` ${c.raw} clicks` : 'N/A' } } }, scales: { x: { ticks: { color: TEXT, font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false }, border: { color: 'rgba(232,168,62,0.1)' } }, y: { ticks: { color: TEXT, callback: v => v + ' clicks' }, grid: { color: GRID }, border: { display: false }, min: 22, max: 45, reverse: true } } }
+      });
+
+      // Day chart — sessions by day
+      const dc = document.getElementById('dayChart');
+      if (dc) {
+        const days =  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','19','22','23','28','29','30','31'];
+        const esp  =  [ 1,  1,  0,  0,  0,  0,  0,  0,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   3,   1,   3,   1];
+        const kmp  =  [ 0,  0,  0,  1,  0,  1,  1,  1,  1,   1,   1,   1,   1,   0,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0];
+        const v60  =  [ 1,  0,  1,  0,  1,  0,  0,  0,  0,   0,   0,   0,   0,   1,   0,   1,   0,   1,   0,   0,   0,   1,   0,   0];
+        const oth  =  [ 0,  0,  0,  0,  0,  0,  0,  0,  0,   0,   0,   0,   1,   0,   0,   0,   1,   0,   0,   0,   0,   0,   0,   0];
+        new Chart(dc, {
+          type: 'bar', data: {
+            labels: days, datasets: [
+              { label: 'Espresso',  data: esp, backgroundColor: AMBER,    borderRadius: 3, stack: 'a' },
+              { label: 'Kompresso', data: kmp, backgroundColor: PURPLE,   borderRadius: 3, stack: 'a' },
+              { label: 'V60',       data: v60, backgroundColor: GREEN,    borderRadius: 3, stack: 'a' },
+              { label: 'Other',     data: oth, backgroundColor: '#27ae60',borderRadius: 3, stack: 'a' }
+            ]
+          }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: TEXT, font: { size: 9 }, autoSkip: false, maxRotation: 0 }, grid: { display: false } }, y: { stacked: true, ticks: { color: TEXT, stepSize: 1 }, grid: { color: GRID }, min: 0, max: 4 } } }
+        });
+      }
+    }
+
+    buildDeck();
+  </script>
+</body>
+
+</html>
