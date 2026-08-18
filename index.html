@@ -1190,7 +1190,7 @@
             if (meta.roastDate) {
               const roastDate = new Date(meta.roastDate + 'T00:00:00');
               const daysFromRoast = Math.floor((Date.now() - roastDate.getTime()) / 86400000);
-              daysInfo = `${daysFromRoast}d from roast (d0) · open ${daysOpen}d · ${bag.size || '—'}`;
+              daysInfo = `${daysFromRoast}d from roast · open ${daysOpen}d · ${bag.size || '—'}`;
             } else {
               daysInfo = `Opened ${daysOpen} day${daysOpen !== 1 ? 's' : ''} ago · ${bag.size || '—'}`;
             }

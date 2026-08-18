@@ -792,9 +792,8 @@
 
         // ── Use Next (oldest/stalest bag — consume first) ──
         const freshestEl = document.getElementById('sh-freshest');
-        // Find the OLDEST opened bag (lowest freshness = consume first)
         let useNext = null;
-        let useNextPct = 101; // start high, find lowest
+        let useNextPct = 101; 
         let useNextLabel = '';
         let useNextBarCls = 'green';
         let useNextRoastAge = '';
@@ -808,12 +807,16 @@
           let label = '';
           let roastAgeStr = '';
 
+          const str = `${l.name || ''} ${l.process || ''} ${l.vendor || ''} ${l.roaster || ''}`.toLowerCase();
+          const isFilter = (meta.restDays >= 30) || str.includes('filter') || str.includes('pour over') || str.includes('v60') || str.includes('light') || str.includes('aeropress');
+          const maxRoastDays = isFilter ? 90 : 60;
+
           if (roastDate) {
             const daysFromRoast = Math.floor((now - roastDate) / 86400000);
-            pct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / 60 * 100)));
+            pct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / maxRoastDays * 100)));
             const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
-            label = `${daysFromRoast}d from roast (d0)` + (daysSinceOpened !== null ? ` · opened ${daysSinceOpened}d ago` : '');
-            roastAgeStr = `${daysFromRoast}d from roast (d0)`;
+            label = `${daysFromRoast}d from roast` + (daysSinceOpened !== null ? ` · opened ${daysSinceOpened}d ago` : '');
+            roastAgeStr = `${daysFromRoast}d from roast`;
           } else if (openedDate) {
             const daysSinceOpened = Math.floor((now - openedDate) / 86400000);
             pct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / 30 * 100)));
@@ -823,7 +826,6 @@
             return;
           }
 
-          // Pick the bag with the LOWEST freshness (oldest from d0)
           if (pct < useNextPct) {
             useNextPct = pct;
             useNext = l;
@@ -833,32 +835,27 @@
           }
         });
 
-        // If no opened bags, fall back to the oldest sealed bag (sorted by roast date / purchase date)
         if (!useNext && sealed.length > 0) {
-          const sortedSealed = [...sealed].sort((a, b) => {
-            const ra = (bagMeta[a.id] || {}).roastDate;
-            const rb = (bagMeta[b.id] || {}).roastDate;
-            if (ra && rb) return new Date(ra) - new Date(rb);
-            if (ra) return -1;
-            if (rb) return 1;
-            return new Date(a.date) - new Date(b.date);
-          });
+          const sortedSealed = [...sealed].sort((a, b) => new Date(a.date) - new Date(b.date));
           const oldest = sortedSealed[0];
           const meta = bagMeta[oldest.id] || {};
           useNext = oldest;
+          const str = `${oldest.name || ''} ${oldest.process || ''} ${oldest.vendor || ''} ${oldest.roaster || ''}`.toLowerCase();
+          const isFilter = (meta.restDays >= 30) || str.includes('filter') || str.includes('pour over') || str.includes('v60') || str.includes('light') || str.includes('aeropress');
+          const maxRoastDays = isFilter ? 90 : 60;
+
           if (meta.roastDate) {
             const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
             const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
-            useNextPct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / 60 * 100)));
-            useNextLabel = `Sealed · ${daysFromRoast}d from roast (d0)`;
+            useNextPct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / maxRoastDays * 100)));
+            useNextLabel = `Sealed · ${daysFromRoast}d from roast`;
             useNextBarCls = useNextPct > 60 ? 'green' : useNextPct > 30 ? 'amber' : 'red';
-            useNextRoastAge = `${daysFromRoast}d from roast (d0)`;
+            useNextRoastAge = `${daysFromRoast}d from roast`;
           } else {
             useNextPct = 50;
             useNextLabel = 'Sealed · oldest on shelf';
             useNextBarCls = 'amber';
             useNextRoastAge = '';
-
         // If no opened bags, fall back to the oldest sealed bag
         if (!useNext && sealed.length > 0) {
           // Pick the oldest sealed bag (by purchase date)

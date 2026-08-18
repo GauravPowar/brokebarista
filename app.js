@@ -848,12 +848,12 @@ function renderShelf() {
       }
     }
 
-    // Freshness bar — roast date is Day 0 (d0)
+    // Freshness bar — differentiate Filter (30d min rest, shines later) vs Espresso (7d rest)
     let freshnessBar = '';
     if (!isDone) {
-      // Per-bean rest days (user-set or smart default based on process)
+      const isFilter = isFilterBean(l, meta);
       const RESTING_DAYS = meta.restDays != null ? meta.restDays : _defaultRestDays(l);
-      const ROAST_SHELF_LIFE = 60; // total days from roast (d0) for peak/usable freshness window
+      const ROAST_SHELF_LIFE = isFilter ? 90 : 60;
       const now = Date.now();
 
       const roastDate = meta.roastDate ? new Date(meta.roastDate + 'T00:00:00').getTime() : null;
@@ -863,26 +863,46 @@ function renderShelf() {
       const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
 
       if (roastDate && daysSinceRoast < RESTING_DAYS) {
-        // ── Phase 1: Resting / degassing from d0 roast date
+        // ── Phase 1: Resting / degassing from roast date
         const restPct = Math.min(100, Math.round(daysSinceRoast / RESTING_DAYS * 100));
         const daysLeft = RESTING_DAYS - daysSinceRoast;
         const openState = openedDate ? ' (Open)' : '';
+        const restTitle = isFilter ? '⏳ Resting (Filter)' : '⏳ Resting';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">⏳ Resting${openState} · ${daysSinceRoast}d of ${RESTING_DAYS}d degassing · ${daysLeft}d left</div>
+          <div class="freshness-label">${restTitle}${openState} · ${daysSinceRoast}d of ${RESTING_DAYS}d degassing · ${daysLeft}d left</div>
           <div class="freshness-track"><div class="freshness-fill fresh-blue" style="width:${restPct}%"></div></div>
         </div>`;
       } else if (roastDate) {
-        // ── Phase 2: Freshness countdown from d0 (roast date)
-        const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceRoast / ROAST_SHELF_LIFE * 100)));
-        const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
-        const freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Past Peak';
+        // ── Phase 2: Freshness window post-rest
+        let freshPct, freshCls, freshLabel;
+        if (isFilter) {
+          // Filter beans: Rest 30d+, Day 30-60 Peak (Shining), Day 60-90 Mellowing, 90d+ Past Peak
+          if (daysSinceRoast <= 60) {
+            freshPct = Math.max(20, Math.min(100, 100 - Math.round((daysSinceRoast - 30) / 30 * 40)));
+            freshCls = 'fresh-purple';
+            freshLabel = '✨ Peak Fresh (Shining)';
+          } else if (daysSinceRoast <= 90) {
+            freshPct = Math.max(10, Math.min(60, 60 - Math.round((daysSinceRoast - 60) / 30 * 50)));
+            freshCls = 'fresh-amber';
+            freshLabel = '☕ Mellowing';
+          } else {
+            freshPct = 0;
+            freshCls = 'fresh-red';
+            freshLabel = 'Past Peak';
+          }
+        } else {
+          // Espresso beans: Rest 7d+, Day 7-30 Peak, Day 30-50 Use Soon, 50d+ Past Peak
+          freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceRoast / ROAST_SHELF_LIFE * 100)));
+          freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
+          freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Past Peak';
+        }
         const openInfo = openedDate ? ` · opened ${daysSinceOpened}d ago` : ' · sealed';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${freshLabel} · ${daysSinceRoast}d from roast (d0)${openInfo}</div>
+          <div class="freshness-label">${freshLabel} · ${daysSinceRoast}d from roast${openInfo}</div>
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       } else if (openedDate) {
-        // ── Fallback 1: No roast date — use opened date as proxy d0
+        // ── Fallback 1: No roast date — use opened date
         const maxFresh = 30;
         const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / maxFresh * 100)));
         const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
@@ -892,7 +912,7 @@ function renderShelf() {
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       } else {
-        // ── Fallback 2: No roast date or opened date — use purchase date as proxy d0
+        // ── Fallback 2: No roast date or opened date — use purchase date
         const daysSincePurchase = Math.floor((now - purchaseDate) / 86400000);
         const fallbackMax = 45;
         const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSincePurchase / fallbackMax * 100)));
@@ -963,17 +983,28 @@ function parseBagSize(size) {
   return null;
 }
 
-// Smart default rest days based on process
+function isFilterBean(log, meta) {
+  if (!log) return false;
+  if (meta && meta.restDays >= 30) return true;
+  const str = `${log.name || ''} ${log.process || ''} ${log.vendor || ''} ${log.roaster || ''}`.toLowerCase();
+  return str.includes('filter') || str.includes('pour over') || str.includes('v60') || str.includes('light') || str.includes('aeropress');
+}
+
+// Smart default rest days based on roast type & process
 function _defaultRestDays(log) {
-  const proc = (log?.process || '').toLowerCase();
-  // Espresso-style darker roasts degas faster; lighter & anaerobic/natural need longer
+  if (!log) return 7;
+  const str = `${log.name || ''} ${log.process || ''} ${log.vendor || ''} ${log.roaster || ''}`.toLowerCase();
+  // Filter beans need minimum 30 days resting period
+  if (str.includes('filter') || str.includes('pour over') || str.includes('v60') || str.includes('light') || str.includes('aeropress')) {
+    return 30;
+  }
+  const proc = (log.process || '').toLowerCase();
   if (proc.includes('anaerobic') || proc.includes('carbonic')) return 14;
   if (proc.includes('co-ferment') || proc.includes('coferment')) return 12;
   if (proc.includes('natural')) return 10;
   if (proc.includes('honey')) return 9;
   if (proc.includes('washed') && proc.includes('natural')) return 8;
-  if (proc.includes('washed')) return 7;
-  return 7; // sensible default
+  return 7; // default for espresso
 }
 
 function openBagModal(id) {

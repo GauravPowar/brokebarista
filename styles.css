@@ -1029,19 +1029,28 @@
     }
 
     .fresh-green {
-      background: var(--green);
+      background: linear-gradient(90deg, #10B981, #059669);
+      box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
+    }
+
+    .fresh-purple {
+      background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+      box-shadow: 0 1px 4px rgba(139, 92, 246, 0.25);
     }
 
     .fresh-amber {
-      background: var(--caramel);
+      background: linear-gradient(90deg, #F59E0B, #D97706);
+      box-shadow: 0 1px 4px rgba(245, 158, 11, 0.25);
     }
 
     .fresh-red {
-      background: #c0392b;
+      background: linear-gradient(90deg, #EF4444, #DC2626);
+      box-shadow: 0 1px 4px rgba(239, 68, 68, 0.25);
     }
 
     .fresh-blue {
-      background: var(--blue);
+      background: linear-gradient(90deg, #3B82F6, #2563EB);
+      box-shadow: 0 1px 4px rgba(59, 130, 246, 0.25);
     }
 
     /* â”€â”€ PROCESS PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
