@@ -237,8 +237,9 @@ function addItemRow(prefill = {}) {
     </div>
     <div class="form-row full"><div class="field">
       <label class="form-label">Product Name</label>
-      <input type="text" id="item-name-${n}" value="${esc(prefill.name || '')}" placeholder="e.g. Baarbara Washed AA">
+      <input type="text" id="item-name-${n}" value="${esc(prefill.name || '')}" placeholder="e.g. Baarbara Washed AA" oninput="_checkDuplicateBean(${n})">
     </div></div>
+    <div id="dup-bean-banner-${n}" style="display:none"></div>
     <div class="form-row">
       <div class="field">
         <label class="form-label">Category</label>
@@ -263,7 +264,7 @@ function addItemRow(prefill = {}) {
       <div class="form-row">
         <div class="field">
           <label class="form-label">Roaster</label>
-          <input type="text" id="item-roaster-${n}" value="${esc(prefill.roaster || '')}" placeholder="e.g. Blue Tokai">
+          <input type="text" id="item-roaster-${n}" value="${esc(prefill.roaster || '')}" placeholder="e.g. Blue Tokai" oninput="_checkDuplicateBean(${n})">
         </div>
         <div class="field">
           <label class="form-label">Origin / Region</label>
@@ -311,6 +312,104 @@ function addItemRow(prefill = {}) {
   return n;
 }
 
+function _checkDuplicateBean(n) {
+  const nameVal = ($(`item-name-${n}`)?.value || '').trim().toLowerCase();
+  const roasterVal = ($(`item-roaster-${n}`)?.value || '').trim().toLowerCase();
+  const banner = $(`dup-bean-banner-${n}`);
+  if (!banner) return;
+
+  // Only check for bean category
+  const cat = $(`item-cat-${n}`)?.value;
+  if (cat !== 'beans') { banner.style.display = 'none'; return; }
+  // Need at least a name to check
+  if (!nameVal || nameVal.length < 2) { banner.style.display = 'none'; return; }
+
+  const beanLogs = (typeof logs !== 'undefined' ? logs : []).filter(l => l.category === 'beans');
+  const matches = beanLogs.filter(l => {
+    const lName = (l.name || '').toLowerCase();
+    const lRoaster = (l.roaster || '').toLowerCase();
+    // Name must match; if roaster is entered it must also match
+    const nameMatch = lName === nameVal || lName.includes(nameVal) || nameVal.includes(lName);
+    const roasterMatch = !roasterVal || lRoaster === roasterVal || lRoaster.includes(roasterVal) || roasterVal.includes(lRoaster);
+    return nameMatch && roasterMatch;
+  });
+
+  if (!matches.length) { banner.style.display = 'none'; return; }
+
+  // Prefer exact name match, then most recent by date
+  const best = matches.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  const currentOverride = $(`item-bean-id-override-${n}`)?.value;
+  if (currentOverride == best.id) return; // already applied
+
+  const dateStr = best.date ? ` (${fmtDate(best.date)})` : '';
+  banner.style.display = 'block';
+  banner.innerHTML = `
+    <div style="
+      display:flex;align-items:flex-start;gap:.6rem;
+      background:rgba(196,125,42,.08);border:1.5px solid rgba(196,125,42,.3);
+      border-radius:10px;padding:.55rem .75rem;margin-bottom:.5rem;
+      font-size:.74rem;color:var(--roast);line-height:1.4
+    ">
+      <span style="font-size:1rem;flex-shrink:0">🫘</span>
+      <div style="flex:1">
+        <strong>This bean is already in your log${dateStr}.</strong><br>
+        Reuse <span style="font-family:'DM Mono',monospace">ID&nbsp;${best.id}</span>
+        (<em>${esc(best.name)}</em> · ${esc(best.roaster || best.vendor)}) to keep your journal sessions linked together.
+        <div style="margin-top:.45rem;display:flex;gap:.5rem;flex-wrap:wrap">
+          <button type="button" onclick="_applyBeanIdOverride(${n}, ${best.id})" style="
+            background:var(--caramel);color:#fff;border:none;border-radius:7px;
+            padding:.25rem .65rem;font-size:.72rem;font-weight:600;cursor:pointer;
+            font-family:'DM Sans',sans-serif
+          ">✓ Use ID ${best.id}</button>
+          <button type="button" onclick="_dismissBeanBanner(${n})" style="
+            background:transparent;color:var(--mid);border:1.5px solid var(--parchment);border-radius:7px;
+            padding:.25rem .65rem;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif
+          ">No, keep as new</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function _applyBeanIdOverride(n, beanId) {
+  // Store the override ID in a hidden input on the item row
+  let inp = $(`item-bean-id-override-${n}`);
+  if (!inp) {
+    inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.id = `item-bean-id-override-${n}`;
+    const row = $(`item-${n}`);
+    if (row) row.appendChild(inp);
+  }
+  inp.value = beanId;
+  const banner = $(`dup-bean-banner-${n}`);
+  if (banner) {
+    banner.innerHTML = `
+      <div style="
+        display:flex;align-items:center;gap:.5rem;
+        background:rgba(94,138,58,.08);border:1.5px solid rgba(94,138,58,.3);
+        border-radius:10px;padding:.45rem .75rem;margin-bottom:.5rem;
+        font-size:.72rem;color:var(--green)
+      ">
+        <span>✅</span>
+        <span>Using existing bean ID <strong>${beanId}</strong> — sessions will stay linked.</span>
+        <button type="button" onclick="_dismissBeanBanner(${n});_clearBeanIdOverride(${n})" style="
+          margin-left:auto;background:transparent;border:none;color:var(--mid);
+          cursor:pointer;font-size:.85rem;line-height:1
+        ">✕</button>
+      </div>`;
+  }
+}
+
+function _dismissBeanBanner(n) {
+  const banner = $(`dup-bean-banner-${n}`);
+  if (banner) banner.style.display = 'none';
+}
+
+function _clearBeanIdOverride(n) {
+  const inp = $(`item-bean-id-override-${n}`);
+  if (inp) inp.value = '';
+}
+
 function removeItem(n) {
   const el = $(`item-${n}`);
   if (el) el.remove();
@@ -342,6 +441,7 @@ function toggleCustomProcess(n) {
 }
 function getItemData(n) {
   const sizeRaw = $(`item-size-${n}`)?.value || '';
+  const beanIdOverride = $(`item-bean-id-override-${n}`)?.value || null;
   return {
     category: $(`item-cat-${n}`)?.value || 'beans',
     name: ($(`item-name-${n}`)?.value || '').trim(),
@@ -358,7 +458,8 @@ function getItemData(n) {
       return v;
     })(),
     brew_equip: [],  // captured via journal entries instead
-    qty: 1
+    qty: 1,
+    ...(beanIdOverride ? { _beanIdOverride: parseInt(beanIdOverride) } : {})
   };
 }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -366,6 +467,8 @@ function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').
 /* ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    SAVE / EDIT / DELETE
 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+function makeClientOrderId() { return 'LOCAL-' + Date.now(); }
+
 async function saveOrder() {
   const date = $('inp-date').value;
   const vendor = $('inp-vendor').value.trim();
@@ -403,12 +506,42 @@ async function saveOrder() {
     } catch (e) { alert('Error: ' + e.message); }
   } else {
     try {
-      const res = await fetch(API, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: { order_id: orderId, date, vendor, is_combo: isCombo, combo_price: comboPrice, notes: '' }, items })
-      });
-      if (res.ok) { await loadData(); window.location.href = '/log'; }
-      else alert('Save failed: ' + await res.text());
+      // Separate items that want to reuse an existing bean ID (update) vs. truly new items
+      const overrideItems = items.filter(i => i._beanIdOverride);
+      const newItems = items.filter(i => !i._beanIdOverride);
+
+      // For each override item, update the existing log entry in-place (keeps the same ID)
+      for (const item of overrideItems) {
+        const existingLog = logs.find(l => l.id === item._beanIdOverride);
+        const existingOrderId = existingLog?.order_id || orderId || makeClientOrderId();
+        await fetch(API, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: item._beanIdOverride,
+            order_id: existingOrderId,
+            date, vendor,
+            category: item.category, name: item.name,
+            price: isCombo ? 0 : item.price,
+            notes: item.notes, roaster: item.roaster, size: item.size,
+            coffee_type: item.coffee_type, brew_equip: item.brew_equip, qty: 1,
+            process: item.process, origin: item.origin,
+            is_combo: isCombo, combo_price: comboPrice
+          })
+        });
+      }
+
+      // Post truly new items as a new order (normal flow)
+      if (newItems.length) {
+        const res = await fetch(API, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order: { order_id: orderId, date, vendor, is_combo: isCombo, combo_price: comboPrice, notes: '' }, items: newItems })
+        });
+        if (!res.ok) { alert('Save failed: ' + await res.text()); return; }
+      } else if (!overrideItems.length) {
+        alert('Add at least one item.'); return;
+      }
+
+      await loadData(); window.location.href = '/log';
     } catch (e) { alert('Error: ' + e.message); }
   }
 }
@@ -715,13 +848,12 @@ function renderShelf() {
       }
     }
 
-    // Freshness bar — two-phase: resting (from roast) + freshness (from bag opened)
+    // Freshness bar — roast date is Day 0 (d0)
     let freshnessBar = '';
     if (!isDone) {
       // Per-bean rest days (user-set or smart default based on process)
       const RESTING_DAYS = meta.restDays != null ? meta.restDays : _defaultRestDays(l);
-      const FRESH_AFTER_OPEN = 30; // days of peak freshness after opening
-      const SEALED_SHELF_LIFE = 60; // days sealed bags stay fresh from roast
+      const ROAST_SHELF_LIFE = 60; // total days from roast (d0) for peak/usable freshness window
       const now = Date.now();
 
       const roastDate = meta.roastDate ? new Date(meta.roastDate + 'T00:00:00').getTime() : null;
@@ -730,47 +862,37 @@ function renderShelf() {
       const daysSinceRoast = roastDate ? Math.floor((now - roastDate) / 86400000) : null;
       const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
 
-      if (roastDate && daysSinceRoast < RESTING_DAYS && !openedDate) {
-        // ── Phase 1: Still resting / degassing (only if bag not yet opened)
+      if (roastDate && daysSinceRoast < RESTING_DAYS) {
+        // ── Phase 1: Resting / degassing from d0 roast date
         const restPct = Math.min(100, Math.round(daysSinceRoast / RESTING_DAYS * 100));
         const daysLeft = RESTING_DAYS - daysSinceRoast;
+        const openState = openedDate ? ' (Open)' : '';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">⏳ Resting · ${daysSinceRoast}d of ${RESTING_DAYS}d degassing · ${daysLeft}d left</div>
+          <div class="freshness-label">⏳ Resting${openState} · ${daysSinceRoast}d of ${RESTING_DAYS}d degassing · ${daysLeft}d left</div>
           <div class="freshness-track"><div class="freshness-fill fresh-blue" style="width:${restPct}%"></div></div>
         </div>`;
-      } else if (roastDate && daysSinceRoast >= RESTING_DAYS && !openedDate) {
-        // ── Resting complete but bag not opened yet — sealed shelf life
-        const sealedDays = daysSinceRoast;
-        const sealedPct = Math.max(0, Math.min(100, 100 - Math.round(sealedDays / SEALED_SHELF_LIFE * 100)));
-        const sealedCls = sealedPct > 60 ? 'fresh-green' : sealedPct > 30 ? 'fresh-amber' : 'fresh-red';
-        const sealedLabel = sealedPct > 60 ? '✅ Ready to open' : sealedPct > 30 ? '⏳ Open soon' : '⚠️ Open now';
+      } else if (roastDate) {
+        // ── Phase 2: Freshness countdown from d0 (roast date)
+        const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceRoast / ROAST_SHELF_LIFE * 100)));
+        const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
+        const freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Past Peak';
+        const openInfo = openedDate ? ` · opened ${daysSinceOpened}d ago` : ' · sealed';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${sealedLabel} · Rested ${daysSinceRoast}d since roast · sealed</div>
-          <div class="freshness-track"><div class="freshness-fill ${sealedCls}" style="width:${sealedPct}%"></div></div>
+          <div class="freshness-label">${freshLabel} · ${daysSinceRoast}d from roast (d0)${openInfo}</div>
+          <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       } else if (openedDate) {
-        // ── Phase 2: Bag is opened — freshness countdown from opened date
-        // Also factor in roast age at open if available
-        let maxFresh = FRESH_AFTER_OPEN;
-        let extraInfo = '';
-        if (roastDate) {
-          const roastAgeAtOpen = Math.floor((openedDate - roastDate) / 86400000);
-          const wasRested = roastAgeAtOpen >= RESTING_DAYS;
-          extraInfo = wasRested
-            ? ` · rested ${roastAgeAtOpen}d`
-            : ` · opened early (${roastAgeAtOpen}d rest)`;
-          // If opened much later after roast, shorten the fresh window
-          if (roastAgeAtOpen > 30) maxFresh = Math.max(14, FRESH_AFTER_OPEN - Math.floor((roastAgeAtOpen - 30) / 3));
-        }
+        // ── Fallback 1: No roast date — use opened date as proxy d0
+        const maxFresh = 30;
         const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / maxFresh * 100)));
         const freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
         const freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Getting Stale';
         freshnessBar = `<div class="freshness-bar-wrap">
-          <div class="freshness-label">${freshLabel} · ${daysSinceOpened}d since opened${extraInfo}</div>
+          <div class="freshness-label">${freshLabel} · ${daysSinceOpened}d since opened</div>
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>
         </div>`;
       } else {
-        // ── Fallback: no roast date or opened date — use purchase date
+        // ── Fallback 2: No roast date or opened date — use purchase date as proxy d0
         const daysSincePurchase = Math.floor((now - purchaseDate) / 86400000);
         const fallbackMax = 45;
         const freshPct = Math.max(0, Math.min(100, 100 - Math.round(daysSincePurchase / fallbackMax * 100)));
@@ -1090,7 +1212,7 @@ function renderJournal() {
     return;
   }
 
-  const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sorted = [...journal].sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
   $('journalList').innerHTML = sorted.map(j => {
     const stars = '★'.repeat(j.rating || 0) + '☆'.repeat(5 - (j.rating || 0));
     const tastes = (j.tastes || []).map(t => `<span class="taste-chip">${esc(t)}</span>`).join('');
@@ -2814,11 +2936,11 @@ function _populateJournalFilterDropdowns() {
 function _applyJournalSort(arr, sortKey) {
   const sorted = [...arr];
   switch (sortKey) {
-    case 'date-asc':    sorted.sort((a, b) => new Date(a.date) - new Date(b.date)); break;
-    case 'date-desc':   sorted.sort((a, b) => new Date(b.date) - new Date(a.date)); break;
-    case 'rating-desc': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.date) - new Date(a.date)); break;
-    case 'rating-asc':  sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0) || new Date(b.date) - new Date(a.date)); break;
-    default:            sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+    case 'date-asc':    sorted.sort((a, b) => new Date(a.date) - new Date(b.date) || Number(a.id) - Number(b.id)); break;
+    case 'date-desc':   sorted.sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    case 'rating-desc': sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    case 'rating-asc':  sorted.sort((a, b) => (a.rating || 0) - (b.rating || 0) || new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id)); break;
+    default:            sorted.sort((a, b) => new Date(b.date) - new Date(a.date) || Number(b.id) - Number(a.id));
   }
   return sorted;
 }

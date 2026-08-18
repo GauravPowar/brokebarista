@@ -801,42 +801,63 @@
 
         opened.forEach(l => {
           const meta = bagMeta[l.id] || {};
+          const roastDate = meta.roastDate ? new Date(meta.roastDate + 'T00:00:00').getTime() : null;
           const openedDate = meta.openedDate ? new Date(meta.openedDate + 'T00:00:00').getTime() : null;
-          if (!openedDate) return;
-          const daysSinceOpened = Math.floor((Date.now() - openedDate) / 86400000);
-          const maxFresh = 30;
-          const pct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / maxFresh * 100)));
-          // Pick the bag with the LOWEST freshness (oldest)
+          const now = Date.now();
+          let pct = 100;
+          let label = '';
+          let roastAgeStr = '';
+
+          if (roastDate) {
+            const daysFromRoast = Math.floor((now - roastDate) / 86400000);
+            pct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / 60 * 100)));
+            const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
+            label = `${daysFromRoast}d from roast (d0)` + (daysSinceOpened !== null ? ` · opened ${daysSinceOpened}d ago` : '');
+            roastAgeStr = `${daysFromRoast}d from roast (d0)`;
+          } else if (openedDate) {
+            const daysSinceOpened = Math.floor((now - openedDate) / 86400000);
+            pct = Math.max(0, Math.min(100, 100 - Math.round(daysSinceOpened / 30 * 100)));
+            label = `${daysSinceOpened}d since opened`;
+            roastAgeStr = '';
+          } else {
+            return;
+          }
+
+          // Pick the bag with the LOWEST freshness (oldest from d0)
           if (pct < useNextPct) {
             useNextPct = pct;
             useNext = l;
-            useNextLabel = `${daysSinceOpened}d since opened`;
+            useNextLabel = label;
             useNextBarCls = pct > 60 ? 'green' : pct > 30 ? 'amber' : 'red';
-            // Roast age
-            if (meta.roastDate) {
-              const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
-              const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
-              useNextRoastAge = `${daysFromRoast}d from roast`;
-            } else {
-              useNextRoastAge = '';
-            }
+            useNextRoastAge = roastAgeStr;
           }
         });
 
-        // If no opened bags, fall back to the oldest sealed bag
+        // If no opened bags, fall back to the oldest sealed bag (sorted by roast date / purchase date)
         if (!useNext && sealed.length > 0) {
-          // Pick the oldest sealed bag (by purchase date)
-          const sortedSealed = [...sealed].sort((a, b) => new Date(a.date) - new Date(b.date));
+          const sortedSealed = [...sealed].sort((a, b) => {
+            const ra = (bagMeta[a.id] || {}).roastDate;
+            const rb = (bagMeta[b.id] || {}).roastDate;
+            if (ra && rb) return new Date(ra) - new Date(rb);
+            if (ra) return -1;
+            if (rb) return 1;
+            return new Date(a.date) - new Date(b.date);
+          });
           const oldest = sortedSealed[0];
           const meta = bagMeta[oldest.id] || {};
           useNext = oldest;
-          useNextPct = 50;
-          useNextLabel = 'Sealed · oldest on shelf';
-          useNextBarCls = 'amber';
           if (meta.roastDate) {
             const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
             const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
-            useNextRoastAge = `${daysFromRoast}d from roast`;
+            useNextPct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / 60 * 100)));
+            useNextLabel = `Sealed · ${daysFromRoast}d from roast (d0)`;
+            useNextBarCls = useNextPct > 60 ? 'green' : useNextPct > 30 ? 'amber' : 'red';
+            useNextRoastAge = `${daysFromRoast}d from roast (d0)`;
+          } else {
+            useNextPct = 50;
+            useNextLabel = 'Sealed · oldest on shelf';
+            useNextBarCls = 'amber';
+            useNextRoastAge = '';
           }
         }
 
