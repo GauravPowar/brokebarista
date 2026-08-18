@@ -808,7 +808,7 @@
     }
 
     .tag-accessories {
-      background: var(--blue-bg);
+      background: rgba(122, 92, 58, .12);
       color: var(--blue);
     }
 
@@ -820,21 +820,45 @@
     }
 
     .epill {
-      font-size: .61rem;
-      padding: .11rem .48rem;
+      font-size: .63rem;
+      padding: .14rem .52rem;
       border-radius: 999px;
       background: var(--parchment);
-      color: var(--mid);
+      color: var(--espresso);
+      border: 1px solid rgba(196, 125, 42, 0.12);
+      font-weight: 500;
+      letter-spacing: .01em;
+      transition: all .2s ease;
     }
 
     .epill.brew {
-      background: rgba(196, 125, 42, .1);
-      color: var(--caramel);
+      background: rgba(232, 168, 62, 0.15);
+      color: #b45309;
+      border: 1px solid rgba(232, 168, 62, 0.28);
     }
 
     .epill.process {
-      background: var(--green-bg);
-      color: var(--green);
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .epill.origin {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .epill.filter-badge {
+      background: rgba(139, 92, 246, 0.12);
+      color: #7c3aed;
+      border: 1px solid rgba(139, 92, 246, 0.25);
+    }
+
+    .epill.espresso-badge {
+      background: rgba(245, 158, 11, 0.12);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.25);
     }
 
     .entry-notes {
@@ -904,19 +928,25 @@
       font-style: italic;
     }
 
-    /* â”€â”€ SHELF â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+    /* ── SHELF ───────────────────────────────────────────── */
     .shelf-card {
       background: var(--steam);
       border: 1px solid var(--parchment);
       border-radius: 16px;
-      padding: 1.1rem 1.2rem;
-      margin-bottom: .9rem;
-      box-shadow: 0 2px 8px var(--shadow);
+      padding: 1.15rem 1.25rem;
+      margin-bottom: .95rem;
+      box-shadow: 0 3px 12px var(--shadow);
       display: grid;
       grid-template-columns: 1fr auto;
       gap: .7rem;
       position: relative;
       overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .shelf-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px var(--shadow);
     }
 
     .shelf-card::before {
@@ -925,7 +955,7 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 3px;
+      width: 3.5px;
       border-radius: 3px 0 0 3px;
       background: var(--caramel);
     }
@@ -944,13 +974,13 @@
 
     .shelf-name {
       font-family: "Playfair Display", serif;
-      font-size: .97rem;
+      font-size: .98rem;
       font-weight: 600;
       color: var(--espresso);
     }
 
     .shelf-roaster {
-      font-size: .7rem;
+      font-size: .71rem;
       color: var(--mid);
       margin-top: .18rem;
     }
@@ -1005,21 +1035,27 @@
     }
 
     .freshness-bar-wrap {
-      margin-top: .55rem;
+      margin-top: .58rem;
     }
 
     .freshness-label {
-      font-size: .63rem;
-      color: var(--mid);
-      letter-spacing: .06em;
-      margin-bottom: .22rem;
+      font-size: .66rem;
+      font-weight: 600;
+      color: var(--roast);
+      letter-spacing: .02em;
+      margin-bottom: .26rem;
     }
 
     .freshness-track {
-      height: 5px;
-      background: var(--parchment);
+      height: 6px;
+      background: rgba(44, 26, 14, 0.08);
       border-radius: 999px;
       overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    body.dark-mode .freshness-track {
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .freshness-fill {
@@ -1030,27 +1066,27 @@
 
     .fresh-green {
       background: linear-gradient(90deg, #10B981, #059669);
-      box-shadow: 0 1px 4px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 1px 6px rgba(16, 185, 129, 0.4);
     }
 
     .fresh-purple {
-      background: linear-gradient(90deg, #8B5CF6, #7C3AED);
-      box-shadow: 0 1px 4px rgba(139, 92, 246, 0.25);
+      background: linear-gradient(90deg, #A855F7, #6366F1);
+      box-shadow: 0 1px 6px rgba(168, 85, 247, 0.4);
     }
 
     .fresh-amber {
-      background: linear-gradient(90deg, #F59E0B, #D97706);
-      box-shadow: 0 1px 4px rgba(245, 158, 11, 0.25);
+      background: linear-gradient(90deg, #FBBF24, #D97706);
+      box-shadow: 0 1px 6px rgba(245, 158, 11, 0.4);
     }
 
     .fresh-red {
-      background: linear-gradient(90deg, #EF4444, #DC2626);
-      box-shadow: 0 1px 4px rgba(239, 68, 68, 0.25);
+      background: linear-gradient(90deg, #F87171, #DC2626);
+      box-shadow: 0 1px 6px rgba(239, 68, 68, 0.4);
     }
 
     .fresh-blue {
-      background: linear-gradient(90deg, #3B82F6, #2563EB);
-      box-shadow: 0 1px 4px rgba(59, 130, 246, 0.25);
+      background: linear-gradient(90deg, #38BDF8, #2563EB);
+      box-shadow: 0 1px 6px rgba(56, 189, 248, 0.4);
     }
 
     /* â”€â”€ PROCESS PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

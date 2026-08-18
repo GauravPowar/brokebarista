@@ -896,7 +896,13 @@ function renderShelf() {
           freshCls = freshPct > 60 ? 'fresh-green' : freshPct > 30 ? 'fresh-amber' : 'fresh-red';
           freshLabel = freshPct > 60 ? 'Peak Fresh' : freshPct > 30 ? 'Use Soon' : 'Past Peak';
         }
-        const openInfo = openedDate ? ` · opened ${daysSinceOpened}d ago` : ' · sealed';
+        let openInfo = '';
+        if (openedDate) {
+          const restDaysBeforeOpen = Math.max(0, Math.floor((openedDate - roastDate) / 86400000));
+          openInfo = ` · rested ${restDaysBeforeOpen}d · opened ${daysSinceOpened}d ago`;
+        } else {
+          openInfo = ` · rested ${daysSinceRoast}d · sealed`;
+        }
         freshnessBar = `<div class="freshness-bar-wrap">
           <div class="freshness-label">${freshLabel} · ${daysSinceRoast}d from roast${openInfo}</div>
           <div class="freshness-track"><div class="freshness-fill ${freshCls}" style="width:${freshPct}%"></div></div>

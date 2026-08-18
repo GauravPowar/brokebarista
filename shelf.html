@@ -815,7 +815,14 @@
             const daysFromRoast = Math.floor((now - roastDate) / 86400000);
             pct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / maxRoastDays * 100)));
             const daysSinceOpened = openedDate ? Math.floor((now - openedDate) / 86400000) : null;
-            label = `${daysFromRoast}d from roast` + (daysSinceOpened !== null ? ` · opened ${daysSinceOpened}d ago` : '');
+            let openInfo = '';
+            if (openedDate) {
+              const restDaysBeforeOpen = Math.max(0, Math.floor((openedDate - roastDate) / 86400000));
+              openInfo = ` · rested ${restDaysBeforeOpen}d · opened ${daysSinceOpened}d ago`;
+            } else {
+              openInfo = ` · rested ${daysFromRoast}d · sealed`;
+            }
+            label = `${daysFromRoast}d from roast${openInfo}`;
             roastAgeStr = `${daysFromRoast}d from roast`;
           } else if (openedDate) {
             const daysSinceOpened = Math.floor((now - openedDate) / 86400000);
@@ -848,7 +855,7 @@
             const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
             const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
             useNextPct = Math.max(0, Math.min(100, 100 - Math.round(daysFromRoast / maxRoastDays * 100)));
-            useNextLabel = `Sealed · ${daysFromRoast}d from roast`;
+            useNextLabel = `Sealed · ${daysFromRoast}d from roast · rested ${daysFromRoast}d`;
             useNextBarCls = useNextPct > 60 ? 'green' : useNextPct > 30 ? 'amber' : 'red';
             useNextRoastAge = `${daysFromRoast}d from roast`;
           } else {
@@ -856,21 +863,6 @@
             useNextLabel = 'Sealed · oldest on shelf';
             useNextBarCls = 'amber';
             useNextRoastAge = '';
-        // If no opened bags, fall back to the oldest sealed bag
-        if (!useNext && sealed.length > 0) {
-          // Pick the oldest sealed bag (by purchase date)
-          const sortedSealed = [...sealed].sort((a, b) => new Date(a.date) - new Date(b.date));
-          const oldest = sortedSealed[0];
-          const meta = bagMeta[oldest.id] || {};
-          useNext = oldest;
-          useNextPct = 50;
-          useNextLabel = 'Sealed · oldest on shelf';
-          useNextBarCls = 'amber';
-          if (meta.roastDate) {
-            const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
-            const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
-            useNextRoastAge = `${daysFromRoast}d from roast`;
->>>>>>> origin/main
           }
         }
 
