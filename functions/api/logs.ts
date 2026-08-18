@@ -84,7 +84,7 @@ export async function onRequestGet({ request, env }: { request: any, env: any })
 
     if (route === "journal") {
       const { results } = await db.prepare(
-        "SELECT * FROM journal ORDER BY date DESC"
+        "SELECT * FROM journal ORDER BY date DESC, id DESC"
       ).all();
       return json({ journal: results || [] });
     }

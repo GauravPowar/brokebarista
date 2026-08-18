@@ -858,6 +858,22 @@
             useNextLabel = 'Sealed · oldest on shelf';
             useNextBarCls = 'amber';
             useNextRoastAge = '';
+
+        // If no opened bags, fall back to the oldest sealed bag
+        if (!useNext && sealed.length > 0) {
+          // Pick the oldest sealed bag (by purchase date)
+          const sortedSealed = [...sealed].sort((a, b) => new Date(a.date) - new Date(b.date));
+          const oldest = sortedSealed[0];
+          const meta = bagMeta[oldest.id] || {};
+          useNext = oldest;
+          useNextPct = 50;
+          useNextLabel = 'Sealed · oldest on shelf';
+          useNextBarCls = 'amber';
+          if (meta.roastDate) {
+            const roastDate = new Date(meta.roastDate + 'T00:00:00').getTime();
+            const daysFromRoast = Math.floor((Date.now() - roastDate) / 86400000);
+            useNextRoastAge = `${daysFromRoast}d from roast`;
+>>>>>>> origin/main
           }
         }
 
