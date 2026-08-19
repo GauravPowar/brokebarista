@@ -1,147 +1,8 @@
-    /* ═══════════════════════════════════════════════════════════
-       THEME 1: NORDIC SPECIALTY CAFE (Option 3 - Clean Porcelain & Matcha Sage)
-    ═══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+       DEFAULT THEME: WARM BARISTA (Artisanal Cream & Caramel)
+       This is the :root fallback — site looks exactly as it always did.
+    ══════════════════════════════════════════════════════════ */
     :root,
-    [data-theme="nordic"],
-    body[data-theme="nordic"] {
-      --cream: #F8FAFC;
-      --parchment: #E2E8F0;
-      --espresso: #0F172A;
-      --roast: #059669;
-      --caramel: #0D9488;
-      --honey: #10B981;
-      --steam: #FFFFFF;
-      --mid: #475569;
-      --light: #94A3B8;
-      --shadow: rgba(15, 23, 42, 0.08);
-      --green: #059669;
-      --green-bg: rgba(5, 150, 105, 0.12);
-      --blue: #0284C7;
-      --blue-bg: rgba(2, 132, 199, 0.12);
-      --purple: #7C3AED;
-      --purple-bg: rgba(124, 58, 237, 0.12);
-      --nav-h: 62px;
-      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    [data-theme="nordic"].dark-mode,
-    body.dark-mode[data-theme="nordic"],
-    body.dark-mode:not([data-theme="luxury"]):not([data-theme="barista"]) {
-      --cream: #0B0F17;
-      --parchment: #1E293B;
-      --espresso: #F8FAFC;
-      --roast: #34D399;
-      --caramel: #2DD4BF;
-      --honey: #38BDF8;
-      --steam: #111827;
-      --mid: #94A3B8;
-      --light: #64748B;
-      --shadow: rgba(0, 0, 0, 0.5);
-      --green: #10B981;
-      --green-bg: rgba(16, 185, 129, 0.18);
-      --blue: #38BDF8;
-      --blue-bg: rgba(56, 189, 248, 0.18);
-      --purple: #A78BFA;
-      --purple-bg: rgba(167, 139, 250, 0.18);
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       THEME 2: LUXURY BRONZE & VELVET (Option 4 - Sumptuous Velvet Chocolate & Champagne Bronze)
-    ═══════════════════════════════════════════════════════════ */
-    [data-theme="luxury"],
-    body[data-theme="luxury"] {
-      --cream: #1B110B;
-      --parchment: #382215;
-      --espresso: #F6EEE3;
-      --roast: #E5A962;
-      --caramel: #D49354;
-      --honey: #F5C77E;
-      --steam: #251810;
-      --mid: #BCA08D;
-      --light: #7E614E;
-      --shadow: rgba(8, 4, 2, 0.7);
-      --green: #68A860;
-      --green-bg: rgba(104, 168, 96, 0.16);
-      --blue: #6FA2D2;
-      --blue-bg: rgba(111, 162, 210, 0.16);
-      --purple: #C27BB0;
-      --purple-bg: rgba(194, 123, 176, 0.16);
-      --nav-h: 62px;
-      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    [data-theme="luxury"].dark-mode,
-    body.dark-mode[data-theme="luxury"] {
-      --cream: #100905;
-      --parchment: #2C1A0F;
-      --espresso: #FAF4EB;
-      --roast: #F2BA74;
-      --caramel: #E09E5B;
-      --honey: #FCD38D;
-      --steam: #1A1009;
-      --mid: #CBB2A1;
-      --light: #6E5343;
-      --shadow: rgba(0, 0, 0, 0.85);
-      --green: #7EC975;
-      --green-bg: rgba(126, 201, 117, 0.2);
-      --blue: #86B8E8;
-      --blue-bg: rgba(134, 184, 232, 0.2);
-      --purple: #D691C4;
-      --purple-bg: rgba(214, 145, 196, 0.2);
-    }
-
-    /* Velvet accents for Luxury Bronze */
-    [data-theme="luxury"] .shelf-card,
-    body[data-theme="luxury"] .shelf-card,
-    [data-theme="luxury"] .panel,
-    body[data-theme="luxury"] .panel,
-    [data-theme="luxury"] .stat-card,
-    body[data-theme="luxury"] .stat-card,
-    [data-theme="luxury"] .entry-card,
-    body[data-theme="luxury"] .entry-card,
-    [data-theme="luxury"] .story-card,
-    body[data-theme="luxury"] .story-card {
-      border: 1px solid rgba(229, 169, 98, 0.18);
-      box-shadow: 0 8px 28px rgba(10, 5, 2, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-
-    [data-theme="luxury"] .shelf-card::before,
-    body[data-theme="luxury"] .shelf-card::before {
-      background: linear-gradient(180deg, #F5C77E, #D49354, #8C532B);
-      box-shadow: 0 0 12px rgba(229, 169, 98, 0.4);
-    }
-
-    [data-theme="luxury"] .shelf-header h1 em,
-    body[data-theme="luxury"] .shelf-header h1 em {
-      color: #E5A962;
-      text-shadow: 0 0 16px rgba(229, 169, 98, 0.35);
-    }
-
-    [data-theme="luxury"] .bottom-nav,
-    body[data-theme="luxury"] .bottom-nav {
-      background: rgba(27, 17, 11, 0.94);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(229, 169, 98, 0.18);
-      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    [data-theme="luxury"] .epill,
-    body[data-theme="luxury"] .epill {
-      background: rgba(42, 28, 18, 0.9);
-      border: 1px solid rgba(229, 169, 98, 0.22);
-      color: #F6EEE3;
-    }
-
-    [data-theme="luxury"] .epill.brew,
-    body[data-theme="luxury"] .epill.brew {
-      background: rgba(229, 169, 98, 0.15);
-      color: #F5C77E;
-      border-color: rgba(229, 169, 98, 0.4);
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       THEME 3: WARM SPECIALTY BARISTA (Classic Artisanal Cream & Caramel)
-    ═══════════════════════════════════════════════════════════ */
     [data-theme="barista"],
     body[data-theme="barista"] {
       --cream: #F5EFE0;
@@ -161,9 +22,10 @@
       --purple: #7A3A8A;
       --purple-bg: rgba(122, 58, 138, 0.1);
       --nav-h: 62px;
-      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition: all 0.3s ease;
     }
 
+    body.dark-mode,
     [data-theme="barista"].dark-mode,
     body.dark-mode[data-theme="barista"] {
       --cream: #140D08;
@@ -184,26 +46,142 @@
       --purple-bg: rgba(180, 122, 196, 0.15);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       background: var(--cream);
       color: var(--espresso);
       font-family: "DM Sans", sans-serif;
       min-height: 100vh;
       padding-bottom: calc(var(--nav-h) + 1.5rem);
-      background-image: radial-gradient(ellipse at 15% 0%, rgba(13, 148, 136, .05) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 100%, rgba(5, 150, 105, .04) 0%, transparent 55%);
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 125, 42, .07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(74, 44, 20, .05) 0%, transparent 55%);
       transition: background var(--transition), color var(--transition);
     }
 
     body.dark-mode {
-      background-image: radial-gradient(ellipse at 15% 0%, rgba(45, 212, 191, .03) 0%, transparent 55%),
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 125, 42, .03) 0%, transparent 55%),
         radial-gradient(ellipse at 85% 100%, rgba(0, 0, 0, .4) 0%, transparent 55%);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       THEME 2: SLATE & CLAY (Warm Grey-Beige with Terra Cotta)
+       Icon in switcher: colour palette — no conflict with app emojis
+    ══════════════════════════════════════════════════════════ */
+    [data-theme="slate"],
+    body[data-theme="slate"] {
+      --cream: #F4F1EE;
+      --parchment: #E5E1DB;
+      --espresso: #1C1916;
+      --roast: #B04A1F;
+      --caramel: #C4622D;
+      --honey: #D97F4E;
+      --steam: #FDFCFA;
+      --mid: #6B6560;
+      --light: #B0A9A2;
+      --shadow: rgba(28, 25, 22, 0.1);
+      --green: #3D7A52;
+      --green-bg: rgba(61, 122, 82, 0.1);
+      --blue: #3F6FAE;
+      --blue-bg: rgba(63, 111, 174, 0.1);
+      --purple: #6E3F9E;
+      --purple-bg: rgba(110, 63, 158, 0.1);
+      --nav-h: 62px;
+      --transition: all 0.3s ease;
+    }
+
+    [data-theme="slate"].dark-mode,
+    body.dark-mode[data-theme="slate"] {
+      --cream: #17100D;
+      --parchment: #261E1A;
+      --espresso: #F4EDE7;
+      --roast: #E07050;
+      --caramel: #CB8258;
+      --honey: #E09A6E;
+      --steam: #1E1511;
+      --mid: #A09790;
+      --light: #6B5E58;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --green: #5FAD72;
+      --green-bg: rgba(95, 173, 114, 0.15);
+      --blue: #6DA0D8;
+      --blue-bg: rgba(109, 160, 216, 0.15);
+      --purple: #A47FD4;
+      --purple-bg: rgba(164, 127, 212, 0.15);
+    }
+
+    [data-theme="slate"] body,
+    body[data-theme="slate"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 98, 45, .07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(68, 36, 20, .05) 0%, transparent 55%);
+    }
+
+    [data-theme="slate"] body.dark-mode,
+    body.dark-mode[data-theme="slate"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 98, 45, .04) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(0, 0, 0, .4) 0%, transparent 55%);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       THEME 3: INK & SAGE (Deep Forest Green with Cream Parchment)
+       Icon in switcher: colour swatch — no conflict with app emojis
+    ══════════════════════════════════════════════════════════ */
+    [data-theme="ink"],
+    body[data-theme="ink"] {
+      --cream: #EFF3F1;
+      --parchment: #D9E3DE;
+      --espresso: #111F1A;
+      --roast: #2D6A4F;
+      --caramel: #3B8B67;
+      --honey: #52A880;
+      --steam: #F7FAF8;
+      --mid: #4A6157;
+      --light: #9AB5AB;
+      --shadow: rgba(17, 31, 26, 0.1);
+      --green: #2D6A4F;
+      --green-bg: rgba(45, 106, 79, 0.12);
+      --blue: #2B6CB0;
+      --blue-bg: rgba(43, 108, 176, 0.12);
+      --purple: #6D4C9E;
+      --purple-bg: rgba(109, 76, 158, 0.12);
+      --nav-h: 62px;
+      --transition: all 0.3s ease;
+    }
+
+    [data-theme="ink"].dark-mode,
+    body.dark-mode[data-theme="ink"] {
+      --cream: #0A1612;
+      --parchment: #152320;
+      --espresso: #EAF2EE;
+      --roast: #52C48A;
+      --caramel: #68D4A2;
+      --honey: #81E0B5;
+      --steam: #111E18;
+      --mid: #89AFA2;
+      --light: #4A6B60;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --green: #52C48A;
+      --green-bg: rgba(82, 196, 138, 0.18);
+      --blue: #63A8E8;
+      --blue-bg: rgba(99, 168, 232, 0.18);
+      --purple: #B488E0;
+      --purple-bg: rgba(180, 136, 224, 0.18);
+    }
+
+    [data-theme="ink"] body,
+    body[data-theme="ink"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(45, 106, 79, .08) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(17, 31, 26, .05) 0%, transparent 55%);
+    }
+
+    [data-theme="ink"] body.dark-mode,
+    body.dark-mode[data-theme="ink"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(82, 196, 138, .04) 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 100%, rgba(0, 0, 0, .5) 0%, transparent 60%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     [data-theme="luxury"] body,

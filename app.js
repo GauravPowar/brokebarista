@@ -3250,30 +3250,30 @@ document.addEventListener('keydown', e => {
 ═══════════════════════════════════════════════════════════ */
 const THEMES = [
   {
-    id: 'nordic',
-    name: 'Nordic Specialty',
-    desc: 'Clean porcelain & matcha sage',
-    icon: '🌿',
-    swatches: ['#F8FAFC', '#059669', '#0D9488', '#0F172A']
-  },
-  {
-    id: 'luxury',
-    name: 'Luxury Bronze & Velvet',
-    desc: 'Velvet chocolate, brushed bronze & gold',
-    icon: '⚜️',
-    swatches: ['#1B110B', '#251810', '#E5A962', '#F6EEE3']
-  },
-  {
     id: 'barista',
     name: 'Warm Barista',
-    desc: 'Artisanal cream & caramel roast',
-    icon: '☕',
-    swatches: ['#F5EFE0', '#C47D2A', '#4A2C14', '#2C1A0E']
+    desc: 'Original artisanal cream & caramel',
+    icon: '🟤',
+    swatches: ['#F5EFE0', '#EDE4CE', '#C47D2A', '#2C1A0E']
+  },
+  {
+    id: 'slate',
+    name: 'Slate & Clay',
+    desc: 'Warm grey-beige with terra cotta',
+    icon: '🟫',
+    swatches: ['#F4F1EE', '#E5E1DB', '#C4622D', '#1C1916']
+  },
+  {
+    id: 'ink',
+    name: 'Ink & Sage',
+    desc: 'Deep forest green with cream parchment',
+    icon: '🟢',
+    swatches: ['#EFF3F1', '#D9E3DE', '#3B8B67', '#111F1A']
   }
 ];
 
 function getCurrentTheme() {
-  return localStorage.getItem('bb_theme') || 'nordic';
+  return localStorage.getItem('bb_theme') || 'barista';
 }
 
 function getCurrentMode() {
