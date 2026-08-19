@@ -3258,10 +3258,10 @@ const THEMES = [
   },
   {
     id: 'luxury',
-    name: 'Luxury Bronze',
-    desc: 'Velvet chocolate & champagne gold',
+    name: 'Luxury Bronze & Velvet',
+    desc: 'Velvet chocolate, brushed bronze & gold',
     icon: '⚜️',
-    swatches: ['#FBF7F0', '#C68B59', '#8C532B', '#1F140E']
+    swatches: ['#1B110B', '#251810', '#E5A962', '#F6EEE3']
   },
   {
     id: 'barista',
