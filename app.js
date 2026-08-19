@@ -3246,26 +3246,171 @@ document.addEventListener('keydown', e => {
 });
 
 /* ═══════════════════════════════════════════════════════════
-   THEME
+   MULTI-THEME ENGINE (Nordic Specialty, Luxury Bronze, Classic Barista)
 ═══════════════════════════════════════════════════════════ */
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  updateThemeUI();
-  // Re-render insights charts on theme change (only if we're on the insights page)
-  if (document.body.dataset.page === 'insights') renderInsights();
+const THEMES = [
+  {
+    id: 'nordic',
+    name: 'Nordic Specialty',
+    desc: 'Clean porcelain & matcha sage',
+    icon: '🌿',
+    swatches: ['#F8FAFC', '#059669', '#0D9488', '#0F172A']
+  },
+  {
+    id: 'luxury',
+    name: 'Luxury Bronze',
+    desc: 'Velvet chocolate & champagne gold',
+    icon: '⚜️',
+    swatches: ['#FBF7F0', '#C68B59', '#8C532B', '#1F140E']
+  },
+  {
+    id: 'barista',
+    name: 'Warm Barista',
+    desc: 'Artisanal cream & caramel roast',
+    icon: '☕',
+    swatches: ['#F5EFE0', '#C47D2A', '#4A2C14', '#2C1A0E']
+  }
+];
+
+function getCurrentTheme() {
+  return localStorage.getItem('bb_theme') || 'nordic';
 }
-function applyTheme() {
+
+function getCurrentMode() {
   const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'dark' || (!saved && prefersDark)) document.body.classList.add('dark-mode');
+  if (saved) return saved;
+  return (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+
+function setTheme(themeId) {
+  localStorage.setItem('bb_theme', themeId);
+  applyTheme();
+  if (typeof document !== 'undefined' && document.body && document.body.dataset && document.body.dataset.page === 'insights' && typeof renderInsights === 'function') renderInsights();
+}
+
+function setMode(mode) {
+  localStorage.setItem('theme', mode);
+  applyTheme();
+  if (typeof document !== 'undefined' && document.body && document.body.dataset && document.body.dataset.page === 'insights' && typeof renderInsights === 'function') renderInsights();
+}
+
+function toggleTheme() {
+  openThemeModal();
+}
+
+function applyTheme() {
+  const theme = getCurrentTheme();
+  const mode = getCurrentMode();
+
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.setAttribute('data-theme', theme);
+    if (mode === 'dark') {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }
   updateThemeUI();
 }
+
+try {
+  applyTheme();
+} catch (e) {}
+
 function updateThemeUI() {
-  const isDark = document.body.classList.contains('dark-mode');
-  document.querySelectorAll('.theme-toggle').forEach(btn => {
-    btn.innerHTML = isDark ? '☀️' : '🌙';
-  });
+  if (typeof document === 'undefined') return;
+  const mode = getCurrentMode();
+  const theme = getCurrentTheme();
+  const activeThemeObj = THEMES.find(t => t.id === theme) || THEMES[0];
+
+  if (typeof document.querySelectorAll === 'function') {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.innerHTML = `${activeThemeObj.icon}`;
+      if (typeof btn.setAttribute === 'function') btn.setAttribute('title', `Theme: ${activeThemeObj.name} (${mode})`);
+    });
+
+    document.querySelectorAll('.theme-card-option').forEach(el => {
+      if (el.dataset && el.dataset.themeId === theme) {
+        el.classList.add('selected');
+      } else {
+        el.classList.remove('selected');
+      }
+    });
+  }
+
+  const lightBtn = typeof document.getElementById === 'function' ? document.getElementById('theme-mode-light') : null;
+  const darkBtn = typeof document.getElementById === 'function' ? document.getElementById('theme-mode-dark') : null;
+  if (lightBtn && darkBtn) {
+    if (mode === 'dark') {
+      darkBtn.classList.add('active');
+      lightBtn.classList.remove('active');
+    } else {
+      lightBtn.classList.add('active');
+      darkBtn.classList.remove('active');
+    }
+  }
+}
+
+function openThemeModal() {
+  if (typeof document === 'undefined' || !document.body) return;
+  let modalOverlay = document.getElementById('themeModalOverlay');
+  if (!modalOverlay) {
+    modalOverlay = document.createElement('div');
+    modalOverlay.id = 'themeModalOverlay';
+    modalOverlay.className = 'theme-modal-overlay';
+    
+    const themeGridHtml = THEMES.map(t => `
+      <div class="theme-card-option ${t.id === getCurrentTheme() ? 'selected' : ''}" data-theme-id="${t.id}" onclick="setTheme('${t.id}')">
+        <div class="theme-card-info">
+          <span class="theme-card-icon">${t.icon}</span>
+          <div>
+            <div class="theme-card-name">${t.name}</div>
+            <div class="theme-card-desc">${t.desc}</div>
+          </div>
+        </div>
+        <div class="theme-swatches">
+          ${t.swatches.map(c => `<span class="theme-swatch" style="background:${c}"></span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    modalOverlay.innerHTML = `
+      <div class="theme-modal-card">
+        <div class="theme-modal-header">
+          <div class="theme-modal-title">🎨 Theme & Palette</div>
+          <button class="theme-modal-close" onclick="closeThemeModal()">&times;</button>
+        </div>
+        <div class="theme-picker-grid">
+          ${themeGridHtml}
+        </div>
+        <div class="theme-mode-row">
+          <span class="theme-mode-label">Appearance</span>
+          <div class="theme-mode-toggle-wrap">
+            <button id="theme-mode-light" class="theme-mode-btn ${getCurrentMode() === 'light' ? 'active' : ''}" onclick="setMode('light')">☀️ Light</button>
+            <button id="theme-mode-dark" class="theme-mode-btn ${getCurrentMode() === 'dark' ? 'active' : ''}" onclick="setMode('dark')">🌙 Dark</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeThemeModal();
+    });
+
+    document.body.appendChild(modalOverlay);
+  }
+
+  updateThemeUI();
+  modalOverlay.classList.add('active');
+}
+
+function closeThemeModal() {
+  if (typeof document === 'undefined') return;
+  const modalOverlay = document.getElementById('themeModalOverlay');
+  if (modalOverlay) modalOverlay.classList.remove('active');
 }
 
 /* ═══════════════════════════════════════════════════════════

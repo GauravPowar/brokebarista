@@ -1,4 +1,100 @@
-    :root {
+    /* ═══════════════════════════════════════════════════════════
+       THEME 1: NORDIC SPECIALTY CAFE (Option 3 - Clean Porcelain & Matcha Sage)
+    ═══════════════════════════════════════════════════════════ */
+    :root,
+    [data-theme="nordic"],
+    body[data-theme="nordic"] {
+      --cream: #F8FAFC;
+      --parchment: #E2E8F0;
+      --espresso: #0F172A;
+      --roast: #059669;
+      --caramel: #0D9488;
+      --honey: #10B981;
+      --steam: #FFFFFF;
+      --mid: #475569;
+      --light: #94A3B8;
+      --shadow: rgba(15, 23, 42, 0.08);
+      --green: #059669;
+      --green-bg: rgba(5, 150, 105, 0.12);
+      --blue: #0284C7;
+      --blue-bg: rgba(2, 132, 199, 0.12);
+      --purple: #7C3AED;
+      --purple-bg: rgba(124, 58, 237, 0.12);
+      --nav-h: 62px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="nordic"].dark-mode,
+    body.dark-mode[data-theme="nordic"],
+    body.dark-mode:not([data-theme="luxury"]):not([data-theme="barista"]) {
+      --cream: #0B0F17;
+      --parchment: #1E293B;
+      --espresso: #F8FAFC;
+      --roast: #34D399;
+      --caramel: #2DD4BF;
+      --honey: #38BDF8;
+      --steam: #111827;
+      --mid: #94A3B8;
+      --light: #64748B;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --green: #10B981;
+      --green-bg: rgba(16, 185, 129, 0.18);
+      --blue: #38BDF8;
+      --blue-bg: rgba(56, 189, 248, 0.18);
+      --purple: #A78BFA;
+      --purple-bg: rgba(167, 139, 250, 0.18);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       THEME 2: LUXURY BRONZE & VELVET (Option 4 - Velvet Chocolate & Champagne Copper)
+    ═══════════════════════════════════════════════════════════ */
+    [data-theme="luxury"],
+    body[data-theme="luxury"] {
+      --cream: #FBF7F0;
+      --parchment: #EFE4D6;
+      --espresso: #1F140E;
+      --roast: #8C532B;
+      --caramel: #C68B59;
+      --honey: #D4A373;
+      --steam: #FFFFFF;
+      --mid: #735745;
+      --light: #BFA89B;
+      --shadow: rgba(31, 20, 14, 0.08);
+      --green: #4E7D47;
+      --green-bg: rgba(78, 125, 71, 0.12);
+      --blue: #5C7C99;
+      --blue-bg: rgba(92, 124, 153, 0.12);
+      --purple: #8A5076;
+      --purple-bg: rgba(138, 80, 118, 0.12);
+      --nav-h: 62px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="luxury"].dark-mode,
+    body.dark-mode[data-theme="luxury"] {
+      --cream: #120A06;
+      --parchment: #24160E;
+      --espresso: #FDF8F3;
+      --roast: #E5A93C;
+      --caramel: #D4A373;
+      --honey: #F2C14E;
+      --steam: #1A0F09;
+      --mid: #BAA393;
+      --light: #7D6353;
+      --shadow: rgba(0, 0, 0, 0.6);
+      --green: #82C975;
+      --green-bg: rgba(130, 201, 117, 0.18);
+      --blue: #82B3DB;
+      --blue-bg: rgba(130, 179, 219, 0.18);
+      --purple: #C484B0;
+      --purple-bg: rgba(196, 132, 176, 0.18);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       THEME 3: WARM SPECIALTY BARISTA (Classic Artisanal Cream & Caramel)
+    ═══════════════════════════════════════════════════════════ */
+    [data-theme="barista"],
+    body[data-theme="barista"] {
       --cream: #F5EFE0;
       --parchment: #EDE4CE;
       --espresso: #2C1A0E;
@@ -16,20 +112,21 @@
       --purple: #7A3A8A;
       --purple-bg: rgba(122, 58, 138, 0.1);
       --nav-h: 62px;
-      --transition: all 0.3s ease;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    body.dark-mode {
-      --cream: #120C08;
-      --parchment: #1F150E;
+    [data-theme="barista"].dark-mode,
+    body.dark-mode[data-theme="barista"] {
+      --cream: #140D08;
+      --parchment: #22170F;
       --espresso: #F5EFE0;
       --roast: #E8A83E;
       --caramel: #D4B483;
       --honey: #F5EFE0;
-      --steam: #1A1208;
+      --steam: #1C130B;
       --mid: #A68A64;
       --light: #7A5C3A;
-      --shadow: rgba(0, 0, 0, 0.4);
+      --shadow: rgba(0, 0, 0, 0.45);
       --green: #8CC85A;
       --green-bg: rgba(140, 200, 90, 0.15);
       --blue: #7AABDF;
@@ -50,14 +147,191 @@
       font-family: "DM Sans", sans-serif;
       min-height: 100vh;
       padding-bottom: calc(var(--nav-h) + 1.5rem);
-      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 125, 42, .07) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 100%, rgba(74, 44, 20, .05) 0%, transparent 55%);
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(13, 148, 136, .05) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(5, 150, 105, .04) 0%, transparent 55%);
       transition: background var(--transition), color var(--transition);
     }
 
     body.dark-mode {
-      background-image: radial-gradient(ellipse at 15% 0%, rgba(196, 125, 42, .03) 0%, transparent 55%),
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(45, 212, 191, .03) 0%, transparent 55%),
         radial-gradient(ellipse at 85% 100%, rgba(0, 0, 0, .4) 0%, transparent 55%);
+    }
+
+    [data-theme="luxury"] body,
+    body[data-theme="luxury"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(198, 139, 89, .06) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(140, 83, 43, .05) 0%, transparent 55%);
+    }
+
+    [data-theme="luxury"] body.dark-mode,
+    body.dark-mode[data-theme="luxury"] {
+      background-image: radial-gradient(ellipse at 15% 0%, rgba(229, 169, 60, .04) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 100%, rgba(0, 0, 0, .5) 0%, transparent 55%);
+    }
+
+    /* ── THEME PICKER MODAL ────────────────────────────── */
+    .theme-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .theme-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .theme-modal-card {
+      background: var(--steam);
+      border: 1.5px solid var(--parchment);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 16px 40px var(--shadow);
+      transform: scale(0.94);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .theme-modal-overlay.active .theme-modal-card {
+      transform: scale(1);
+    }
+
+    .theme-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .theme-modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--espresso);
+    }
+
+    .theme-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      color: var(--mid);
+      cursor: pointer;
+      padding: .2rem;
+      line-height: 1;
+    }
+
+    .theme-picker-grid {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .theme-card-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem 1rem;
+      border-radius: 14px;
+      border: 2px solid var(--parchment);
+      background: var(--cream);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-card-option:hover {
+      border-color: var(--caramel);
+      transform: translateY(-1px);
+    }
+
+    .theme-card-option.selected {
+      border-color: var(--roast);
+      background: var(--steam);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .theme-card-info {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .theme-card-icon {
+      font-size: 1.4rem;
+    }
+
+    .theme-card-name {
+      font-weight: 600;
+      font-size: .92rem;
+      color: var(--espresso);
+    }
+
+    .theme-card-desc {
+      font-size: .7rem;
+      color: var(--mid);
+      margin-top: .15rem;
+    }
+
+    .theme-swatches {
+      display: flex;
+      gap: 5px;
+    }
+
+    .theme-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .theme-mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid var(--parchment);
+    }
+
+    .theme-mode-label {
+      font-size: .85rem;
+      font-weight: 500;
+      color: var(--espresso);
+    }
+
+    .theme-mode-toggle-wrap {
+      display: flex;
+      background: var(--parchment);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .theme-mode-btn {
+      border: none;
+      background: none;
+      padding: .35rem .75rem;
+      font-size: .78rem;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--mid);
+      transition: all .2s;
+    }
+
+    .theme-mode-btn.active {
+      background: var(--steam);
+      color: var(--espresso);
+      box-shadow: 0 2px 6px var(--shadow);
     }
 
     /* â”€â”€ BOTTOM NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

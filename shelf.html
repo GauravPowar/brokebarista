@@ -10,6 +10,15 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400&display=swap"
     rel="stylesheet">
+  <script>
+    (function() {
+      var theme = localStorage.getItem('bb_theme') || 'nordic';
+      var savedMode = localStorage.getItem('theme');
+      var isDark = savedMode === 'dark' || (!savedMode && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', theme);
+      if (isDark) document.documentElement.classList.add('dark-mode');
+    })();
+  </script>
   <link rel="stylesheet" href="/styles.css">
   <style>
     /* ── Shelf Header ────────────────────────────── */
