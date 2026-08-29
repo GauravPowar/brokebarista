@@ -114,7 +114,7 @@ function onGrinderChange() {
 }
 
 function populateBrewerGrinderDropdowns() {
-  const defaultBrewers = ['Dedica Duo', 'Americano', 'V60', 'KaldiPress', 'AeroPress', 'French Press', 'Cold Brew', 'Cafflano Kompresso'];
+  const defaultBrewers = ['Dedica Duo', 'V60', 'KaldiPress', 'AeroPress', 'French Press', 'Cold Brew', 'Cafflano Kompresso'];
   const customBrewers = _loadCustomBrewers();
   let brewerHTML = '<option value="">Select</option>';
   defaultBrewers.forEach(b => {
@@ -1970,7 +1970,6 @@ const V60_BREWERS = ['V60', 'Pour Over', 'Chemex'];
 const ESPRESSO_BREWERS = ['Dedica Duo'];
 const KOMPRESSO_BREWERS = ['Cafflano Kompresso'];
 const FRENCH_KALDI_BREWERS = ['French Press', 'KaldiPress', 'AeroPress'];
-const AMERICANO_BREWERS = ['Americano'];
 const COLD_BREWERS = ['Cold Brew'];
 const MOKA_POT_BREWERS = ['Moka Pot'];
 // Market prices per cup
@@ -1979,7 +1978,6 @@ const MARKET_ESPRESSO = 200;   // ₹/cup
 const MARKET_KOMPRESSO = 175;  // ₹/cup
 const MARKET_COLD_BREW = 200;  // ₹/cup (Cold Brew)
 const MARKET_FRENCH_KALDI = 150; // ₹/cup (French Press, KaldiPress & AeroPress)
-const MARKET_AMERICANO = 210;  // ₹/cup (Americano = Espresso + ₹10)
 const MARKET_MOKA_POT = 100;   // ₹/cup (Moka Pot)
 const MARKET_MILK_BASED = 250; // ₹/cup (milk-based drinks: lattes, cappuccinos, etc.)
 const MARKET_STANDARD = 150;   // ₹/cup (all other methods & base price for untracked bags)
@@ -2020,7 +2018,6 @@ function marketPriceForBrewer(brewer, isMilkBased) {
   if (b.includes('espresso')) return MARKET_ESPRESSO;
   if (b.includes('cold brew')) return MARKET_COLD_BREW;
   if (b.includes('french press') || b.includes('kaldipress') || b.includes('aeropress')) return MARKET_FRENCH_KALDI;
-  if (b.includes('americano')) return MARKET_AMERICANO;
   if (b.includes('moka pot')) return MARKET_MOKA_POT;
 
   return MARKET_STANDARD;
@@ -2029,7 +2026,6 @@ function marketPriceForBrewer(brewer, isMilkBased) {
 // Market price for a gram-entry's usedFor label (shelf tracking)
 const USED_FOR_PRICE = {
   'Espresso': 200,
-  'Americano': 210,
   'Cold Brew': 200,
   'Pour Over': 200,
   'French Press': 150,
@@ -2730,7 +2726,7 @@ function renderMoneySaved() {
   $('ins-savings-breakdown').innerHTML = html;
   $('ins-savings-assumptions').innerHTML =
     `<span style="font-weight:600;color:var(--caramel)">☕ Café price assumptions:</span> ` +
-    `V60 / Pour Over = ₹${MARKET_V60} · Dedica Duo = ₹${MARKET_ESPRESSO} · Americano = ₹${MARKET_AMERICANO} · Kompresso = ₹${MARKET_KOMPRESSO} · French Press / KaldiPress / AeroPress = ₹${MARKET_FRENCH_KALDI} · Cold Brew = ₹${MARKET_COLD_BREW} · Moka Pot = ₹${MARKET_MOKA_POT} · 🥛 Milk-based = ₹${MARKET_MILK_BASED} · Base/Other = ₹${MARKET_STANDARD} per cup. ` +
+    `V60 / Pour Over = ₹${MARKET_V60} · Dedica Duo = ₹${MARKET_ESPRESSO} · Kompresso = ₹${MARKET_KOMPRESSO} · French Press / KaldiPress / AeroPress = ₹${MARKET_FRENCH_KALDI} · Cold Brew = ₹${MARKET_COLD_BREW} · Moka Pot = ₹${MARKET_MOKA_POT} · 🥛 Milk-based = ₹${MARKET_MILK_BASED} · Base/Other = ₹${MARKET_STANDARD} per cup. ` +
     `Standard dose ${STD_DOSE_G}g/cup for untracked bags. Home cost = bag price ÷ bag size. Negative savings = brew cost more than café.`;
 }
 

@@ -189,7 +189,7 @@ function computeStats(month){
     'V60': 200, 'Pour Over': 200, 'Chemex': 200,
     'Dedica Duo': 200, 'Cafflano Kompresso': 175,
     'Cold Brew': 200, 'AeroPress': 150, 'Moka Pot': 100,
-    'KaldiPress': 150, 'French Press': 150, 'Americano': 210, 'Siphon': 150,
+    'KaldiPress': 150, 'French Press': 150, 'Siphon': 150,
   };
   const cafeCost = brews.reduce((s, j) => {
     if (j.is_milk_based || j.isMilkBased) return s + 250;
