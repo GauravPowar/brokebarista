@@ -352,7 +352,7 @@ export async function onRequestPut({ request, env }: { request: any, env: any })
     if (body.id) {
       await db.prepare(
         `UPDATE logs SET date=?,category=?,vendor=?,name=?,price=?,notes=?,roaster=?,size=?,
-         coffee_type=?,brew_equip=?,qty=?,roast_level=?,process=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
+         coffee_type=?,brew_equip=?,qty=?,roast_level=?,process=?,origin=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
       ).bind(
         body.date, normalizeCategory(body.category),
         body.vendor || "", body.name || "", parseFloat(body.price || 0),
@@ -362,6 +362,7 @@ export async function onRequestPut({ request, env }: { request: any, env: any })
         parseInt(body.qty || 1),
         body.roast_level || body.roastLevel || null,
         body.process || null,
+        body.origin || null,
         body.id
       ).run();
       if (body.order_id) {

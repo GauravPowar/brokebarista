@@ -154,11 +154,11 @@
     <div class="label fu">Espresso Brewers</div>
     <div class="headline fu d1"><span class="hi">101</span> espresso-style brews</div>
     <div style="margin-top:1.5rem" class="fu d2">
-      <div class="bar-item"><div class="bname">Espresso Machine</div><div class="btrack"><div class="bfill" style="width:100%;background:${AMBER}"></div></div><div class="bval">90×</div></div>
+      <div class="bar-item"><div class="bname">Dedica Duo</div><div class="btrack"><div class="bfill" style="width:100%;background:${AMBER}"></div></div><div class="bval">90×</div></div>
       <div class="bar-item"><div class="bname">Kompresso</div><div class="btrack"><div class="bfill" style="width:12%;background:${PURPLE}"></div></div><div class="bval">11×</div></div>
     </div>
     <div class="chart-container fu d3" style="margin-top:1rem;height:180px"><canvas id="espBrewerChart"></canvas></div>
-    <div class="sub fu d4" style="margin-top:.5rem"><span style="color:${AMBER}">■</span> Espresso Machine <span style="color:${PURPLE}">■</span> Kompresso · <span style="font-size:.85rem;opacity:.5">per month</span></div>`},
+    <div class="sub fu d4" style="margin-top:.5rem"><span style="color:${AMBER}">■</span> Dedica Duo <span style="color:${PURPLE}">■</span> Kompresso · <span style="font-size:.85rem;opacity:.5">per month</span></div>`},
 
       /* 4 — FILTER BREWERS */
       { cls: 's4', html: `
@@ -200,7 +200,7 @@
     <div class="label fu">KINGrinder K6 — Espresso Grind</div>
     <div class="headline fu d1">The K6 era: <em>May 31 → June</em></div>
     <div class="chart-container fu d2"><canvas id="k6EspChart"></canvas></div>
-    <div class="sub fu d3">Kompresso: 33–40 clicks · Espresso Machine: 25–32 clicks<br><span style="opacity:.4;font-size:.85rem">Lower = finer · <span style="color:${AMBER}">■</span> Espresso Machine <span style="color:${PURPLE}">■</span> Kompresso</span></div>`},
+    <div class="sub fu d3">Kompresso: 33–40 clicks · Dedica Duo: 25–32 clicks<br><span style="opacity:.4;font-size:.85rem">Lower = finer · <span style="color:${AMBER}">■</span> Dedica Duo <span style="color:${PURPLE}">■</span> Kompresso</span></div>`},
 
       /* 8 — FLAVORS */
       { cls: 's8', html: `
@@ -321,7 +321,7 @@
         type: 'bar', data: {
           labels: ['April', 'May', 'June'],
           datasets: [
-            { label: 'Espresso Machine', data: [35, 31, 20], backgroundColor: AMBER, borderRadius: 4, stack: 'a' },
+            { label: 'Dedica Duo', data: [35, 31, 20], backgroundColor: AMBER, borderRadius: 4, stack: 'a' },
             { label: 'Kompresso', data: [0, 1, 10], backgroundColor: PURPLE, borderRadius: 4, stack: 'a' }
           ]
         }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: TEXT }, grid: { display: false } }, y: { stacked: true, ticks: { color: TEXT, stepSize: 10 }, grid: { color: GRID }, min: 0, max: 40 } } }
@@ -360,7 +360,7 @@
       });
 
       // === K6 Espresso Grind Chart ===
-      // Two datasets: Espresso Machine and Kompresso
+      // Two datasets: Dedica Duo and Kompresso
       const k6Labels = ['May 31','Jun 1','Jun 3','Jun 3b','Jun 4','Jun 6','Jun 7','Jun 8','Jun 10','Jun 12','Jun 19','Jun 20','Jun 20b','Jun 20c','Jun 21','Jun 22','Jun 22b','Jun 23','Jun 24','Jun 24b','Jun 25','Jun 25b','Jun 25c','Jun 26','Jun 27','Jun 28','Jun 28b','Jun 29','Jun 30','Jun 30b'];
       const k6Esp =    [27, null,null,null,null,null,null,null,null,null,30,25,25,30,30,30,30,30,30,31,31,31,28,31,31,30,30,31,32,31];
       const k6Kmp =    [null,35,33,60,37,35,37,35,35,40,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
@@ -369,7 +369,7 @@
         type: 'line', data: {
           labels: k6Labels,
           datasets: [
-            { label: 'Espresso Machine', data: k6Esp, borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.06)', pointBackgroundColor: AMBER, pointRadius: 3.5, tension: 0.3, fill: false, spanGaps: false },
+            { label: 'Dedica Duo', data: k6Esp, borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.06)', pointBackgroundColor: AMBER, pointRadius: 3.5, tension: 0.3, fill: false, spanGaps: false },
             { label: 'Kompresso', data: k6Kmp, borderColor: PURPLE, backgroundColor: 'rgba(142,68,173,0.06)', pointBackgroundColor: PURPLE, pointRadius: 3.5, tension: 0.3, fill: false, spanGaps: false }
           ]
         }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw ? ` ${c.dataset.label}: ${c.raw} clicks` : '' } } }, scales: { x: { ticks: { color: TEXT, font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }, grid: { display: false } }, y: { ticks: { color: TEXT, callback: v => v + ' clicks' }, grid: { color: GRID }, min: 20, max: 65, reverse: true } } }
