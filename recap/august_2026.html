@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>August 2026 — Brew Recap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600;800;900&family=DM+Serif+Display:ital@0;1&display=swap"
+    rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box }
+    :root { --amber: #e8a83e; --caramel: #c47d2a; --cream: #f5efe0; --c1: #1a0a00 }
+    body { font-family: 'DM Sans', sans-serif; background: var(--c1); color: var(--cream); overflow: hidden; height: 100vh; width: 100vw; user-select: none }
+    #deck { width: 100%; height: 100%; position: relative }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s, transform .5s; transform: translateY(40px); padding: 2rem; text-align: center; overflow: hidden }
+    .slide.active { opacity: 1; pointer-events: all; transform: translateY(0) }
+    .slide.out { opacity: 0; transform: translateY(-40px) }
+    .s0 { background: radial-gradient(ellipse at 30% 40%, #2d1a1a, #0d0404 70%) }
+    .s1 { background: radial-gradient(ellipse at 70% 30%, #1a1a3d, #040408 70%) }
+    .s2 { background: radial-gradient(ellipse at 50% 60%, #001a2d, #000508 70%) }
+    .s3 { background: radial-gradient(ellipse at 20% 50%, #1a000d, #050002 70%) }
+    .s4 { background: radial-gradient(ellipse at 80% 40%, #0d1a00, #030500 70%) }
+    .s5 { background: radial-gradient(ellipse at 50% 50%, #001a1a, #000503 70%) }
+    .s6 { background: radial-gradient(ellipse at 30% 60%, #1a0d00, #050300 70%) }
+    .s7 { background: radial-gradient(ellipse at 60% 40%, #0a001a, #020005 70%) }
+    .s8 { background: radial-gradient(ellipse at 50% 50%, #001a0a, #000503 70%) }
+    .s9 { background: radial-gradient(ellipse at 40% 30%, #1a1a00, #050500 70%) }
+    .s10 { background: radial-gradient(ellipse at 60% 50%, #1a0a0a, #050202 70%) }
+    .s11 { background: radial-gradient(ellipse at 40% 50%, #0a1a1a, #020505 70%) }
+    .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: float linear infinite; opacity: .15 }
+    @keyframes float { 0% { transform: translateY(100vh) rotate(0deg) } 100% { transform: translateY(-20px) rotate(720deg) } }
+    .label { font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; opacity: .55; margin-bottom: 1rem; font-weight: 600 }
+    .bignum { font-size: clamp(4rem, 20vw, 9rem); font-weight: 900; line-height: 1; background: linear-gradient(135deg, var(--amber), var(--caramel), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: pop .6s cubic-bezier(.175, .885, .32, 1.275) both }
+    @keyframes pop { from { transform: scale(.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+    .headline { font-family: 'DM Serif Display', serif; font-size: clamp(1.4rem, 5vw, 2.4rem); line-height: 1.2; margin: .5rem 0 1rem }
+    .sub { font-size: 1rem; opacity: .65; max-width: 520px; line-height: 1.6 }
+    .hi { color: var(--amber); font-weight: 700; -webkit-text-fill-color: var(--amber) }
+    .pill { display: inline-block; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: .4rem 1.2rem; font-size: .9rem; margin: .3rem; backdrop-filter: blur(8px) }
+    .bar-item { display: flex; align-items: center; gap: 1rem; margin: .4rem 0; width: min(420px, 90vw) }
+    .bname { font-size: .85rem; width: 130px; text-align: right; flex-shrink: 0; line-height: 1.2 }
+    .btrack { flex: 1; background: rgba(255,255,255,.08); border-radius: 4px; height: 10px; overflow: hidden }
+    .bfill { height: 100%; border-radius: 4px }
+    .bval { font-size: .8rem; opacity: .6; width: 30px; flex-shrink: 0 }
+    .tag { display: inline-block; font-size: .75rem; padding: .3rem .8rem; border-radius: 999px; margin: .2rem; font-weight: 600 }
+    .moment-item { display: flex; align-items: flex-start; gap: .9rem; text-align: left; margin: .6rem 0; max-width: 480px; width: 90vw }
+    .mdot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .65rem; border: 0.5px solid }
+    .mdot-good { background: rgba(90,158,114,.15); border-color: rgba(90,158,114,.4); color: #7ac494 }
+    .mdot-bad { background: rgba(192,80,58,.15); border-color: rgba(192,80,58,.4); color: #e06050 }
+    .mbody .date { font-size: .68rem; opacity: .4; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .15rem }
+    .mbody .note { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-style: italic; line-height: 1.25 }
+    .mbody .note.good { color: #7ac494 }
+    .mbody .note.bad { color: #e06050 }
+    .mbody .detail { font-size: .75rem; opacity: .5; margin-top: .2rem; line-height: 1.5 }
+    .chart-container { width: min(480px, 90vw); height: 220px; position: relative }
+    #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--amber); transition: width .4s; z-index: 9999 }
+    #backBtn { position: fixed; top: 1.1rem; left: 1rem; z-index: 999; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: .35rem .9rem; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: .75rem; letter-spacing: .05em; text-decoration: none; backdrop-filter: blur(8px); transition: background .2s }
+    #backBtn:hover { background: rgba(255,255,255,.1) }
+    #dots { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; gap: .5rem; z-index: 999 }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); cursor: pointer; transition: all .3s }
+    .dot.active { background: var(--amber); transform: scale(1.4) }
+    #navL, #navR { position: fixed; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.06); border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; z-index: 999; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .2s }
+    #navL:hover, #navR:hover { background: rgba(255,255,255,.15) }
+    #navL { left: 1rem }
+    #navR { right: 1rem }
+    .coffee-cup { font-size: 5rem; animation: bounce 2s ease-in-out infinite }
+    @keyframes bounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-12px) } }
+    .steam { position: absolute; bottom: 44%; left: 50%; width: 3px; background: rgba(255,255,255,.12); border-radius: 2px; animation: steam 2s ease-in-out infinite; transform-origin: bottom center }
+    @keyframes steam { 0% { height: 0; opacity: .2; transform: translateX(-50%) } 50% { height: 60px; opacity: .5; transform: translateX(-50%) scaleX(1.5) rotate(4deg) } 100% { height: 0; opacity: 0; transform: translateX(-50%) } }
+    .glow { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.4); animation: pulse 2s ease-in-out infinite }
+    @keyframes pulse { 0%, 100% { text-shadow: 0 0 40px var(--amber), 0 0 80px rgba(232,168,62,.3) } 50% { text-shadow: 0 0 60px var(--amber), 0 0 120px rgba(232,168,62,.6) } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
+    .fu { animation: fadeUp .6s both }
+    .d1 { animation-delay: .15s }
+    .d2 { animation-delay: .3s }
+    .d3 { animation-delay: .45s }
+    .d4 { animation-delay: .6s }
+    .d5 { animation-delay: .75s }
+  </style>
+</head>
+
+<body>
+  <div id="progress"></div>
+  <a id="backBtn" href="index.html">&#8592; All Recaps</a>
+  <div id="dots"></div>
+  <button id="navL">&#8249;</button>
+  <button id="navR">&#8250;</button>
+  <div id="deck"></div>
+
+  <script>
+    const COLORS = ['#e8a83e','#c47d2a','#16a085','#8e44ad','#c0392b','#2980b9','#27ae60','#d35400'];
+    let cur = 0, tot = 0;
+
+    function particles(el) {
+      for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div'); p.className = 'particle';
+        const s = Math.random() * 6 + 2;
+        p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;background:${COLORS[Math.floor(Math.random()*COLORS.length)]};animation-duration:${Math.random()*10+8}s;animation-delay:-${Math.random()*10}s`;
+        el.appendChild(p);
+      }
+    }
+
+    const SLIDES = [
+      /* 0 — INTRO */
+      { cls: 's0', html: `
+    <div class="steam" style="margin-left:-8px"></div>
+    <div class="steam" style="margin-left:8px;animation-delay:.7s"></div>
+    <div class="coffee-cup">&#9749;</div>
+    <div class="label fu d1">Monthly Recap</div>
+    <div class="headline fu d2" style="font-size:clamp(2rem,8vw,3.8rem)">August <span style="color:var(--amber)">2026</span></div>
+    <div class="sub fu d3">36 brews across 28 active days.<br>The Dedica locked in at 29&ndash;32 clicks. Java Trench stole the pour-over crown. Excelsa arrived &mdash; wine in a cup.</div>` },
+
+      /* 1 — SESSIONS */
+      { cls: 's1', html: `
+    <div class="label fu">Sessions This Month</div>
+    <div class="bignum fu d1">36</div>
+    <div class="headline fu d2">cups of <em>steady precision</em></div>
+    <div class="sub fu d3">Brewed on <span class="hi">28 out of 31 days</span> &mdash; averaging ~1.2 brews a day.<br>Twelve perfect shots. Three bags rotated. One new roaster debuted.</div>
+    <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center" class="fu d4">
+      <div class="pill">&#11088; 12 five-stars</div>
+      <div class="pill">&#128202; 4.1&#9733; avg</div>
+      <div class="pill">&#129752; 3 beans active</div>
+      <div class="pill">&#127919; 29&ndash;32 clicks locked</div>
+    </div>` },
+
+      /* 2 — BREWER SPLIT */
+      { cls: 's2', html: `
+    <div class="label fu">Brewer Lineup</div>
+    <div class="headline fu d1">The <span class="hi">Dedica Duo</span> dominated all month</div>
+    <div style="margin-top:1.5rem" class="fu d2">
+      <div class="bar-item"><div class="bname">Espresso</div><div class="btrack"><div class="bfill" style="width:100%;background:#e8a83e"></div></div><div class="bval">28&times;</div></div>
+      <div class="bar-item"><div class="bname">V60</div><div class="btrack"><div class="bfill" style="width:25%;background:#16a085"></div></div><div class="bval">7&times;</div></div>
+      <div class="bar-item"><div class="bname">KaldiPress</div><div class="btrack"><div class="bfill" style="width:4%;background:#27ae60"></div></div><div class="bval">1&times;</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:1rem"><span class="hi">78%</span> espresso &middot; <span class="hi">19%</span> pour over &middot; <span class="hi">3%</span> immersion</div>` },
+
+      /* 3 — BEANS */
+      { cls: 's3', html: `
+    <div class="label fu">Bean Rotation</div>
+    <div class="headline fu d1"><em>Daily Driver</em> powered August, <span class="hi">Java Trench</span> stole pour-overs</div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Daily Driver</div><div class="btrack"><div class="bfill" style="width:100%;background:#e8a83e"></div></div><div class="bval">26&times;</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Java Trench</div><div class="btrack"><div class="bfill" style="width:27%;background:#16a085"></div></div><div class="bval">7&times;</div></div>
+      <div class="bar-item"><div class="bname" style="font-size:.75rem">Excelsa</div><div class="btrack"><div class="bfill" style="width:12%;background:#c0392b"></div></div><div class="bval">3&times;</div></div>
+    </div>
+    <div class="sub fu d3" style="margin-top:.8rem">DD Bag 2 closed Aug 19 &rarr; Bag 3 opened Aug 20 &middot; Java Trench debut Jul 29, pour-over hero all of August &middot; Monsoon Excelsa debut Aug 29 &mdash; wine-forward chaos</div>` },
+
+      /* 4 — BAG TRANSITION */
+      { cls: 's4', html: `
+    <div class="label fu">The Bag Transition &mdash; Daily Driver</div>
+    <div class="headline fu d1">Bag 2 <span class="hi">&rarr;</span> Bag 3, seamless hand-off</div>
+    <div style="margin-top:1.2rem;display:flex;flex-direction:column;gap:.8rem;align-items:center" class="fu d2">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 1&ndash;19 &middot; Bag 2 finale</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#e8a83e">29&ndash;32 clicks &middot; locked and loaded</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">19 espresso sessions. Dialled in tight at 29&ndash;31 clicks on K6. Closed out with a candy-like, syrupy 5&#9733; shot.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 20 &middot; New bag day</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#7ac494">Bag 3 opened &mdash; peanuts &amp; butter &#127810;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">Started at 30 clicks, preinfused. &ldquo;Tastes like peanuts with a sweet aftertaste. Mixed with butter &mdash; salty, caramelly.&rdquo;</div>
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 25&ndash;30 &middot; Locked in</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--amber)">32 clicks. Five 5&#9733; in a row. &#127919;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">Aug 25&rarr;27&rarr;28&rarr;29&rarr;30 all 5&#9733; at 32 clicks. Hazelnut, Dark Chocolate, Cocoa, Vanilla &mdash; the full spectrum.</div>
+      </div>
+    </div>` },
+
+      /* 5 — EXCELSA DEBUT */
+      { cls: 's5', html: `
+    <div class="label fu">New Bean Spotlight</div>
+    <div class="headline fu d1"><span class="hi">Excelsa</span> by Monsoon Coffee Co &mdash; wine in a cup</div>
+    <div style="margin-top:1.2rem;display:flex;flex-direction:column;gap:.6rem;align-items:center" class="fu d2">
+      <div style="background:rgba(192,80,58,.08);border:1px solid rgba(192,80,58,.2);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 29 &middot; First shot</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#e06050">&ldquo;The aroma is lovely. Wine all over the room.&rdquo; &#9733;&#9733;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">15g &rarr; 30g &middot; 20s &middot; 33 clicks &middot; Under-extracted but the aroma was unreal.</div>
+      </div>
+      <div style="background:rgba(192,80,58,.08);border:1px solid rgba(192,80,58,.2);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 30 &middot; The Shreyansh incident</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#e06050">&ldquo;Never letting Shreyansh grind beans again.&#128591;&rdquo; &#9733;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">15g &rarr; 30.4g &middot; 19s &middot; 35 clicks &middot; Way too coarse. Lesson learned.</div>
+      </div>
+      <div style="background:rgba(90,158,114,.08);border:1px solid rgba(90,158,114,.2);border-radius:12px;padding:.9rem 1.4rem;max-width:400px;text-align:left;width:90vw">
+        <div style="font-size:.7rem;opacity:.4;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Aug 31 &middot; Getting there</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#7ac494">&ldquo;Wine, artificial chocolates.&rdquo; &#9733;&#9733;&#9733;</div>
+        <div style="font-size:.78rem;opacity:.5;margin-top:.2rem">15g &rarr; 34g &middot; 24s &middot; 30 clicks &middot; Almost dialled in. Grape + Sweet Aromatics. Journey continues.</div>
+      </div>
+    </div>` },
+
+      /* 6 — FLAVORS */
+      { cls: 's6', html: `
+    <div class="label fu">Your Palate</div>
+    <div class="headline fu d1">August tasted like <span class="hi">Dark Chocolate</span>, <span class="hi">Strawberry</span> &amp; <span class="hi">Vanilla</span></div>
+    <div style="margin-top:1.2rem" class="fu d2">
+      <span class="tag" style="background:#c47d2a22;border:1px solid #c47d2a55;color:#c47d2a">Dark Chocolate &times;4 &#11088;</span>
+      <span class="tag" style="background:#c0392b22;border:1px solid #c0392b55;color:#e07868">Strawberry &times;3 &#11088;</span>
+      <span class="tag" style="background:#e8a83e22;border:1px solid #e8a83e55;color:#e8a83e">Vanilla &times;2 &#11088;</span>
+      <span class="tag" style="background:#27ae6022;border:1px solid #27ae6055;color:#7ac494">Overall Sweet &times;2</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Cocoa &times;2</span>
+      <span class="tag" style="background:#16a08522;border:1px solid #16a08555;color:#7ac494">Caramelized &times;2</span>
+      <span class="tag" style="background:#8e44ad22;border:1px solid #8e44ad55;color:#b07fd6">Sweet Aromatics &times;2</span>
+      <span class="tag" style="background:#d3540022;border:1px solid #d3540055;color:#e07840">Peach &times;1</span>
+      <span class="tag" style="background:#e8a83e22;border:1px solid #e8a83e55;color:#e8a83e">Hazelnut &times;1</span>
+      <span class="tag" style="background:#16a08522;border:1px solid #16a08555;color:#7ac494">Maple Syrup &times;1</span>
+      <span class="tag" style="background:#2980b922;border:1px solid #2980b955;color:#7ab4d6">Pear &times;1</span>
+      <span class="tag" style="background:#c0392b22;border:1px solid #c0392b55;color:#e07868">Almond &times;1</span>
+      <span class="tag" style="background:#8e44ad22;border:1px solid #8e44ad55;color:#b07fd6">Grape &times;1</span>
+      <span class="tag" style="background:#27ae6022;border:1px solid #27ae6055;color:#7ac494">Peanuts &times;1</span>
+    </div>
+    <div class="sub fu d3" style="margin-top:1rem;font-size:.85rem">The Aug 25 Java Trench V60 erupted with Strawberry, Peach &amp; Sweet Aromatics. And Aug 28 espresso unlocked Cocoa, Dark Chocolate &amp; Overall Sweet &mdash; both &#11088;&#11088;&#11088;&#11088;&#11088;</div>` },
+
+      /* 7 — STANDOUT MOMENTS */
+      { cls: 's7', html: `
+    <div class="label fu">Standout Moments</div>
+    <div style="margin-top:1rem">
+      <div class="moment-item fu d1">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Aug 19 &middot; Espresso</div>
+        <div class="note good">"Candy-like and syrupy." &#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <div class="detail">Daily Driver Bag 2 finale &middot; 16.8g&rarr;33.2g &middot; 41s &middot; 29 clicks &middot; Maple Syrup + Caramelized &middot; Last drop from the bag</div></div>
+      </div>
+      <div class="moment-item fu d2">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Aug 25 &middot; V60</div>
+        <div class="note good">"Strawberry, Peach, Sweet Aromatics." &#11088;&#11088;&#11088;&#11088;&#11088;</div>
+        <div class="detail">Java Trench &middot; 17g&rarr;255g &middot; 190s &middot; 100 clicks &middot; The pour-over peak of August</div></div>
+      </div>
+      <div class="moment-item fu d3">
+        <div class="mdot mdot-good">&#10086;</div>
+        <div class="mbody"><div class="date">Aug 27&ndash;29 &middot; Espresso streak</div>
+        <div class="note good">"Hazelnut, Dark Chocolate, Cocoa, Vanillin." &#11088;&#11088;&#11088;&#11088;&#11088; &times;3</div>
+        <div class="detail">Daily Driver Bag 3 &middot; 32 clicks locked &middot; Three consecutive 5&#9733; days &middot; The dessert trio</div></div>
+      </div>
+      <div class="moment-item fu d4">
+        <div class="mdot mdot-bad">&#10005;</div>
+        <div class="mbody"><div class="date">Aug 30 &middot; The Shreyansh grind</div>
+        <div class="note bad">"Never letting Shreyansh grind beans again.&#128591;" &#9733;</div>
+        <div class="detail">Excelsa &middot; 15g&rarr;30.4g &middot; 19s &middot; 35 clicks &middot; someone else grinding = disaster</div></div>
+      </div>
+    </div>` },
+
+      /* 8 — GRIND CHART */
+      { cls: 's8', html: `
+    <div class="label fu">Dialling In</div>
+    <div class="headline fu d1">The K6 clicks across <em>August espresso</em></div>
+    <div class="chart-container fu d2"><canvas id="grindChart"></canvas></div>
+    <div class="sub fu d3">Espresso range: 29&ndash;33 clicks on K6<br><span style="opacity:.4;font-size:.85rem">Espresso sessions shown &middot; lower = finer &middot; Bag transition marked at Aug 20</span></div>` },
+
+      /* 9 — DAILY ACTIVITY */
+      { cls: 's9', html: `
+    <div class="label fu">Activity</div>
+    <div class="headline fu d1">Sessions by day &mdash; <span class="hi">28 active days</span></div>
+    <div class="chart-container fu d2" style="height:200px"><canvas id="dayChart"></canvas></div>
+    <div class="sub fu d3">28 active days &middot; Espresso <span style="color:#e8a83e">&#9632;</span> V60 <span style="color:#16a085">&#9632;</span> KaldiPress <span style="color:#27ae60">&#9632;</span></div>` },
+
+      /* 10 — SPENDING & SAVINGS */
+      { cls: 's10', html: `
+    <div class="label fu">Money Saved vs Caf&eacute;</div>
+    <div class="bignum fu d1" style="font-size:clamp(3rem,14vw,7rem)">&#8377;6,148</div>
+    <div class="headline fu d2">saved this month</div>
+    <div class="sub fu d3">Caf&eacute; equiv: <span class="hi">&#8377;8,550</span> &middot; Beans consumed: <span class="hi">~&#8377;2,402</span><br><span style="font-size:.8rem;opacity:.5">(28 espresso &times; &#8377;200 + 7 V60 &times; &#8377;225 + 1 KaldiPress &times; &#8377;175) &minus; beans</span><br>Also picked up: Self-Leveling Tamp (&#8377;780) + Candy Haze + Brewer&apos;s Tribute + SKIA Red Honey (&#8377;200, split w/ @16clicks) for the shelf.</div>` },
+
+      /* 11 — OUTRO */
+      { cls: 's11', html: `
+    <div class="headline glow fu" style="font-size:clamp(2rem,8vw,3.2rem)">That was August &#9749;</div>
+    <div class="sub fu d2" style="margin-top:1rem">36 brews &middot; 12 perfect shots &middot; Dedica ran the show &middot; Java Trench owned pour-overs.<br>28 days of coffee. Excelsa&apos;s wine-forward chaos just getting started.</div>
+    <div style="margin-top:2rem;display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center" class="fu d3">
+      <div class="pill">&#9749; 36 brews</div>
+      <div class="pill">&#128293; 28/31 days</div>
+      <div class="pill">&#11088; 12 five-stars</div>
+      <div class="pill">&#128176; &#8377;6,148 saved</div>
+      <div class="pill">&#127919; 32 clicks locked</div>
+      <div class="pill">&#127863; Excelsa debut</div>
+    </div>
+    <a href="index.html" class="pill fu d4" style="margin-top:1.5rem;display:inline-block">&#8592; All Recaps</a>` },
+    ];
+
+    function buildDeck() {
+      const deck = document.getElementById('deck');
+      SLIDES.forEach(({ cls, html }) => {
+        const div = document.createElement('div');
+        div.className = `slide ${cls}`; div.innerHTML = html;
+        particles(div); deck.appendChild(div);
+      });
+      tot = SLIDES.length;
+      const dots = document.getElementById('dots');
+      for (let i = 0; i < tot; i++) { const d = document.createElement('div'); d.className = 'dot'; d.onclick = () => goTo(i); dots.appendChild(d); }
+      goTo(0);
+      requestAnimationFrame(initCharts);
+    }
+
+    function goTo(n) {
+      const slides = document.querySelectorAll('.slide');
+      slides[cur]?.classList.remove('active'); slides[cur]?.classList.add('out');
+      setTimeout(() => slides[cur]?.classList.remove('out'), 500);
+      cur = n; slides[cur]?.classList.add('active');
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+      document.getElementById('progress').style.width = `${((cur + 1) / tot * 100).toFixed(1)}%`;
+    }
+
+    function navNext() { if (cur >= tot - 1) { window.location.href = 'index.html'; } else { goTo(cur + 1); } }
+    function navPrev() { goTo(Math.max(cur - 1, 0)); }
+    document.getElementById('navR').onclick = navNext;
+    document.getElementById('navL').onclick = navPrev;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navNext();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navPrev();
+    });
+    let tx = 0;
+    document.addEventListener('touchstart', e => { tx = e.touches[0].clientX }, { passive: true });
+    document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) { dx < 0 ? navNext() : navPrev() } });
+
+    function initCharts() {
+      const TEXT = 'rgba(245,239,224,0.35)'; const GRID = 'rgba(232,168,62,0.06)';
+      const AMBER = '#e8a83e'; const GREEN = '#16a085'; const PURPLE = '#8e44ad';
+
+      Chart.defaults.font.family = "'DM Sans',sans-serif";
+      Chart.defaults.font.size = 11; Chart.defaults.color = TEXT;
+
+      // Grind chart — August espresso sessions K6 clicks
+      const gc = document.getElementById('grindChart');
+      if (gc) new Chart(gc, {
+        type: 'line', data: {
+          labels: ['1','2','3a','3b','4a','4b','5','6','7a','7b','8','9','10','11','12','13','14a','14b','15','16','17','18','19a','19b','20','21','22','23','24','25','26','27a','27b','28','29','30'],
+          datasets: [{
+            data: [32,31,31,30,30,30,31,31,30,32,31,null,31,31,31,31,31,30,30,29,29,29,29,29,30,31,33,31,32,32,32,33,32,32,32,32],
+            borderColor: AMBER, backgroundColor: 'rgba(232,168,62,0.08)', pointBackgroundColor: ctx => {
+              // Highlight bag transition at index 24 (Aug 20)
+              return ctx.dataIndex === 24 ? '#7ac494' : AMBER;
+            },
+            pointRadius: 2.5, tension: 0.3, fill: true, spanGaps: true
+          }]
+        }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw ? ` ${c.raw} clicks` : 'N/A' } },
+          annotation: {} }, scales: { x: { ticks: { color: TEXT, font: { size: 7 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 18 }, grid: { display: false }, border: { color: 'rgba(232,168,62,0.1)' } }, y: { ticks: { color: TEXT, callback: v => v + ' clicks' }, grid: { color: GRID }, border: { display: false }, min: 27, max: 36, reverse: true } } }
+      });
+
+      // Day chart — sessions by day
+      const dc = document.getElementById('dayChart');
+      if (dc) {
+        const days = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'];
+        const esp  = [ 1, 1, 2, 2, 1, 1, 3, 1, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1];
+        const v60  = [ 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0];
+        const oth  = [ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        new Chart(dc, {
+          type: 'bar', data: {
+            labels: days, datasets: [
+              { label: 'Espresso',   data: esp, backgroundColor: AMBER,     borderRadius: 3, stack: 'a' },
+              { label: 'V60',        data: v60, backgroundColor: GREEN,     borderRadius: 3, stack: 'a' },
+              { label: 'KaldiPress', data: oth, backgroundColor: '#27ae60', borderRadius: 3, stack: 'a' }
+            ]
+          }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: TEXT, font: { size: 8 }, autoSkip: false, maxRotation: 0 }, grid: { display: false } }, y: { stacked: true, ticks: { color: TEXT, stepSize: 1 }, grid: { color: GRID }, min: 0, max: 5 } } }
+        });
+      }
+    }
+
+    buildDeck();
+  </script>
+</body>
+
+</html>
