@@ -1284,8 +1284,8 @@ function renderJournal() {
 }
 
 function openJournalModal(editId) {
-  // populate bean select from logs — exclude finished bags
-  const beans = logs.filter(l => l.category === 'beans' && !finishedBags.includes(l.id)).sort((a, b) => new Date(b.date) - new Date(a.date));
+  // populate bean select from logs — only show opened (and not finished) bags
+  const beans = logs.filter(l => l.category === 'beans' && !!bagMeta[l.id]?.openedDate && !finishedBags.includes(l.id)).sort((a, b) => new Date(b.date) - new Date(a.date));
   $('j-bean').innerHTML = '<option value="">— Select a bean —</option>' +
     beans.map(b => `<option value="${b.id}">${esc(b.name)} (${esc(b.roaster || b.vendor)})</option>`).join('');
 
