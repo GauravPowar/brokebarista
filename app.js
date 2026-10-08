@@ -3145,7 +3145,7 @@ function renderJournal() {
 /* ═══════════════════════════════════════════════════════════
    OWNER ACCESS & AUTH
 ═══════════════════════════════════════════════════════════ */
-const CORRECT_PIN_HASH = 'f652f5c87c84f33899f9be3b2f62607ce5b61c68cac1f70bb4cdbb40d79b6904'; // PIN: 2811
+const CORRECT_PIN_HASH = 'a24e43b7765e445a86b1904b1c24b094dbd50eaf218ddc9cd6c2b3cbcd72cea3'; // PIN: 2602
 const SESSION_KEY = 'brewlog_unlocked';
 let isOwner = false;
 let pinInput = '';
