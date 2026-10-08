@@ -74,6 +74,7 @@ export async function onRequestGet({ request, env }: { request: any, env: any })
       "ALTER TABLE logs ADD COLUMN roast_level TEXT",
       "ALTER TABLE logs ADD COLUMN process TEXT",
       "ALTER TABLE journal ADD COLUMN grinder TEXT",
+      "ALTER TABLE journal ADD COLUMN is_milk_based INTEGER DEFAULT 0",
       "ALTER TABLE shelf_meta ADD COLUMN rest_days INTEGER",
     ];
     for (const m of migrations) {
@@ -169,6 +170,7 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
       "ALTER TABLE logs ADD COLUMN roast_level TEXT",
       "ALTER TABLE logs ADD COLUMN process TEXT",
       "ALTER TABLE journal ADD COLUMN grinder TEXT",
+      "ALTER TABLE journal ADD COLUMN is_milk_based INTEGER DEFAULT 0",
       "ALTER TABLE shelf_meta ADD COLUMN rest_days INTEGER",
     ];
     for (const m of migrations) {
@@ -181,13 +183,13 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
       const j = body;
       await db.prepare(
         `INSERT OR REPLACE INTO journal
-         (id, date, brewer, grinder, bean_id, bean_label, dose, yield, time, temp, grind, notes, rating, tastes, updated_at)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`
+         (id, date, brewer, grinder, bean_id, bean_label, dose, yield, time, temp, grind, notes, rating, tastes, is_milk_based, updated_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`
       ).bind(
         String(j.id), j.date || "", j.brewer || "", j.grinder || "", j.beanId || "", j.beanLabel || "",
         j.dose || 0, j.yield || 0, j.time || 0, j.temp || 0,
         j.grind || "", j.notes || "", j.rating || 0,
-        JSON.stringify(j.tastes || [])
+        JSON.stringify(j.tastes || []), j.is_milk_based ? 1 : 0
       ).run();
       return json({ ok: true });
     }
@@ -323,12 +325,12 @@ export async function onRequestPut({ request, env }: { request: any, env: any })
       const j = body;
       await db.prepare(
         `UPDATE journal SET date=?,brewer=?,grinder=?,bean_id=?,bean_label=?,dose=?,yield=?,time=?,temp=?,
-         grind=?,notes=?,rating=?,tastes=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
+         grind=?,notes=?,rating=?,tastes=?,is_milk_based=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
       ).bind(
         j.date || "", j.brewer || "", j.grinder || "", j.beanId || "", j.beanLabel || "",
         j.dose || 0, j.yield || 0, j.time || 0, j.temp || 0,
         j.grind || "", j.notes || "", j.rating || 0,
-        JSON.stringify(j.tastes || []), String(j.id)
+        JSON.stringify(j.tastes || []), j.is_milk_based ? 1 : 0, String(j.id)
       ).run();
       return json({ ok: true });
     }
