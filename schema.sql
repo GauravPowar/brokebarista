@@ -1,5 +1,6 @@
 -- ── MIGRATION (run this if upgrading an existing DB) ────────
 -- ALTER TABLE logs ADD COLUMN process TEXT;
+-- ALTER TABLE logs ADD COLUMN origin TEXT;
 -- ─────────────────────────────────────────────────────────────
 
 -- Brew Log · schema.sql
@@ -39,6 +40,7 @@ CREATE TABLE logs (
   qty         INTEGER DEFAULT 1,
   roast_level TEXT,
   process     TEXT,
+  origin      TEXT,
   created_at  TEXT    DEFAULT CURRENT_TIMESTAMP,
   updated_at  TEXT    DEFAULT CURRENT_TIMESTAMP
 );

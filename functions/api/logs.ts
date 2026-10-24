@@ -73,6 +73,7 @@ export async function onRequestGet({ request, env }: { request: any, env: any })
       // Columns that may not exist in older logs tables
       "ALTER TABLE logs ADD COLUMN roast_level TEXT",
       "ALTER TABLE logs ADD COLUMN process TEXT",
+      "ALTER TABLE logs ADD COLUMN origin TEXT",
       "ALTER TABLE journal ADD COLUMN grinder TEXT",
       "ALTER TABLE journal ADD COLUMN is_milk_based INTEGER DEFAULT 0",
       "ALTER TABLE shelf_meta ADD COLUMN rest_days INTEGER",
@@ -169,6 +170,7 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
       // Columns that may not exist in older logs tables
       "ALTER TABLE logs ADD COLUMN roast_level TEXT",
       "ALTER TABLE logs ADD COLUMN process TEXT",
+      "ALTER TABLE logs ADD COLUMN origin TEXT",
       "ALTER TABLE journal ADD COLUMN grinder TEXT",
       "ALTER TABLE journal ADD COLUMN is_milk_based INTEGER DEFAULT 0",
       "ALTER TABLE shelf_meta ADD COLUMN rest_days INTEGER",
@@ -227,8 +229,8 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
       for (const item of body.items) {
         await db.prepare(
           `INSERT INTO logs
-           (order_id, date, category, vendor, name, price, notes, roaster, size, coffee_type, brew_equip, qty, roast_level, process)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+           (order_id, date, category, vendor, name, price, notes, roaster, size, coffee_type, brew_equip, qty, roast_level, process, origin)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
         ).bind(
           order_id, o.date || new Date().toISOString().slice(0, 10),
           normalizeCategory(item.category),
@@ -239,7 +241,8 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
           Array.isArray(item.brew_equip) ? item.brew_equip.join(",") : (item.brew_equip || item.brewEquip || ""),
           parseInt(item.qty || 1),
           item.roast_level || item.roastLevel || null,
-          item.process || null
+          item.process || null,
+          item.origin || null
         ).run();
       }
       return json({ ok: true });
@@ -257,14 +260,14 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
 
     if (action === "addLog") {
       const { order_id, date, category, vendor, name, price, notes, roaster, size,
-        coffee_type, brew_equip, qty, roast_level, process } = body;
+        coffee_type, brew_equip, qty, roast_level, process, origin } = body;
       await db.prepare(
-        `INSERT INTO logs (order_id,date,category,vendor,name,price,notes,roaster,size,coffee_type,brew_equip,qty,roast_level,process)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        `INSERT INTO logs (order_id,date,category,vendor,name,price,notes,roaster,size,coffee_type,brew_equip,qty,roast_level,process,origin)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
       ).bind(
         order_id, date, normalizeCategory(category), vendor, name,
         price || 0, notes || "", roaster || "", size || "",
-        coffee_type || "", brew_equip || "", qty || 1, roast_level || null, process || null
+        coffee_type || "", brew_equip || "", qty || 1, roast_level || null, process || null, origin || null
       ).run();
       return json({ ok: true });
     }
@@ -280,14 +283,14 @@ export async function onRequestPost({ request, env }: { request: any, env: any }
 
     if (action === "updateLog") {
       const { id, date, category, vendor, name, price, notes, roaster, size,
-        coffee_type, brew_equip, qty, roast_level, process } = body;
+        coffee_type, brew_equip, qty, roast_level, process, origin } = body;
       await db.prepare(
         `UPDATE logs SET date=?,category=?,vendor=?,name=?,price=?,notes=?,roaster=?,size=?,
-         coffee_type=?,brew_equip=?,qty=?,roast_level=?,process=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
+         coffee_type=?,brew_equip=?,qty=?,roast_level=?,process=?,origin=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`
       ).bind(
         date, normalizeCategory(category), vendor, name, price || 0,
         notes || "", roaster || "", size || "",
-        coffee_type || "", brew_equip || "", qty || 1, roast_level || null, process || null, id
+        coffee_type || "", brew_equip || "", qty || 1, roast_level || null, process || null, origin || null, id
       ).run();
       return json({ ok: true });
     }
@@ -391,8 +394,8 @@ export async function onRequestPut({ request, env }: { request: any, env: any })
       for (const item of items) {
         await db.prepare(
           `INSERT INTO logs
-           (order_id,date,category,vendor,name,price,notes,roaster,size,coffee_type,brew_equip,qty,roast_level,process)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+           (order_id,date,category,vendor,name,price,notes,roaster,size,coffee_type,brew_equip,qty,roast_level,process,origin)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
         ).bind(
           order_id, o.date, normalizeCategory(item.category),
           item.vendor || o.vendor || "", item.name || "",
@@ -402,7 +405,8 @@ export async function onRequestPut({ request, env }: { request: any, env: any })
           Array.isArray(item.brew_equip) ? item.brew_equip.join(",") : (item.brew_equip || item.brewEquip || ""),
           parseInt(item.qty || 1),
           item.roast_level || item.roastLevel || null,
-          item.process || null
+          item.process || null,
+          item.origin || null
         ).run();
       }
       return json({ ok: true });
