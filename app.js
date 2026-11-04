@@ -113,6 +113,18 @@ function onGrinderChange() {
   }
 }
 
+function normalizeBrewerName(b) {
+  if (!b) return '';
+  const s = String(b).trim();
+  if (s.toLowerCase() === 'kompresso') return 'Cafflano Kompresso';
+  return s;
+}
+
+function isSameBrewer(a, b) {
+  if (!a || !b) return a === b;
+  return normalizeBrewerName(a).toLowerCase() === normalizeBrewerName(b).toLowerCase();
+}
+
 function populateBrewerGrinderDropdowns() {
   const defaultBrewers = ['Dedica Duo', 'V60', 'KaldiPress', 'AeroPress', 'French Press', 'Cold Brew', 'Cafflano Kompresso'];
   const customBrewers = _loadCustomBrewers();
@@ -1235,7 +1247,12 @@ function renderJournal() {
   const rated = journal.filter(j => j.rating > 0);
   const avgR = rated.length ? Math.round(rated.reduce((s, j) => s + j.rating, 0) / rated.length * 10) / 10 : null;
   const brewCount = {};
-  journal.forEach(j => { if (j.brewer) brewCount[j.brewer] = (brewCount[j.brewer] || 0) + 1; });
+  journal.forEach(j => {
+    if (j.brewer) {
+      const b = normalizeBrewerName(j.brewer);
+      brewCount[b] = (brewCount[b] || 0) + 1;
+    }
+  });
   const favBrew = Object.entries(brewCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
   $('jsTotal').textContent = total;
   $('jsAvgRating').textContent = avgR ? avgR + '★' : '—';
@@ -1301,9 +1318,9 @@ function openJournalModal(editId) {
 
     // Set Brewer selection
     const brewerVal = j.brewer || '';
-    const hasBrewerOption = [...$('j-brewer').options].some(opt => opt.value === brewerVal);
-    if (hasBrewerOption) {
-      $('j-brewer').value = brewerVal;
+    const matchedBrewerOpt = [...$('j-brewer').options].find(opt => isSameBrewer(opt.value, brewerVal));
+    if (matchedBrewerOpt) {
+      $('j-brewer').value = matchedBrewerOpt.value;
       toggleCustomBrewerField();
     } else if (brewerVal) {
       $('j-brewer').value = 'other';
@@ -1968,7 +1985,7 @@ function downloadShareCard() {
 // Brewer category classification
 const V60_BREWERS = ['V60', 'Pour Over', 'Chemex'];
 const ESPRESSO_BREWERS = ['Dedica Duo'];
-const KOMPRESSO_BREWERS = ['Cafflano Kompresso'];
+const KOMPRESSO_BREWERS = ['Cafflano Kompresso', 'Kompresso'];
 const FRENCH_KALDI_BREWERS = ['French Press', 'KaldiPress', 'AeroPress'];
 const COLD_BREWERS = ['Cold Brew'];
 const MOKA_POT_BREWERS = ['Moka Pot'];
@@ -2015,9 +2032,9 @@ function marketPriceForBrewer(brewer, isMilkBased) {
 
   if (b.includes('v60') || b.includes('pour over') || b.includes('chemex')) return MARKET_V60;
   if (b.includes('kompresso')) return MARKET_KOMPRESSO;
-  if (b.includes('espresso')) return MARKET_ESPRESSO;
+  if (b.includes('espresso') || b.includes('dedica') || b.includes('americano')) return MARKET_ESPRESSO;
   if (b.includes('cold brew')) return MARKET_COLD_BREW;
-  if (b.includes('french press') || b.includes('kaldipress') || b.includes('aeropress')) return MARKET_FRENCH_KALDI;
+  if (b.includes('french press') || b.includes('kaldipress') || b.includes('aeropress') || b.includes('siphon')) return MARKET_FRENCH_KALDI;
   if (b.includes('moka pot')) return MARKET_MOKA_POT;
 
   return MARKET_STANDARD;
@@ -2026,14 +2043,19 @@ function marketPriceForBrewer(brewer, isMilkBased) {
 // Market price for a gram-entry's usedFor label (shelf tracking)
 const USED_FOR_PRICE = {
   'Espresso': 200,
+  'Americano': 200,
   'Cold Brew': 200,
   'Pour Over': 200,
   'French Press': 150,
   'KaldiPress': 150,
   'AeroPress': 150,
+  'Moka Pot': 100,
+  'Kompresso': 175,
+  'Cafflano Kompresso': 175,
 };
 function marketPriceForUsedFor(usedFor) {
-  return USED_FOR_PRICE[usedFor] || MARKET_STANDARD;
+  if (!usedFor) return MARKET_STANDARD;
+  return USED_FOR_PRICE[usedFor] || marketPriceForBrewer(usedFor, false);
 }
 
 // Returns cost-per-gram for a specific bean log entry
@@ -2510,10 +2532,11 @@ function renderInsights() {
   const methodHistory = {}; // month -> { method: count }
   journal.forEach(j => {
     if (!j.brewer) return;
-    methodCount[j.brewer] = (methodCount[j.brewer] || 0) + 1;
+    const b = normalizeBrewerName(j.brewer);
+    methodCount[b] = (methodCount[b] || 0) + 1;
     const ym = j.date.slice(0, 7);
     if (!methodHistory[ym]) methodHistory[ym] = {};
-    methodHistory[ym][j.brewer] = (methodHistory[ym][j.brewer] || 0) + 1;
+    methodHistory[ym][b] = (methodHistory[ym][b] || 0) + 1;
   });
 
   const mE = Object.entries(methodCount).sort((a, b) => b[1] - a[1]);
@@ -2594,7 +2617,7 @@ function renderGrindRecommender() {
 
   // Target extraction time range for espresso (seconds)
   const ESPRESSO_MIN = 25, ESPRESSO_MAX = 35, ESPRESSO_IDEAL = 28;
-  const ESPRESSO_METHODS = ['Dedica Duo', 'Cafflano Kompresso', 'AeroPress'];
+  const ESPRESSO_METHODS = ['Dedica Duo', 'Cafflano Kompresso', 'Kompresso', 'AeroPress'];
 
   // Collect espresso sessions with a grind setting and brew time
   // group by grinder → grind → array of {time, rating}
@@ -2936,10 +2959,10 @@ function _populateJournalFilterDropdowns() {
   const beanSel = $('jFilterBean');
   if (!brewerSel || !beanSel) return;
 
-  const brewers = [...new Set(journal.map(j => j.brewer).filter(Boolean))].sort();
+  const brewers = [...new Set(journal.map(j => normalizeBrewerName(j.brewer)).filter(Boolean))].sort();
   const currentBrewer = brewerSel.value;
   brewerSel.innerHTML = '<option value="">☕ All Brewers</option>' +
-    brewers.map(b => `<option value="${b.replace(/"/g, '&quot;')}"${currentBrewer === b ? ' selected' : ''}>${esc(b)}</option>`).join('');
+    brewers.map(b => `<option value="${b.replace(/"/g, '&quot;')}"${isSameBrewer(currentBrewer, b) ? ' selected' : ''}>${esc(b)}</option>`).join('');
 
   if (grinderSel) {
     const grinders = [...new Set(journal.map(j => j.grinder).filter(Boolean))].sort();
@@ -3008,7 +3031,12 @@ function renderJournal() {
   const rated = journal.filter(j => j.rating > 0);
   const avgR = rated.length ? (rated.reduce((s, j) => s + j.rating, 0) / rated.length).toFixed(1) : '—';
   const brCount = {};
-  journal.forEach(j => { if (j.brewer) brCount[j.brewer] = (brCount[j.brewer] || 0) + 1; });
+  journal.forEach(j => {
+    if (j.brewer) {
+      const b = normalizeBrewerName(j.brewer);
+      brCount[b] = (brCount[b] || 0) + 1;
+    }
+  });
   const favBr = Object.entries(brCount).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
   if ($('jsTotal'))     $('jsTotal').textContent     = total;
   if ($('jsAvgRating')) $('jsAvgRating').textContent = avgR !== '—' ? avgR + '★' : '—';
@@ -3028,7 +3056,7 @@ function renderJournal() {
   let filtered = [...journal];
 
   if (f.brewer) {
-    filtered = filtered.filter(j => (j.brewer || '') === f.brewer);
+    filtered = filtered.filter(j => isSameBrewer(j.brewer, f.brewer));
   }
   if (f.grinder) {
     filtered = filtered.filter(j => (j.grinder || '') === f.grinder);
@@ -3052,7 +3080,7 @@ function renderJournal() {
     filtered = filtered.filter(j => {
       const beanName = j.beanId ? (logs.find(l => l.id === parseInt(j.beanId))?.name || j.beanLabel || '') : (j.beanLabel || '');
       const haystack = [
-        beanName, j.brewer || '', j.grinder || '', j.notes || '',
+        beanName, j.brewer || '', normalizeBrewerName(j.brewer), j.grinder || '', j.notes || '',
         ...(j.tastes || []),
       ].join(' ').toLowerCase();
       return haystack.includes(f.search);

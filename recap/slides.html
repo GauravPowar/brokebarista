@@ -171,7 +171,12 @@ function computeStats(month){
   allTastes.forEach(t=>{tasteCount[t]=(tasteCount[t]||0)+1});
   const topTastes=Object.entries(tasteCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const brewerCount={};
-  brews.forEach(j=>{if(j.brewer) brewerCount[j.brewer]=(brewerCount[j.brewer]||0)+1});
+  brews.forEach(j=>{
+    if(j.brewer) {
+      const b = j.brewer.trim().toLowerCase() === 'kompresso' ? 'Cafflano Kompresso' : j.brewer;
+      brewerCount[b] = (brewerCount[b] || 0) + 1;
+    }
+  });
   const topBrewers=Object.entries(brewerCount).sort((a,b)=>b[1]-a[1]);
   const beanCount={};
   brews.forEach(j=>{const k=(j.bean_label||j.beanLabel||'Unknown').split('(')[0].trim();beanCount[k]=(beanCount[k]||0)+1;});
@@ -185,23 +190,52 @@ function computeStats(month){
   streak=max;
   const beans=logs.filter(l=>l.category==='beans');
   const beanSpend=beans.filter(l=>l.date.startsWith(month)).reduce((s,l)=>s+Number(l.price||0),0);
-  const MARKET = {
-    'V60': 200, 'Pour Over': 200, 'Chemex': 200,
-    'Dedica Duo': 200, 'Cafflano Kompresso': 175,
-    'Cold Brew': 200, 'AeroPress': 150, 'Moka Pot': 100,
-    'KaldiPress': 150, 'French Press': 150, 'Siphon': 150,
-  };
+  function parseSlideGrams(size) {
+    if (!size) return 0;
+    const s = String(size);
+    const kg = s.match(/(\d+(?:\.\d+)?)\s*kg/i);
+    if (kg) return Number(kg[1]) * 1000;
+    const g = s.match(/(\d+(?:\.\d+)?)\s*g(?!r)/i);
+    if (g) return Number(g[1]);
+    return 0;
+  }
+  function getSlideGlobalCostPerGram() {
+    const bLogs = (logs || []).filter(l => l.category === 'beans' && l.price && l.size);
+    let totalG = 0, totalP = 0;
+    bLogs.forEach(l => {
+      const g = parseSlideGrams(l.size);
+      if (g > 0 && l.price) { totalG += g; totalP += Number(l.price); }
+    });
+    return totalG > 0 ? totalP / totalG : 2.3;
+  }
+  function getSlideMarketPrice(brewer, isMilkBased) {
+    if (isMilkBased) return 250;
+    if (!brewer) return 150;
+    const b = brewer.toLowerCase();
+    if (b.includes('v60') || b.includes('pour over') || b.includes('chemex')) return 200;
+    if (b.includes('kompresso')) return 175;
+    if (b.includes('espresso') || b.includes('dedica') || b.includes('americano')) return 200;
+    if (b.includes('cold brew')) return 200;
+    if (b.includes('french press') || b.includes('kaldipress') || b.includes('aeropress') || b.includes('siphon')) return 150;
+    if (b.includes('moka pot')) return 100;
+    return 150;
+  }
+  const gcpg = getSlideGlobalCostPerGram();
   const cafeCost = brews.reduce((s, j) => {
-    if (j.is_milk_based || j.isMilkBased) return s + 250;
-    return s + (MARKET[j.brewer] || 150);
+    return s + getSlideMarketPrice(j.brewer, !!(j.is_milk_based || j.isMilkBased));
   }, 0);
-  const homeCost=brews.reduce((s,j)=>{
-    const bean=logs.find(l=>String(l.id)===String(j.bean_id||j.beanId));
-    const sz=String(bean?.size||'');
-    const gM=sz.match(/(\d+(?:\.\d+)?)\s*g/i),kgM=sz.match(/(\d+(?:\.\d+)?)\s*kg/i);
-    const g=gM?Number(gM[1]):kgM?Number(kgM[1])*1000:0;
-    return s+Number(j.dose||0)*(bean&&g?Number(bean.price||0)/g:0);
-  },0);
+  const homeCost = brews.reduce((s, j) => {
+    const bid = String(j.bean_id || j.beanId || '');
+    let bean = bid ? logs.find(l => String(l.id) === bid) : null;
+    if (!bean && (j.bean_label || j.beanLabel)) {
+      const lbl = String(j.bean_label || j.beanLabel).toLowerCase();
+      bean = logs.find(l => l.category === 'beans' && lbl.includes(String(l.name).toLowerCase()));
+    }
+    const g = bean ? parseSlideGrams(bean.size) : 0;
+    const cpg = (g > 0 && bean.price) ? (Number(bean.price) / g) : gcpg;
+    const dose = Number(j.dose) || 15;
+    return s + (dose * cpg);
+  }, 0);
   return{brews,topTastes,topBrewers,topBeans,totalYield,avgRating,rated5,streak,beanSpend,cafeCost,homeCost};
 }
 
